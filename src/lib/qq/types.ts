@@ -353,6 +353,7 @@ export interface Review {
   visible: boolean;
   bothSubmitted: boolean;
   createdAt: string;
+  images?: { id: string; color: string; label?: string }[];
   appeal?: {
     reason: string;
     evidence: string;

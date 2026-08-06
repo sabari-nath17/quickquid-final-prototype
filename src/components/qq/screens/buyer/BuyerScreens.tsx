@@ -39,9 +39,10 @@ import {
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
 import {
-  ProfileCard, BriefCard, ProposalCard, GigCard, PortfolioItemCard,
+  ProfileCard, BriefCard, ProposalCard, PortfolioItemCard,
   MilestoneStepper, PaymentTracker, ContractMilestoneList,
 } from "@/components/qq/shared/cards";
+import { VideoGigCard } from "@/components/qq/shared/VideoGigCard";
 import { EvidenceDropzone } from "@/components/qq/shared/EvidenceDropzone";
 import {
   formatINR, buyerFee, buyerTotal, budgetBand, BUDGET_BANDS, CATEGORIES,
@@ -58,7 +59,7 @@ import {
   Copy, CreditCard, FileText, Gavel, Info, Link2, Loader2, Lock,
   Mail, MessageSquare, Pencil, Plus, RefreshCw, Send, Shield,
   ShieldAlert, ShieldCheck, Sparkles, Star, Upload, UserCog, Users,
-  Wallet, X, XCircle, Eye, EyeOff, Ban, RotateCcw, Hand, FileCheck,
+  Wallet, X, XCircle, Eye, EyeOff, Ban, RotateCcw, Hand, FileCheck, Camera,
   FileSearch, IndianRupee, Scale, ChevronLeft, Image as ImageIcon,
   Paperclip, Search, SlidersHorizontal, Tag, Clock4, Hash,
 } from "lucide-react";
@@ -869,9 +870,17 @@ export function BuyerTalent() {
                     description="Try a broader category or budget range. Gigs are reviewed before going live."
                   />
                 ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {filteredGigs.map((g) => (
-                      <GigCard key={g.id} gig={g} onOpen={() => setSelectedGigId(g.id)} />
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+                    {filteredGigs.map((g, idx) => (
+                      <VideoGigCard
+                        key={g.id}
+                        gig={g}
+                        hasVideo={g.status === "approved_live" && idx % 2 === 0}
+                        views={g.views}
+                        requests={g.requests}
+                        rating={g.rating}
+                        onOpen={() => setSelectedGigId(g.id)}
+                      />
                     ))}
                   </div>
                 )}
@@ -1925,16 +1934,17 @@ export function BuyerContract() {
     toast({ title: "Milestone accepted", description: "Payout queued for Admin processing." });
   }
 
-  function submitReview(rating: number, comment: string) {
+  function submitReview(rating: number, comment: string, images: { id: string; color: string; label?: string }[]) {
     const review = {
       id: genId("REV"), contractId: contract!.id, fromUserId: currentUserId ?? "",
       fromName: contract!.buyerName, toRole: "pro" as const, rating, comment,
       visible: false, bothSubmitted: false, createdAt: new Date().toISOString(),
+      images: images.length > 0 ? images : undefined,
     };
     addReview(review);
     addAudit({ adminId: currentUserId ?? "", adminRole: "buyer", action: "Review submitted", entity: "Review", entityId: review.id });
     setReviewOpen(false);
-    toast({ title: "Review submitted", description: "Reviews are double-blind — visible only after both parties submit." });
+    toast({ title: "Review submitted", description: images.length > 0 ? `Review with ${images.length} photo${images.length !== 1 ? "s" : ""} submitted. Visible after both parties submit.` : "Reviews are double-blind — visible only after both parties submit." });
   }
 
   function submitDispute(d: {
@@ -2275,6 +2285,14 @@ export function BuyerContract() {
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground">{myReview.comment}</p>
+                    {myReview.images && myReview.images.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {myReview.images.map((img) => (
+                          <div key={img.id} className="size-12 rounded-md border border-border" style={{ background: `linear-gradient(135deg, ${img.color}, ${img.color}aa)` }} title={img.label} />
+                        ))}
+                        <span className="text-[10px] text-muted-foreground self-center ml-1">{myReview.images.length} photo{myReview.images.length !== 1 ? "s" : ""} attached</span>
+                      </div>
+                    )}
                     <StatusBadge tone={myReview.bothSubmitted ? "success" : "pending"} icon={false}>{myReview.bothSubmitted ? "Visible (both submitted)" : "Hidden — waiting for Pro's review"}</StatusBadge>
                   </div>
                 ) : (
@@ -2560,9 +2578,21 @@ function CancellationForm({ contract, onSubmit, onCancel }: { contract: Contract
   );
 }
 
-function ReviewDialog({ open, onOpenChange, proName, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; proName: string; onSubmit: (rating: number, comment: string) => void }) {
+function ReviewDialog({ open, onOpenChange, proName, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; proName: string; onSubmit: (rating: number, comment: string, images: { id: string; color: string; label?: string }[]) => void }) {
   const [rating, setRating] = React.useState(5);
   const [comment, setComment] = React.useState("");
+  const [images, setImages] = React.useState<{ id: string; color: string; label?: string }[]>([]);
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const palette = ["#7C3AED", "#0891B2", "#CA8A04", "#DB2777", "#0EA5E9"];
+
+  function addImages(files: FileList | null) {
+    if (!files) return;
+    const arr = Array.from(files).slice(0, 5 - images.length);
+    arr.forEach((f, i) => {
+      setImages((prev) => [...prev, { id: `ri-${Date.now()}-${i}`, color: palette[(images.length + i) % palette.length], label: f.name }]);
+    });
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[440px]">
@@ -2575,7 +2605,7 @@ function ReviewDialog({ open, onOpenChange, proName, onSubmit }: { open: boolean
             <Label>Rating</Label>
             <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
-                <button key={i} type="button" onClick={() => setRating(i + 1)} className="p-1">
+                <button key={i} type="button" onClick={() => setRating(i + 1)} className="p-1" aria-label={`${i + 1} star`}>
                   <Star className={cn("size-6", i < rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
                 </button>
               ))}
@@ -2585,10 +2615,39 @@ function ReviewDialog({ open, onOpenChange, proName, onSubmit }: { open: boolean
             <Label htmlFor="rc">Comment</Label>
             <Textarea id="rc" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="What went well? What could be better?" />
           </div>
+          <div className="space-y-1.5">
+            <Label>Photos of delivered work (optional)</Label>
+            <div className="flex flex-wrap gap-2">
+              {images.map((img) => (
+                <div key={img.id} className="relative size-14 overflow-hidden rounded-md border border-border group" style={{ background: `linear-gradient(135deg, ${img.color}, ${img.color}aa)` }}>
+                  <button
+                    type="button"
+                    onClick={() => setImages((prev) => prev.filter((x) => x.id !== img.id))}
+                    className="absolute top-0.5 right-0.5 rounded bg-black/60 p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Remove photo"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+              {images.length < 5 && (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex size-14 flex-col items-center justify-center rounded-md border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                >
+                  <Camera className="size-4" />
+                  <span className="text-[9px] mt-0.5">Add</span>
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">Up to 5 photos. Visible in your review (like Fiverr's Live Portfolio).</p>
+            <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => addImages(e.target.files)} />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => onSubmit(rating, comment)} disabled={!comment}><Star className="size-4" /> Submit review</Button>
+          <Button onClick={() => onSubmit(rating, comment, images)} disabled={!comment}><Star className="size-4" /> Submit review</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

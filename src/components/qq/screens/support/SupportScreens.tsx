@@ -35,7 +35,7 @@ import {
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
-import { PortfolioItemCard } from "@/components/qq/shared/cards";
+import { PortfolioGallery } from "@/components/qq/shared/PortfolioGallery";
 import {
   buyerFee,
   buyerTotal,
@@ -727,10 +727,6 @@ export function PublicProfileScreen() {
     (c) => c.proId === proId && (c.status === "completed" || c.status === "active"),
   );
 
-  // Featured + remaining portfolio split
-  const featured = profile.portfolioItems.filter((p) => p.featured);
-  const other = profile.portfolioItems.filter((p) => !p.featured);
-
   const sampleFee = profile.feeFrom ?? 25000;
 
   function handleReport(reason: string, note: string) {
@@ -920,26 +916,23 @@ export function PublicProfileScreen() {
             </SectionCard>
           )}
 
-          {/* Selected work — Portfolio */}
+          {/* Selected work — Portfolio (masonry gallery with lightbox) */}
           {profile.portfolioItems.length > 0 && (
             <SectionCard
               title="Selected work"
-              description="Case studies and past projects. Featured work is highlighted."
+              description="Case studies and past projects. Click any item to open the full-screen gallery."
             >
-              {featured.length > 0 && (
-                <div className="grid sm:grid-cols-2 gap-3 mb-3">
-                  {featured.map((item) => (
-                    <PortfolioItemCard key={item.id} item={item} featured />
-                  ))}
-                </div>
-              )}
-              {other.length > 0 && (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {other.map((item) => (
-                    <PortfolioItemCard key={item.id} item={item} />
-                  ))}
-                </div>
-              )}
+              <PortfolioGallery
+                items={profile.portfolioItems.map((item) => ({
+                  id: item.id,
+                  type: item.type === "case_study" ? "image" : item.type === "link" ? "link" : "image",
+                  title: item.title,
+                  description: item.description,
+                  url: item.url,
+                  color: item.id === profile.portfolioItems[0]?.id ? "#7C3AED" : ["#0891B2", "#CA8A04", "#DB2777", "#0EA5E9"][parseInt(item.id.replace(/\D/g, "") || "0") % 4],
+                  featured: item.featured,
+                }))}
+              />
             </SectionCard>
           )}
 

@@ -396,3 +396,41 @@ The prototype was stable after Round 4 (activity timeline, replay tour, gig seed
 - Wire ReviewWithImages into the contract completion review form (add image upload to the review submission).
 - Add the media demo to the sidebar nav for admin roles.
 - Consider adding real image upload support (base64 storage) for portfolio items and review images.
+
+---
+
+## Cron Review Round 6 — Media Components Integrated into Live Screens
+
+### Current project status assessment
+The prototype was stable after Round 5 (media components built: VaultDeliverable, PortfolioGallery, ReviewWithImages, VideoGigCard + MediaLifecycleDemo screen). However, those components were only showcased in the demo screen — they weren't integrated into the actual screens where users encounter media. This round focused on wiring all 4 media components into their real product locations: buyer gigs feed, public profile, contract completion review form, and the admin sidebar.
+
+### Completed modifications
+
+**Integrations (4):**
+1. **VideoGigCard → buyer talent/gigs feed** — Replaced the basic `GigCard` with `VideoGigCard` in the buyer Gigs tab. Live gigs (approved_live) at even indices get `hasVideo=true`, enabling hover-to-preview with play/pause indicator, mute toggle, "Video preview" badge, Live pulse indicator, Verified Pro badge, views/requests/revisions metrics. VLM-confirmed: "16:9 cover with Video preview badge, Verified badge, views/requests/revisions shown." (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+2. **PortfolioGallery → public profile** — Replaced the flat `PortfolioItemCard` grid in the public profile with the masonry `PortfolioGallery` (1/2/3 column responsive). Maps portfolio items to GalleryItem format with deterministic colors, featured badges, type detection (case_study→image, link→link). Click any item → full-screen lightbox with next/prev, zoom, keyboard nav. VLM-confirmed: "masonry-style grid with mixed-size cards, Featured badge, clearly a gallery." (`src/components/qq/screens/support/SupportScreens.tsx`)
+3. **ReviewWithImages → contract completion review form** — Enhanced the `ReviewDialog` with image upload support: up to 5 photos, 48px color thumbnails with remove-on-hover, dashed "Add" button, file picker. Updated `submitReview` to accept and store images. Updated the `Review` type with optional `images` field. Review display in the completion tab now shows attached photo thumbnails with count. (`src/components/qq/screens/buyer/BuyerScreens.tsx`, `src/lib/qq/types.ts`)
+4. **Media & lifecycle → Ops Manager sidebar** — Added "Media & lifecycle" nav item (Clapperboard icon) to the ops_manager sidebar, making the showcase screen directly accessible without going through AdminNotes. (`src/components/qq/shell/Shell.tsx`)
+
+**Type enhancement:**
+5. **Review.images** — Added optional `images?: { id: string; color: string; label?: string }[]` field to the `Review` interface, enabling review photo storage. (`src/lib/qq/types.ts`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Buyer → Talent → Gigs tab → VideoGigCard renders with "Video preview" badge + Verified badge + views/requests (VLM-confirmed). Visitor → Browse marketplace → public profile → PortfolioGallery masonry grid with Featured badge + "Click any item to open the full-screen gallery" (VLM-confirmed). Ops Manager → sidebar shows "Media & lifecycle" nav item → click → Media & Asset Flow Showcase screen loads. Completed contract → Completion tab → Private review section shows review with image thumbnails. All clean, no console/runtime errors.
+- VLM screenshot reviews confirmed: VideoGigCard "16:9 cover, Video preview badge, Verified, views/requests", PortfolioGallery "masonry-style grid, mixed-size cards, Featured badge, clearly a gallery".
+
+### Unresolved issues / risks + next-phase priorities
+1. **Review image upload is simulated** — Images are stored as color gradients (not real base64 images). In production, these would be actual uploaded photos. For the prototype it demonstrates the UI flow. **Priority: low** (prototype limitation).
+2. **VideoGigCard video is simulated** — The hover-to-preview shows a CSS animation (pulsing blocks), not a real video. In production this would autoplay a muted video. **Priority: low** (prototype limitation).
+3. **Pro profile editor still uses old PortfolioItemCard** — The ProProfile editor screen (not the public profile) still uses the old portfolio item cards for editing. Could be updated for consistency. **Priority: low**.
+4. **Only 1 live gig in seed data** — The buyer gigs feed shows only 1 live gig (GIG-3001), making the grid look sparse. Could add more live gig seeds. **Priority: low**.
+5. **DialogContent aria-describedby warning** — A non-blocking accessibility warning about missing Description for some DialogContent. **Priority: low** (cosmetic, doesn't break functionality).
+
+### Recommended next-phase focus
+- Add 2-3 more live gig seeds to make the buyer gigs feed grid look fuller.
+- Update the ProProfile editor to use PortfolioGallery for previewing portfolio items.
+- Add real base64 image upload support for review images and portfolio items.
+- Migrate remaining inline alert banners to the shared AlertBanner component.
+- Add the activity timeline to the Pro dashboard (proposals, contracts, payouts).

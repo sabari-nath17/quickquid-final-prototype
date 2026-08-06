@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Briefcase, Users, FileText, Wallet, MessageSquare,
   ShieldCheck, Banknote, RefreshCcw, Scale, ScrollText, FileSearch,
   Bell, Search, HelpCircle, Menu, X, Home, ChevronDown, UserCog,
-  Sparkles, ClipboardList, ShieldAlert, ClipboardCheck, Sun, Moon,
+  Sparkles, ClipboardList, ShieldAlert, ClipboardCheck, Sun, Moon, Clapperboard,
 } from "lucide-react";
 import type { Role, ViewName } from "@/lib/qq/types";
 import { useToast } from "@/hooks/use-toast";
@@ -69,6 +69,7 @@ const NAV: Record<Role, NavItem[]> = {
     { label: "Trust & Safety", view: "admin_trust", icon: ShieldAlert },
     { label: "Gig moderation", view: "admin_gig_moderation", icon: Sparkles },
     { label: "Audit log", view: "admin_audit", icon: ScrollText },
+    { label: "Media & lifecycle", view: "media_lifecycle_demo", icon: Clapperboard },
     { label: "Admin notes", view: "admin_notes", icon: ClipboardList },
   ],
 };
