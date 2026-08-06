@@ -471,3 +471,43 @@ The prototype was stable after Round 6 (media components integrated into live sc
 - Adjust the Help FAB position to avoid overlapping gig card content.
 - Update the ProProfile editor's preview pane to use PortfolioGallery.
 - Consider adding real base64 image upload support for portfolio items and review images.
+
+---
+
+## Cron Review Round 8 — AlertBanner Migration, Help FAB Fix, ProProfile Crash Fix, 5th Gig
+
+### Current project status assessment
+The prototype was stable after Round 7 (Pro activity timeline, fuller gigs feed, polish). This round focused on the recommended next-phase priorities: (1) migrating inline alert banners to the shared AlertBanner component, (2) fixing the Help FAB overlap, (3) adding a 5th live gig, (4) updating the ProProfile preview to use PortfolioGallery, and — critically — (5) fixing a pre-existing ProProfile crash bug (empty SelectItem value) that was discovered during QA.
+
+### Completed modifications
+
+**Bug fix (critical):**
+1. **ProProfile crash — empty SelectItem value** — The ProProfile screen crashed on load with "Application error: a client-side exception has occurred." The root cause was `<SelectItem value="">None</SelectItem>` in the secondary category Select. Radix UI's Select component does not allow empty string (`""`) values for SelectItem — it throws a runtime error. Fixed by using `"none"` as the value and mapping it back to `undefined` in the `onValueChange` handler: `patch({ secondaryCategory: v === "none" ? undefined : v })`. This was a pre-existing bug from the initial build that only surfaced when navigating to the ProProfile editor. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+**Styling polish:**
+2. **Help FAB size + z-index** — The floating Help button was too large (`px-4 py-2.5 text-sm`) and at `z-30`, overlapping gig card content. Reduced to `px-3.5 py-2 text-xs` with `size-3.5` icon, lowered to `z-20` (below dialogs at `z-50`), added `transition-opacity`. (`src/components/qq/shell/SupportWidget.tsx`)
+3. **AlertBanner migration (buyer dashboard)** — Replaced the inline `<Card className="border-amber-300 bg-amber-50…">` action-required banner with the shared `AlertBanner` component (tone="warning", icon=AlertTriangle, title + body + actions). Consistent dark-mode styling, proper semantic structure. (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+4. **AlertBanner migration (payment evidence)** — Replaced the inline `<div className="border-amber-200 bg-amber-50…">` info banner with `AlertBanner` (tone="info", icon=Info). (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+
+**New features:**
+5. **5th live gig seed** — Added GIG-3010 (Priya Nair, "Landing page in 48 hours", ₹20,000, 234 views, 11 requests, 4.9★, emerald cover). The buyer gigs feed now shows 5 live gigs, filling the 3-column grid nicely (2 rows: 3 + 2). (`src/lib/qq/seed.ts`)
+6. **PortfolioGallery in ProProfile preview** — Replaced the flat `PortfolioItemCard` grid in the ProProfile's "Public preview" tab with the masonry `PortfolioGallery`. Pros can now click portfolio items in the preview to open the full-screen lightbox, matching the public profile experience. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Buyer dashboard shows AlertBanner (action required). Buyer → Talent → Gigs tab shows 5 live gigs (all 5 titles confirmed present). Pro → Profile → no longer crashes (SelectItem fix) → Public preview tab shows PortfolioGallery with "Selected work" + "Partner Portal Case Study". Help FAB is smaller and less intrusive. All clean, no console/runtime errors.
+- The ProProfile crash fix was the most impactful — this screen was completely broken before (crashed on every load attempt).
+
+### Unresolved issues / risks + next-phase priorities
+1. **More inline alert banners** — A few admin screens still use inline alert divs. Could migrate them to AlertBanner for full consistency. **Priority: low** (most visible ones done).
+2. **Real image upload** — Review images and portfolio items still use color gradients. **Priority: low** (prototype limitation).
+3. **5th gig leaves 2-card second row** — The 3-column grid now has 5 items (3 + 2), which still leaves some empty space. Could add a 6th gig or use a different layout. **Priority: low** (cosmetic).
+4. **ProProfile SelectItem audit** — Other Select components in ProProfile should be audited for empty values. The secondary category was the only one with `value=""`. **Priority: low** (fixed, but worth checking others).
+
+### Recommended next-phase focus
+- Audit all Select components across the app for empty string values (Radix UI doesn't allow `""`).
+- Migrate remaining admin inline alert banners to AlertBanner.
+- Add a 6th live gig or adjust the gigs grid layout.
+- Consider adding real base64 image upload for portfolio items.
+- Add more seeded contract lifecycle states (e.g., a contract with an active dispute, a contract in the revision cycle).

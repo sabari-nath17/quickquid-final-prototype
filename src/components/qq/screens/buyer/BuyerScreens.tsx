@@ -34,7 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow, ActivityTimeline,
+  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow, ActivityTimeline, AlertBanner,
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
@@ -168,34 +168,28 @@ export function BuyerDashboard() {
 
       {/* Action required banner */}
       {(actionContracts.length > 0 || rejectedPayments.length > 0) && (
-        <Card className="p-4 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
-              <AlertTriangle className="size-5 text-amber-600" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="font-medium text-amber-900 dark:text-amber-200">Action required</div>
-              <div className="text-sm text-amber-800 dark:text-amber-300">
-                {rejectedPayments.length > 0 ? (
-                  <>Payment evidence <span className="font-mono">{rejectedPayments[0].id}</span> was rejected. Resubmit to unlock milestone funding.</>
-                ) : actionContracts.length > 0 ? (
-                  <>Submit payment evidence for <span className="font-mono">{actionContracts[0].id}</span> so the Pro can begin Milestone 1 work.</>
-                ) : null}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {rejectedPayments.length > 0 ? (
-                <Button size="sm" onClick={() => navigate("buyer_payment", { contractId: rejectedPayments[0].contractId })}>
-                  Resubmit evidence
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => navigate("buyer_payment", { contractId: actionContracts[0].id })}>
-                  Submit evidence <ArrowRight className="size-3.5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </Card>
+        <AlertBanner
+          tone="warning"
+          icon={AlertTriangle}
+          title="Action required"
+          actions={
+            rejectedPayments.length > 0 ? (
+              <Button size="sm" onClick={() => navigate("buyer_payment", { contractId: rejectedPayments[0].contractId })}>
+                Resubmit evidence
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => navigate("buyer_payment", { contractId: actionContracts[0].id })}>
+                Submit evidence <ArrowRight className="size-3.5" />
+              </Button>
+            )
+          }
+        >
+          {rejectedPayments.length > 0 ? (
+            <>Payment evidence <span className="font-mono">{rejectedPayments[0].id}</span> was rejected. Resubmit to unlock milestone funding.</>
+          ) : actionContracts.length > 0 ? (
+            <>Submit payment evidence for <span className="font-mono">{actionContracts[0].id}</span> so the Pro can begin Milestone 1 work.</>
+          ) : null}
+        </AlertBanner>
       )}
 
       <QuickStats stats={stats} />
@@ -2735,9 +2729,9 @@ export function BuyerPayment() {
         breadcrumb={<Button variant="ghost" size="sm" onClick={() => navigate(contract ? "buyer_contract" : "buyer_dashboard", contract ? { contractId: contract.id } : undefined)} className="mb-1"><ChevronLeft className="size-3.5" /> Back</Button>}
       />
 
-      <div className="rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-3 text-sm text-amber-800 dark:text-amber-300">
-        <Info className="size-4 inline mr-1" /> Submit the UTR or transaction reference first. Supporting screenshots are optional and may contain sensitive information.
-      </div>
+      <AlertBanner tone="info" icon={Info} title="How to submit payment evidence">
+        Submit the UTR or transaction reference first. Supporting screenshots are optional and may contain sensitive information.
+      </AlertBanner>
 
       {/* Rejected recovery */}
       {isRejected && (

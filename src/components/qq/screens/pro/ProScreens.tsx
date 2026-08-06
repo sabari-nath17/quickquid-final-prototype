@@ -39,6 +39,7 @@ import {
   PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline,
 } from "@/components/qq/shared";
 import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
+import { PortfolioGallery } from "@/components/qq/shared/PortfolioGallery";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
 import {
@@ -649,10 +650,10 @@ export function ProProfile() {
                   </div>
                   <div className="space-y-1.5">
                     <Label>Secondary category</Label>
-                    <Select value={profile.secondaryCategory ?? ""} onValueChange={(v) => patch({ secondaryCategory: v })}>
+                    <Select value={profile.secondaryCategory ?? "none"} onValueChange={(v) => patch({ secondaryCategory: v === "none" ? undefined : v })}>
                       <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {CATEGORIES.filter((c) => c !== profile.primaryCategory).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -933,11 +934,17 @@ export function ProProfile() {
                   {profile.portfolioItems.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No portfolio items yet.</p>
                   ) : (
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {(featured ? [featured, ...profile.portfolioItems.filter((p) => !p.featured)] : profile.portfolioItems).slice(0, 4).map((p) => (
-                        <PortfolioItemCard key={p.id} item={p} featured={p.featured} />
-                      ))}
-                    </div>
+                    <PortfolioGallery
+                      items={(featured ? [featured, ...profile.portfolioItems.filter((p) => !p.featured)] : profile.portfolioItems).slice(0, 6).map((p) => ({
+                        id: p.id,
+                        type: p.type === "case_study" ? "image" : p.type === "link" ? "link" : "image",
+                        title: p.title,
+                        description: p.description,
+                        url: p.url,
+                        color: p.id === featured?.id ? "#7C3AED" : ["#0891B2", "#CA8A04", "#DB2777", "#0EA5E9"][parseInt(p.id.replace(/\D/g, "") || "0") % 4],
+                        featured: p.featured,
+                      }))}
+                    />
                   )}
                 </section>
 
