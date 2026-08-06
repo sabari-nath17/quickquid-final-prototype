@@ -221,3 +221,47 @@ The QuickQuid prototype (v0.1) was functionally complete from the initial build 
 - Auto-normalize SLA timestamps on hydration if seed dates are stale.
 - Add 2-3 more seeded journey states (payout failed, completed+review, gig moderation) for richer demo paths.
 - Consider a "guided tour" overlay for first-time reviewers explaining the role switcher + command palette.
+
+---
+
+## Cron Review Round 2 — QA, Milestone UX, Onboarding, Seeded Journeys
+
+### Current project status assessment
+The prototype was stable after Round 1 (lint clean, no runtime errors, all 33 screens connected, command palette + dark mode + reset/normalize tools working). This round focused on: (1) addressing VLM-identified visual issues from Round 1 (stats card alignment, milestone stepper clarity, funding-pending prominence), (2) auto-normalizing SLA timestamps so the app looks correct on first load without manual action, (3) adding a guided onboarding tour for first-time reviewers, (4) seeding richer demo journey states (completed contract + reviews, payout failed), and (5) refining dark mode nav styling.
+
+### Completed modifications
+
+**Bug fixes / UX improvements:**
+1. **Auto-normalize SLA timestamps on hydration** — Added a `useEffect` in `QuickQuidApp` that checks the oldest payment's `submittedAt` on first hydration; if it's >60 days old (seed data is from Jan 2025), it automatically runs `normalizeSlaTimestamps()`. Verified: fresh load now shows 4 normal / 2 approaching / 1 breached in the ops SLA queue (was all "Breached" before). (`src/components/qq/QuickQuidApp.tsx`)
+2. **Dark mode active nav refinement** — Active sidebar item now uses `dark:bg-primary/20 dark:text-primary` (subtle tint) instead of solid `bg-primary` (which became near-white in dark mode). Inactive items use `dark:text-muted-foreground`. (`src/components/qq/shell/Shell.tsx`)
+
+**Styling polish (VLM-driven):**
+3. **Pro workroom milestone stepper** — Replaced the flat milestone list with a vertical stepper: circular nodes on a connecting line, with status-aware colors (green check for done/accepted, amber lock for funding-pending, primary for active, muted for not-started). Funding-pending milestone cards now have an amber background + lock icon. (`src/components/qq/screens/pro/ProScreens.tsx`)
+4. **Sticky "Waiting for M1 funding" banner** — Added a sticky amber bar at the top of the Workroom tab (below the header) that stays visible while scrolling, showing "Waiting for M1 funding (₹34,200) — do not begin work until QuickQuid confirms payment." (`src/components/qq/screens/pro/ProScreens.tsx`)
+5. **Funding-pending interlock copy** — Made the warning more specific: "Milestone M1 funding is pending manual admin review. You will receive a notification once it is cleared. Expected Admin review target: 24 hours." (was generic "An accepted milestone is currently under manual payment verification…"). (`src/components/qq/screens/pro/ProScreens.tsx`)
+6. **QuickStats cards** — Redesigned: icon now sits in a rounded `bg-primary/10` badge (was floating muted icon), label is uppercase tracking-wide, number is `font-bold` (was `font-semibold`). VLM-confirmed: "stats row now scans as a professional, scannable dashboard widget." (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+
+**New features:**
+7. **Guided onboarding tour** — 5-step modal tour that auto-appears when a signed-in user first lands on a dashboard (if not completed). Steps: Welcome → Switch roles (role switcher) → Press ⌘K (command palette) → Locked business rules (0%/14%/manual) → Dark mode + persistence. Progress bar, step counter, Skip/Back/Next, and a "Try ⌘K" CTA on step 3 that opens the command palette. Dismissal persisted to localStorage (`quickquid-tour-completed-v1`). (`src/components/qq/shell/OnboardingTour.tsx`, wired in `QuickQuidApp.tsx`)
+8. **Seeded completed contract with reviews** — Added QQ-0680 "Ops console redesign" (Northstar Labs ↔ Akhil Menon, ₹55,000, 3 milestones all `payout_processed`, status `completed`) + 2 double-blind reviews (5-star from buyer, 5-star from pro, both visible). Enriches the Buyer/Pro dashboard engagement lists and demonstrates the completion/review flow. (`src/lib/qq/seed.ts`)
+9. **Seeded payout-failed state** — Added PO-5010 (Rahul Verma, ₹18,000, status `failed`, failureReason "Beneficiary account number mismatch. Bank returned NEFT-771200441 as invalid."). Visible in Finance → Payouts queue with `failed` status, demonstrating the payout-failed recovery path (Screen 09.6). (`src/lib/qq/seed.ts`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: fresh load → sign in as buyer → onboarding tour auto-appears (5 steps, dismissable) → QuickStats improved (VLM-confirmed) → switch to Pro → open workroom → Workroom tab shows vertical milestone stepper with connecting line + amber funding-pending M1 + sticky "Waiting for M1 funding" banner (VLM-confirmed) → switch to Ops → SLA queue auto-normalized (4 normal / 2 approaching / 1 breached, no manual action needed) → dark mode toggle works with subtle nav tint → completed contract QQ-0680 visible in buyer dashboard → failed payout PO-5010 visible in Finance payouts queue. All clean, no console/runtime errors.
+- VLM screenshot reviews confirmed: stats row alignment fixed, milestone stepper clearer, funding-pending visually distinct, sticky banner visible, dark mode consistent.
+
+### Unresolved issues / risks + next-phase priorities
+1. **Toast z-index above modal** — The "Signed in" toast renders above the onboarding tour modal backdrop (VLM-flagged). The toast container needs a lower z-index than the Dialog, or the Dialog needs a higher z-index. **Priority: low-medium** (cosmetic, only visible during the brief tour toast).
+2. **Mobile bottom nav touch targets** — VLM flagged the bottom nav items may be <48px tall on mobile. They're `h-14` (56px) which meets the 44px minimum, but the icon+label spacing could be tighter. **Priority: low**.
+3. **Inline alert banners not yet migrated** — Some buyer/admin screens still use inline `<div>` alert banners rather than the shared `AlertBanner` component. Dark-mode contrast is generally fine (uses `dark:` variants) but consistency could be improved. **Priority: medium**.
+4. **More gig moderation seeds** — GIG-3002 (under_review) and GIG-3003 (changes_requested) exist, but no "submitted awaiting first review" gig. **Priority: low**.
+5. **Tour re-trigger** — Once dismissed, the tour won't show again even after "Reset demo data" (separate localStorage key). Consider clearing the tour-completed flag on reset. **Priority: low**.
+
+### Recommended next-phase focus
+- Fix toast z-index to render below modals/dialogs.
+- Migrate remaining inline alert banners to shared `AlertBanner` for consistency.
+- Clear the onboarding-tour-completed flag when "Reset demo data" is run, so reviewers can see the tour again after a reset.
+- Add a "submitted awaiting first review" gig seed + surface it in Admin → Gig moderation.
+- Consider adding lightweight SVG empty-state illustrations for polish.

@@ -1560,7 +1560,7 @@ export function ProContract() {
               </SectionCard>
 
               {fundingPending && (
-                <InterlockCard tone="warning" icon={AlertTriangle} title="Do not begin work until payment is confirmed" body="An accepted milestone is currently under manual payment verification. Expected Admin review target: 24 hours." />
+                <InterlockCard tone="warning" icon={AlertTriangle} title="Do not begin work until payment is confirmed" body="Milestone M1 funding is pending manual admin review. You will receive a notification once it is cleared. Expected Admin review target: 24 hours." />
               )}
             </div>
           </div>
@@ -1700,28 +1700,53 @@ function WorkroomTab({ contract, currentMilestone }: { contract: Contract; curre
 
   return (
     <div className="space-y-4">
+      {ms.status === "funding_pending" && (
+        <div className="sticky top-16 z-20 flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-100 px-4 py-2.5 dark:bg-amber-950/60 dark:border-amber-800 shadow-sm">
+          <Lock className="size-4 text-amber-700 dark:text-amber-400 shrink-0" />
+          <div className="flex-1 min-w-0 text-sm">
+            <span className="font-semibold text-amber-900 dark:text-amber-200">Waiting for {ms.label} funding ({formatINR(ms.proFee)})</span>
+            <span className="text-amber-800 dark:text-amber-300/80 ml-1">— do not begin work until QuickQuid confirms payment.</span>
+          </div>
+        </div>
+      )}
       <SectionCard title="Milestones" description="Max 4 per contract. Workroom gates submit until funding is confirmed.">
-        <div className="space-y-2">
-          {contract.milestones.map((m) => {
+        <div className="relative space-y-2 pl-4">
+          {/* Vertical connecting line */}
+          <div className="absolute left-[1.4rem] top-6 bottom-6 w-px bg-border" aria-hidden />
+          {contract.milestones.map((m, idx) => {
             const meta = statusMeta(m.status);
             const isActive = m.id === activeMilestoneId;
+            const isFundingPending = m.status === "funding_pending";
+            const isDone = ["accepted", "payout_queued", "payout_processed"].includes(m.status);
             return (
-              <button
-                key={m.id}
-                onClick={() => setActiveMilestoneId(m.id)}
-                className={cn("w-full text-left rounded-lg border p-3 transition-all", isActive ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/30")}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">{m.index}</div>
-                    <div>
-                      <div className="font-medium text-sm">{m.label} · {m.description}</div>
-                      <div className="text-xs text-muted-foreground">{formatINR(m.proFee)}</div>
-                    </div>
-                  </div>
-                  <StatusBadge tone={meta.tone} icon={false}>{meta.label}</StatusBadge>
+              <div key={m.id} className="relative">
+                {/* Node on the line */}
+                <div className={cn(
+                  "absolute -left-4 top-3.5 z-10 flex size-6 items-center justify-center rounded-full border-2 bg-card text-[10px] font-semibold",
+                  isDone ? "border-emerald-500 bg-emerald-500 text-white" : isFundingPending ? "border-amber-500 bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : isActive ? "border-primary text-primary" : "border-border text-muted-foreground",
+                )}>
+                  {isDone ? <CheckCircle2 className="size-3.5" /> : isFundingPending ? <Lock className="size-3" /> : m.index}
                 </div>
-              </button>
+                <button
+                  onClick={() => setActiveMilestoneId(m.id)}
+                  className={cn(
+                    "w-full text-left rounded-lg border p-3 pl-9 transition-all",
+                    isActive ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-border hover:border-primary/30",
+                    isFundingPending && "border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-sm">{m.label} · {m.description}</span>
+                        {isFundingPending && <Lock className="size-3 text-amber-600 shrink-0" />}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{formatINR(m.proFee)}</div>
+                    </div>
+                    <StatusBadge tone={meta.tone} icon={false}>{meta.label}</StatusBadge>
+                  </div>
+                </button>
+              </div>
             );
           })}
         </div>

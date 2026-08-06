@@ -303,6 +303,29 @@ export const SEED_CONTRACTS: Contract[] = [
     cancellationTerms: "Either party may request cancellation. Refund is governed by work-start status and Finance review. No automatic refund.",
     currentMilestoneId: "M-1",
   },
+  {
+    id: "QQ-0680",
+    buyerId: "BUY-1042",
+    buyerName: "Northstar Labs",
+    proId: "PRO-2088",
+    proName: "Akhil Menon",
+    briefId: "BRF-0892",
+    briefTitle: "Ops console redesign",
+    scope: "Redesign the internal ops console for queue triage and audit. 6 key screens, design tokens, handoff docs.",
+    exclusions: ["No development", "No SEO"],
+    timeline: "4 weeks",
+    totalProFee: 55000,
+    revisions: 2,
+    milestones: [
+      { id: "M-1", index: 1, label: "M1", description: "Discovery & wireframes", proFee: 20000, status: "payout_processed", acceptanceCriteria: ["Stakeholder aligned wireframes"], versions: [{ id: "V-1", version: 1, status: "accepted", submitter: "pro", timestamp: "2025-01-02T10:00:00Z", link: "https://figma.com/file/wireframes", changeNote: "Initial wireframes" }] },
+      { id: "M-2", index: 2, label: "M2", description: "Hi-fi design", proFee: 20000, status: "payout_processed", acceptanceCriteria: ["Hi-fi screens approved"], versions: [{ id: "V-2", version: 1, status: "accepted", submitter: "pro", timestamp: "2025-01-09T10:00:00Z", link: "https://figma.com/file/hifi", changeNote: "Hi-fi screens" }] },
+      { id: "M-3", index: 3, label: "M3", description: "Handoff & docs", proFee: 15000, status: "payout_processed", acceptanceCriteria: ["Design tokens & docs delivered"], versions: [{ id: "V-3", version: 1, status: "accepted", submitter: "pro", timestamp: "2025-01-16T10:00:00Z", link: "https://figma.com/file/handoff", changeNote: "Final handoff" }] },
+    ],
+    status: "completed",
+    createdAt: "2024-12-20T09:00:00Z",
+    cancellationTerms: "Either party may request cancellation. Refund is governed by work-start status and Finance review. No automatic refund.",
+    currentMilestoneId: "M-3",
+  },
 ];
 
 export const SEED_PAYMENTS: PaymentEvidence[] = [
@@ -353,6 +376,21 @@ export const SEED_PAYOUTS: Payout[] = [
     processedAt: "2024-12-29T16:20:00Z",
     slipAvailable: true,
   },
+  {
+    id: "PO-5010",
+    contractId: "QQ-0720",
+    proId: "PRO-2101",
+    proName: "Rahul Verma",
+    milestoneLabel: "M2",
+    proFee: 18000,
+    commission: 0,
+    netPayout: 18000,
+    status: "failed",
+    beneficiaryToken: "BNF-6612",
+    queuedAt: "2025-01-09T10:00:00Z",
+    failureReason: "Beneficiary account number mismatch. Bank returned NEFT-771200441 as invalid.",
+    slipAvailable: false,
+  },
 ];
 
 export const SEED_REFUNDS: Refund[] = [
@@ -389,7 +427,32 @@ export const SEED_DISPUTES: Dispute[] = [
   },
 ];
 
-export const SEED_REVIEWS: Review[] = [];
+export const SEED_REVIEWS: Review[] = [
+  {
+    id: "REV-1001",
+    contractId: "QQ-0680",
+    fromUserId: "BUY-1042",
+    fromName: "Northstar Labs",
+    toRole: "pro",
+    rating: 5,
+    comment: "Akhil delivered the ops console redesign ahead of schedule. The design tokens and handoff docs were exceptional. Would rehire.",
+    visible: true,
+    bothSubmitted: true,
+    createdAt: "2025-01-17T10:00:00Z",
+  },
+  {
+    id: "REV-1002",
+    contractId: "QQ-0680",
+    fromUserId: "PRO-2088",
+    fromName: "Akhil Menon",
+    toRole: "buyer",
+    rating: 5,
+    comment: "Clear brief, fast feedback, prompt milestone acceptance. Great client to work with.",
+    visible: true,
+    bothSubmitted: true,
+    createdAt: "2025-01-17T12:00:00Z",
+  },
+];
 
 export const SEED_TICKETS: SupportTicket[] = [
   {

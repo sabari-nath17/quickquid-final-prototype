@@ -113,7 +113,9 @@ export function Sidebar() {
               onClick={() => navigate(item.view)}
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                active ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/80 hover:bg-muted hover:text-foreground",
+                active
+                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/25"
+                  : "text-foreground/80 hover:bg-muted hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground",
               )}
             >
               <item.icon className="size-4" />

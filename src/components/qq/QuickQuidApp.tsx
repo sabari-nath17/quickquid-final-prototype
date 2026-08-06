@@ -6,6 +6,7 @@ import { Sidebar, MobileSidebar, Header, MobileBottomNav } from "./shell/Shell";
 import { NotificationDrawer } from "./shell/NotificationDrawer";
 import { SupportWidget } from "./shell/SupportWidget";
 import { CommandPalette, ThemeProvider } from "./shell/CommandPalette";
+import { OnboardingTour } from "./shell/OnboardingTour";
 import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor/RoleAuthScreens";
 import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
@@ -122,8 +123,9 @@ function Breadcrumb() {
 }
 
 export function QuickQuidApp() {
-  const { view, currentRole, hydrated, navigate } = useQQ();
+  const { view, currentRole, hydrated, navigate, payments, normalizeSlaTimestamps } = useQQ();
   const [mounted, setMounted] = React.useState(false);
+  const [autoNormalized, setAutoNormalized] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
   // On hydration, restore the signed-in user to their role home instead of role_selection
@@ -133,6 +135,21 @@ export function QuickQuidApp() {
       navigate(home);
     }
   }, [mounted, hydrated, currentRole, view, navigate]);
+
+  // Auto-normalize SLA timestamps once on first hydration if seed data is stale (>60 days old).
+  // This prevents every queue item from showing "Breached" because seed dates are from Jan 2025.
+  React.useEffect(() => {
+    if (mounted && hydrated && !autoNormalized && payments.length > 0) {
+      const oldest = payments[0]?.submittedAt;
+      if (oldest) {
+        const ageDays = (Date.now() - new Date(oldest).getTime()) / 86400000;
+        if (ageDays > 60) {
+          normalizeSlaTimestamps();
+        }
+      }
+      setAutoNormalized(true);
+    }
+  }, [mounted, hydrated, autoNormalized, payments, normalizeSlaTimestamps]);
 
   // Avoid hydration flash — render a neutral shell until mounted
   if (!mounted) {
@@ -186,6 +203,7 @@ export function QuickQuidApp() {
         <NotificationDrawer />
         <SupportWidget />
         <CommandPalette />
+        <OnboardingTour />
       </div>
     </ThemeProvider>
   );

@@ -316,12 +316,14 @@ function QuickStats({ stats }: { stats: { label: string; value: number; icon: Re
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((s) => (
-        <Card key={s.label} className="p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{s.label}</span>
-            <s.icon className="size-4 text-muted-foreground" />
+        <Card key={s.label} className="p-4 hover:shadow-sm transition-shadow">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{s.label}</span>
+            <div className="rounded-md bg-primary/10 p-1.5">
+              <s.icon className="size-3.5 text-primary" />
+            </div>
           </div>
-          <div className="mt-1 text-2xl font-semibold tabular-nums">{s.value}</div>
+          <div className="mt-2 text-2xl font-bold tabular-nums">{s.value}</div>
         </Card>
       ))}
     </div>
