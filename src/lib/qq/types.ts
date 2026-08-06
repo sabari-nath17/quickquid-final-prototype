@@ -546,7 +546,8 @@ export type ViewName =
   | "public_profile"
   | "brief_detail_public"
   | "notifications"
-  | "admin_notes";
+  | "admin_notes"
+  | "media_lifecycle_demo";
 
 export interface ViewParams {
   [key: string]: string | undefined;

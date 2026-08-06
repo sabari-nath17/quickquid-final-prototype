@@ -1,0 +1,1687 @@
+# QuickQuid Engineer Wireframe and Product Specification
+
+Status: Product blueprint for the v0.1 clickable prototype and engineering handoff.
+
+Audience: Product engineer, frontend engineer, backend engineer, QA, operations lead, and product designer.
+
+Out of scope: Tech-stack selection, API vendor selection, legal/tax advice, and production security architecture.
+
+## 1. Product Contract
+
+QuickQuid is a Buyer-to-Pro freelance marketplace built around trust, reputation, repeat hiring, and controlled manual operations.
+
+### 1.1 Non-negotiable v0.1 rules
+
+| Rule | Product requirement |
+|---|---|
+| Pro commission | QuickQuid deducts ₹0 platform commission from the Pro's agreed professional fee. |
+| Buyer fee | Buyer pays a separate 14% beta QuickQuid fee on top of the Pro fee. |
+| Fee visibility | Pro fee, Buyer fee, applicable-tax placeholder, and Buyer total appear before payment. |
+| Payment model | Buyer submits structured payment evidence; Finance Admin verifies it manually. |
+| Escrow/wallet | Do not claim automated escrow. Do not create a wallet in v0.1. |
+| Work gate | A Pro cannot begin work until the required milestone is Payment Confirmed. |
+| Payout model | Buyer acceptance creates Payout Queued; Finance/Admin then processes it manually. |
+| Milestones | Maximum four milestones per contract. |
+| Trust labels | Use identity reviewed, portfolio reviewed, availability, and completed projects. Never use an unexplained generic verified badge. |
+| v0.2 | Productized Pro gigs are future overlays, not live v0.1 functionality. |
+| v0.3 | Paid priority gig feed is future only. |
+
+### 1.2 Canonical product actors
+
+| Role | Uses the product for | Cannot do |
+|---|---|---|
+| Visitor | Choose intent and view public content | View private data or transact |
+| Buyer | Find talent, post briefs, hire, pay, review, rehire | Access Admin controls or Pro payout data |
+| Pro | Build profile/reputation, apply, work, deliver, receive payout | Access Buyer payment evidence or Admin controls |
+| Support Tier 1 | KYC intake, support, workroom visibility | Move money or suspend users |
+| Finance Tier 2 | Verify payments, process payout/refund records | Suspend users or decide risk cases |
+| Risk Tier 3 | Review risk, disputes, suspensions, audit log | Verify payments or trigger payouts |
+| Ops Manager | Watch queues/SLA and assign escalations | Bypass configured financial authorization |
+
+### 1.3 Canonical sample data
+
+| Object | Sample |
+|---|---|
+| Buyer | Northstar Labs (BUY-1042), B2B SaaS, Kochi |
+| Pro | Akhil Menon (PRO-2088), Product Designer and UX Researcher |
+| Brief | Build a secure partner onboarding portal (BRF-0892) |
+| Contract | QQ-0892 |
+| Pro fee | ₹80,000 |
+| Buyer fee | 14% = ₹11,200 |
+| Buyer total | ₹91,200 before applicable taxes |
+| Counter-offer | ₹85,000 Pro fee / ₹11,900 Buyer fee / ₹96,900 total before tax |
+| Milestones | M1 ₹34,200; M2 ₹20,000; M3 ₹15,800; M4 ₹10,000 |
+| Payment evidence | PAY-0892, UTR982341771, NEFT, M1, ₹34,200 |
+
+## 2. Product Map and Lifecycle
+
+~~~mermaid
+flowchart LR
+  V[Visitor] --> S01[01 Account Profile Readiness]
+  S01 --> B02[02 Buyer Dashboard]
+  S01 --> P02[02 Pro Dashboard]
+  B02 --> S03[03 Discovery]
+  P02 --> S03
+  S03 --> S04[04 Detail]
+  B02 --> S05[05 Create Brief]
+  S05 --> S06[06 Applicants and Proposals]
+  S04 --> S06
+  S06 --> S07[07 Messaging and Scope]
+  S07 --> S08[08 Offer and Contract]
+  S08 --> S09[09 Payment Verification]
+  S09 --> S10[10 Workroom and Delivery]
+  S10 --> S11[11 Completion Dispute Review]
+  S11 --> B02
+  S11 --> P02
+  S01 --> S12[12 Admin Operations]
+  S09 --> S12
+  S11 --> S12
+  S02[02 Dashboard] --> S99[99 Communications and Support]
+  S09 --> S99
+  S11 --> S99
+~~~
+
+### 2.1 Canonical contract and money state model
+
+~~~mermaid
+stateDiagram-v2
+  [*] --> DraftBrief
+  DraftBrief --> OpenBrief
+  OpenBrief --> ProposalSubmitted
+  ProposalSubmitted --> Shortlisted
+  Shortlisted --> OfferDraft
+  OfferDraft --> AcceptedPendingFunding
+  AcceptedPendingFunding --> PaymentEvidenceSubmitted
+  PaymentEvidenceSubmitted --> PaymentRejected
+  PaymentRejected --> PaymentEvidenceSubmitted
+  PaymentEvidenceSubmitted --> PaymentConfirmed
+  PaymentConfirmed --> ClearedToWork
+  ClearedToWork --> InDelivery
+  InDelivery --> InReview
+  InReview --> RevisionRequested
+  RevisionRequested --> InDelivery
+  InReview --> MilestoneAccepted
+  MilestoneAccepted --> PayoutQueued
+  PayoutQueued --> PayoutProcessed
+  PayoutProcessed --> NextMilestone
+  NextMilestone --> ClearedToWork
+  PayoutProcessed --> Completed
+  InDelivery --> Disputed
+  InReview --> Disputed
+  PayoutQueued --> Disputed
+  Disputed --> ResolvedPayout
+  Disputed --> ResolvedRefund
+  ResolvedPayout --> Completed
+  ResolvedRefund --> Completed
+~~~
+
+### 2.2 Status ownership
+
+| Status | Who can trigger it | Visible to | Required user-facing language |
+|---|---|---|---|
+| Draft | Buyer or Pro | Owner only | Draft saved |
+| Pending verification | User submits; Admin resolves | Owner, authorized Admin | Under Admin review |
+| Payment evidence submitted | Buyer | Buyer, Pro, Finance | Payment evidence under review |
+| Payment confirmed | Finance / authorized checker | Buyer, Pro, Admin | Payment confirmed. Pro may begin work. |
+| Cleared to work | System after payment confirmation | Buyer, Pro | Work may begin |
+| In review | Pro submits delivery | Buyer, Pro, Admin read-only | Buyer review required |
+| Payout queued | Buyer accepts milestone | Buyer, Pro, Finance | Payout queued for Admin processing |
+| Payout processed | Finance records processing | Buyer, Pro, Admin | Payout processed |
+| Disputed | Buyer or Pro | Both parties, Risk, Support context | Under dispute review |
+| Resolved | Risk/authorized resolver | Both parties, Finance | Resolution recorded |
+
+### 2.3 Shared navigation
+
+Buyer sidebar: Dashboard, Find Talent, My Briefs, Contracts, Payments, Messages, Settings.
+
+Pro sidebar: Dashboard, Find Briefs, My Proposals, Contracts, Workroom, Payouts, Messages, Settings.
+
+Admin sidebar: Operations, KYC, Payment Verification, Payouts, Refunds, Disputes, Trust and Safety, Audit Log, Settings.
+
+### 2.4 Shared UI elements
+
+| Component | Used by | Product behavior |
+|---|---|---|
+| Status badge | All screens | Icon plus text plus semantic color; never color only |
+| Action-required banner | Buyer/Pro dashboards, contracts | Remains visible until the blocking action is resolved |
+| Fee breakdown | Brief, proposal, offer, payment, invoice | Always separates Pro fee and Buyer fee |
+| Readiness card | Buyer/Pro onboarding | Explains eligibility and links to the unblock action |
+| Audit event | Admin | Records Admin, role, action, target entity, old/new status, time, reason |
+| Sensitive field | Pro/Admin | Masks values outside authorized reveal flow |
+| Support widget | All | Attaches contract/payment context to a ticket |
+
+## 3. Wireframe Convention
+
+Every primary screen contains:
+
+1. Who, What, When, Where, Why, and How.
+2. Desktop-first text wireframe.
+3. All required sub-screen/modal/drawer states.
+4. Connections to prior and next states.
+5. Data, permission, validation, and edge-condition rules.
+
+Frame naming:
+
+~~~text
+[Role] / [Screen ID] / [Sub-screen ID] / [State] / [Viewport]
+Example: Pro / S01 / 1.12 / Published / Desktop
+~~~
+
+## 4. SCREEN 01 - Account, Role, Profile and Verification Readiness
+
+### 4.1 5W1H
+
+- **Who:** Visitor, Buyer, Pro, authorized KYC/Risk Admin.
+- **What:** Account creation, intent selection, personal/company profile setup, public preview, verification readiness, and payout-readiness setup.
+- **When:** First visit; profile update; Pro eligibility setup; payout-data change.
+- **Where:** Public entry, authenticated Settings/Profile, and Admin KYC queue.
+- **Why:** QuickQuid needs clear role intent, credible profiles, controlled trust signals, and safe payout readiness without making Buyers abandon before seeing value.
+- **How:** User selects role, authenticates, completes role-specific profile tasks, submits required information for review, receives clear status, and publishes a public profile.
+
+### 4.2 Desktop wireframe
+
+~~~text
+[QuickQuid] [Role badge]                              [Help] [Bell] [Avatar]
+--------------------------------------------------------------------------------
+[Sidebar] | Breadcrumb: Account / Profile
+          | [Page title]                         [Profile completion 72%]
+          |
+          | [Readiness cards / profile editor / verification step content]
+          |
+          |                           [What you can do next]
+          |                           [Public vs private visibility summary]
+~~~
+
+### 4.3 Sub-screen specifications
+
+#### 1.1 Role Selection
+
+Who: Unauthenticated Visitor.  
+What: Intent page with Buyer and Pro selection before authentication.  
+When: First visit or intentional role registration.  
+Where: Public root route.  
+Why: Prevents mixed intent and sets the right dashboard/navigation.  
+How: Two large cards: I want to hire and I want to work; Google, LinkedIn, or email authentication. Pro card says 0% QuickQuid commission. Keep 100% of your agreed professional fee.  
+Connection: Success goes to 1.2. Authentication error stays inline with retry.
+
+#### 1.2 Readiness Dashboard
+
+Who: Buyer and Pro.  
+What: Role-specific eligibility checklist and completion status.  
+When: First login and whenever eligibility changes.  
+Where: Dashboard onboarding section and Settings.  
+Why: Shows what blocks a risky action without blocking exploration.  
+How: Buyer tasks are account, profile, billing when needed, create brief, fund milestone. Pro tasks are profile, identity, evidence, payout details, Admin review, proposal eligibility. Buyer can browse and draft before verification.  
+Connection: Card CTAs lead to 1.3, 1.8, 1.11, 5.1, or 6.3.
+
+#### 1.3 KYC and Payout Upload
+
+Who: Pro; Buyer only when policy requires it; authorized Admin reviewer.  
+What: Multi-step identity and payout-information intake.  
+When: Pro onboarding, payout setup, or re-verification.  
+Where: Settings modal/dedicated onboarding step and Admin KYC queue.  
+Why: Payout cannot safely occur without current reviewed payout information.  
+How: Identity, professional details, payout details. Accept JPG/PNG/PDF up to 10MB. Mask sensitive fields after entry. Submit creates Pending Admin review.  
+Connection: Submit goes to 1.4; Admin approval goes to 1.13; rejection returns to 1.4 resubmit.
+
+#### 1.4 Pending and Rejected Verification
+
+Who: Buyer/Pro who submitted information.  
+What: Verification status and recovery state.  
+When: After submission or Admin decision.  
+Where: Readiness dashboard, Settings, notification deep link.  
+Why: Users need a reason and self-service next step rather than a vague failed state.  
+How: Pending shows target review time. Rejected shows configured reason and Resubmit CTA.  
+Connection: Resubmit goes to 1.3. Support goes to 99.2.
+
+#### 1.5 Pro Payout-Readiness Interlock
+
+Who: Pro.  
+What: Blocking modal when a Pro attempts a paid proposal while payout readiness is incomplete.  
+When: Pro presses Submit Proposal in 6.3.  
+Where: Proposal modal overlay.  
+Why: Avoids accepting work where payout cannot be completed.  
+How: Modal identifies the missing requirement with Add payout details and Cancel; do not erase the draft proposal.  
+Connection: Add payout goes to 1.3; approval later returns to preserved proposal draft.
+
+#### 1.6 Duplicate Device/Network Risk Flag
+
+Who: Risk Admin.  
+What: Risk signal attached to a verification record.  
+When: A risk rule detects a match with a prior suspended pattern.  
+Where: Admin KYC record header.  
+Why: Manual review needs investigation support without treating a match as automatic guilt.  
+How: Show hashed signal, match confidence, prior status, history, and actions: Investigate, Request information, Reject, Approve with documented rationale.  
+Connection: Decision creates 12.4 audit event and 99.1 notification.
+
+#### 1.7 Update Payout Details
+
+Who: Pro.  
+What: Edit/re-verification flow for payout data.  
+When: Pro changes beneficiary/bank details.  
+Where: Pro Settings > Payout details.  
+Why: Payout destination changes are high-risk.  
+How: Save changes as pending, mask data, pause new paid proposals until review. Existing contractual obligations stay visible to Admin.  
+Connection: Submit to 1.4; Admin decision updates 1.13.
+
+#### 1.8 Buyer Organization Details
+
+Who: Buyer.  
+What: Private billing/company information editor.  
+When: Buyer enters or updates invoice/billing context.  
+Where: Buyer Settings > Organization and billing.  
+Why: Company details need correction without Support intervention.  
+How: Company name, billing address, GSTIN if applicable, billing contact, validation, save state. It does not alter public profile automatically.  
+Connection: Data is used by 5.1, 8.1, and 11.7.
+
+#### 1.9 Terms and Privacy Consent
+
+Who: Buyer and Pro.  
+What: Explicit commercial-terms and privacy-notice acknowledgement.  
+When: Before sensitive verification submission and account activation.  
+Where: KYC completion modal.  
+Why: User sees fee terms and information-use notice at the point of action.  
+How: Separate checkboxes for Terms including fee structure and Privacy Notice; record version/timestamp.  
+Connection: Required before 1.3 submission.
+
+#### 1.10 Pro Work Relationship Acknowledgement
+
+Who: Pro.  
+What: Commercial relationship acknowledgement.  
+When: During Pro verification/onboarding.  
+Where: KYC final step.  
+Why: Establishes user understanding while legal terms remain governed by an approved agreement and law.  
+How: Show counsel-approved acknowledgement text and record version, time, and user ID. Do not treat this as legal classification by itself.  
+Connection: Required before 1.3 submission.
+
+#### 1.11 Personal Profile Builder
+
+Who: Buyer and Pro.  
+What: Edit personal/company profile and reputation surface.  
+When: Onboarding and later profile updates.  
+Where: Settings > Profile and readiness CTA.  
+Why: Marketplace users need credible, comparable information to decide.  
+How: Pro fields: avatar, public name, headline, bio, categories, skills, portfolio, work samples, availability, response time, project size, optional language/time-zone. Buyer fields: display name, logo, company description, industry, hiring categories. Each field shows public/private setting.  
+Connection: Save goes to 1.12; published profile appears on 3.1 and 4.1.
+
+#### 1.12 Public Profile Preview and Customization
+
+Who: Buyer and Pro.  
+What: Exact public-profile preview plus customization.  
+When: Before publishing or adjusting visibility.  
+Where: Settings > Profile > Preview.  
+Why: Users must know what another marketplace user will see.  
+How: Reorder sections, choose featured portfolio item, set optional field visibility, preview by role, save draft, publish/unpublish. Trust labels are dimensioned.  
+Connection: Publish appears in 3.1 Discovery and 4.1 Detail; unpublish removes discovery eligibility but preserves contracts.
+
+#### 1.13 Profile Completion and Approval Interlock
+
+Who: Buyer and Pro.  
+What: Eligibility status derived from profile, evidence, verification, and payout readiness.  
+When: Any supporting state changes.  
+Where: Dashboard, Profile settings, proposal submission, public profile.  
+Why: Converts opaque eligibility into a clear checklist.  
+How: Show required versus optional tasks and why access is locked. Never reveal private risk logic.  
+Connection: Enables 3.1 publication, 6.3 proposal, and payout functions by role.
+
+### 4.4 Screen 01 rules
+
+- Public profile visibility is separate from account privacy and billing data.
+- Sensitive KYC/payout fields never render on public profile frames.
+- Profile changes have draft, saved, and published states; contracts preserve their original profile snapshot.
+- Pro payout changes trigger re-review and proposal eligibility interlock.
+- Every Admin review action writes an audit event.
+
+## 5. SCREEN 02 - Role Dashboard and Action Centre
+
+### 5.1 5W1H
+
+- **Who:** Buyer and Pro. Admin has Screen 12.
+- **What:** Role-specific action centre for active work, blocking tasks, recent updates, and next action.
+- **When:** Every authenticated session and after verification/payment/delivery/dispute status changes.
+- **Where:** First signed-in route and dashboard navigation entry.
+- **Why:** Users should not hunt for the next action during manual verification delays.
+- **How:** Action-required banner first, active engagement cards second, guided empty state, global notification drawer.
+
+### 5.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Dashboard                                      [Bell] [Avatar]
+          | [Sticky action-required banner + CTA]
+          | [Welcome / profile readiness]
+          | [Active engagements list ---------------------------------]
+          | [Contract card] [status] [milestone] [next action CTA]
+          | [Contract card] [status] [milestone] [next action CTA]
+          | [Recent activity / saved items]
+~~~
+
+### 5.3 Sub-screen specifications
+
+#### 2.1 Sticky Action-Required Banner
+
+Who: Buyer and Pro.  
+What: Persistent blocking-action banner.  
+When: Required user step is pending.  
+Where: Dashboard top and relevant contract screen.  
+Why: Prevents missed payment evidence, blocked work, and unreviewed delivery.  
+How: Buyer: Action required: submit payment evidence for QQ-0892. Pro: Payment verification pending. Do not begin work until QuickQuid confirms funding.  
+Connection: CTA deep-links to 9.1, 9.2, 10.5, 11.2, or 1.3.
+
+#### 2.2 Active Engagements List
+
+Who: Buyer and Pro.  
+What: Chronological contract/project cards.  
+When: User has active, pending, or recently completed work.  
+Where: Dashboard main content.  
+Why: Reduces context switching and exposes status plus next step.  
+How: Each card has title, counterpart, contract ID, status, milestone, fee context, last update, CTA.  
+Connection: CTA goes to 8.1, 9.1, 10.1, or 11.1 based on status.
+
+#### 2.3 Buyer First-Time Empty State
+
+Who: Buyer with no projects.  
+What: Guided first action instead of a blank dashboard.  
+When: No active/completed engagement exists.  
+Where: Active engagements area.  
+Why: Buyer needs a direct path to marketplace liquidity.  
+How: Copy: No active projects yet. Start with a clear brief or find a professional directly. CTAs: Post a brief and Search talent.  
+Connection: Post a brief goes to 5.1. Search talent goes to 3.1.
+
+#### 2.4 Global Notification Drawer
+
+Who: Buyer and Pro.  
+What: Global event list.  
+When: User opens Bell or system adds event.  
+Where: Header right-side drawer.  
+Why: User should not poll multiple pages for updates.  
+How: Ordered notifications with unread state, timestamp, entity name, event summary, deep link, mark-read.  
+Connection: Every notification opens the precise entity/sub-screen.
+
+### 5.4 Screen 02 rules
+
+- Derive dashboard cards and banner from the canonical state model; do not create a second conflicting status system.
+- The most urgent blocking item wins banner priority.
+- Dismissing a notification never resolves the underlying requirement.
+
+## 6. SCREEN 03 - Marketplace Discovery and Feeds
+
+### 6.1 5W1H
+
+- **Who:** Buyer looking for Pros and Pro looking for eligible briefs.
+- **What:** Search, filter, save, and compare marketplace inventory.
+- **When:** User enters Find Talent/Find Briefs or follows a category/search link.
+- **Where:** Role navigation; public profile/brief publication feeds this inventory.
+- **Why:** Discovery turns marketplace supply and demand into a relevant first conversation or proposal.
+- **How:** Role-defaulted segmented feed, filters, sortable cards, explicit trust/price/availability, and recovery empty state.
+
+### 6.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Find Talent / Find Briefs
+          | [Search input________________________________] [Talent | Briefs]
+          | ---------------------------------------------------------------
+          | [Filter rail 240px] | [Result count] [Sort]
+          | [category]           | [Profile/Brief card ------------------]
+          | [budget band]        | [image/avatar] [trust] [price] [CTA]
+          | [availability]       | [Profile/Brief card ------------------]
+          | [evidence]           |
+~~~
+
+### 6.3 Sub-screen specifications
+
+#### 3.1 Mode-Switching Feed
+
+Who: Buyer and Pro.  
+What: Talent/Briefs segmented discovery view.  
+When: Marketplace navigation opens.  
+Where: Find Talent or Find Briefs.  
+Why: Keeps Buyer and Pro goals clear while retaining a shared marketplace surface.  
+How: Buyer defaults to Talent; Pro defaults to Briefs. Cards show avatar/cover, title, category, trust labels, availability/budget, fee, CTA.  
+Connection: Card opens 4.1. Save creates dashboard saved record. CTA goes to 4.2 or 6.3.
+
+#### 3.2 Filters and Empty States
+
+Who: Buyer and Pro.  
+What: Faceted filters, sort, and recovery state.  
+When: User refines results or no match exists.  
+Where: Discovery left rail/mobile filter sheet.  
+Why: User needs fast narrowing without losing marketplace context.  
+How: Category, budget band, availability, evidence type, experience, delivery format. Empty state proposes a specific broadening action.  
+Connection: Applied filter updates 3.1 list; clear filters restores defaults.
+
+### 6.4 Screen 03 rules
+
+- Published profiles in 1.12 populate Talent cards; published briefs in 5.1 populate Brief cards.
+- Cards show only public/approved fields.
+- Budget bands are discovery labels, not claims about universal market pricing.
+
+## 7. SCREEN 04 - Professional, Job and Gig Detail
+
+### 7.1 5W1H
+
+- **Who:** Buyer evaluating a Pro/service; Pro evaluating a brief; Admin reviewing v0.2 gig submissions.
+- **What:** High-context detail surface for profile, brief, or future productized gig.
+- **When:** User opens discovery card, shared link, saved item, or direct invitation.
+- **Where:** Marketplace detail route; v0.2 Pro dashboard gig section.
+- **Why:** Evidence, scope, price, and trust remain visible together at the decision point.
+- **How:** 66% narrative/evidence plus 33% sticky commercial/action panel on desktop; stack commercial summary above CTA on mobile.
+
+### 7.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Breadcrumb / Detail
+          | [Narrative 66% --------------------------------] [Sticky 33%]
+          | [Avatar or project cover]                       | [Status]
+          | [Title / headline / trust signals]              | [Pro fee]
+          | [About / scope / requirements]                 | [Buyer fee]
+          | [Portfolio or project gallery]                 | [Tax placeholder]
+          | [Reviews / work history]                       | [Buyer total]
+          |                                                | [Primary CTA]
+~~~
+
+### 7.3 Sub-screen specifications
+
+#### 4.1 Two-Pane Detail
+
+Who: Buyer and Pro.  
+What: Profile/brief detail with evidence and commercial CTA.  
+When: Discovery card or shared link opens.  
+Where: Public/authenticated marketplace detail route.  
+Why: Users should not scroll away from price, trust, and next action while reviewing detail.  
+How: Narrative has portfolio, scope, requirements, timeline, exclusions, reviews. Sticky pane has Pro fee, ₹0 QuickQuid commission from Pro, Buyer fee, tax placeholder, total, availability, CTA.  
+Connection: Buyer goes to 4.2, 5.1, or 8.1. Pro goes to 6.3.
+
+#### 4.2 Invite to Brief
+
+Who: Buyer.  
+What: Private-brief selection/invitation modal.  
+When: Buyer selects Invite on a Pro profile.  
+Where: 4.1 sticky action panel.  
+Why: Buyer with scoped work can bypass public posting.  
+How: Select private brief, view scope preview, add optional note, send invite; handle no-private-brief, duplicate, unavailable state.  
+Connection: Send creates Pro notification and opens 6.3/7.1 context.
+
+#### 4.3 Pro Availability Pause
+
+Who: Pro.  
+What: Availability control.  
+When: Pro cannot take new work.  
+Where: Pro dashboard/profile settings, discovery/detail reflection.  
+Why: Protects capacity and avoids unwanted invitations.  
+How: Toggle Available for new work. Off hides from Available Now and blocks new invite with clear copy; existing work remains active.  
+Connection: Updates 3.1 card and 4.1 CTA.
+
+#### 4.4 Pro Gig Creation - v0.2
+
+Who: Approved Pro.  
+What: Productized service creation wizard.  
+When: v0.2 only; Pro selects Create a gig.  
+Where: Pro dashboard > Gigs.  
+Why: Turns repeatable services into discoverable packages after v0.1 liquidity is proven.  
+How: Basics, Scope, Deliverables, Pricing, Timeline, Requirements, Preview; require title, category, inclusions, exclusions, fee, timeline, evidence, cover image.  
+Connection: 4.5 -> 4.6 -> 4.7; not live in v0.1 navigation.
+
+#### 4.5 Gig Packages and Commercial Summary - v0.2
+
+Who: Pro creating a gig; Buyer later viewing it.  
+What: Package/service pricing and total-cost preview.  
+When: Gig creation/edit.  
+Where: 4.4 pricing step.  
+Why: Productized service needs clear boundaries to avoid scope creep.  
+How: Single package first; Basic/Standard/Premium can be future. Show Pro fee, ₹0 commission, Buyer fee, total before tax, timeline, revisions, exclusions.  
+Connection: Save goes to 4.6.
+
+#### 4.6 Gig Preview and Publish - v0.2
+
+Who: Pro.  
+What: Buyer-facing gig preview before moderation submission.  
+When: Pro completes a gig draft.  
+Where: Gig creation final step.  
+Why: Pro should inspect discovery/detail representation before publication.  
+How: Cover, title, profile, trust, deliverables, exclusions, FAQ, price, total. Save draft, Submit for review, Back to edit.  
+Connection: Submit goes to 4.7.
+
+#### 4.7 Gig Moderation and Approval - v0.2
+
+Who: Admin/Risk.  
+What: Gig review queue and decision screen.  
+When: Pro submits a gig or material edit.  
+Where: Admin operations v0.2 overlay.  
+Why: Productized services need scope/content quality controls.  
+How: Review content, creator trust, price, evidence, prohibited data, history. Approve, request changes, reject, pause, escalate.  
+Connection: Decision updates 4.6; approved gig appears in 3.1/4.8.
+
+#### 4.8 Buyer Gig Detail and Request - v0.2
+
+Who: Buyer.  
+What: Productized gig detail and request route.  
+When: Buyer opens future gig card.  
+Where: 3.1 future Gig feed/detail.  
+Why: Buyer needs exact deliverable and total before requesting service.  
+How: Show Pro fee, Buyer fee, tax placeholder, total, timeline, revisions, requirements, Request this gig CTA.  
+Connection: Request goes to 8.1; 9.1 manual payment gate still applies.
+
+#### 4.9 Gig Management and Performance - v0.2
+
+Who: Pro.  
+What: Gig inventory table and performance summary.  
+When: v0.2 Pro has draft/live/paused gigs.  
+Where: Pro dashboard > Gigs.  
+Why: Pro needs to manage service availability and improve listings.  
+How: Title, status, views, requests, conversion, active orders, rating, updated time; edit, pause, duplicate, archive actions.  
+Connection: Edit goes to 4.4. Request goes to 8.1. Material changes trigger version/review rules.
+
+### 7.4 Screen 04 rules
+
+- 4.1 is live in v0.1 for Pro/Brief detail.
+- 4.4 through 4.9 are future v0.2 overlays and must be visibly labelled/not linked from live v0.1 routes.
+- Portfolio evidence may be public. Delivery evidence is private to an active contract unless user explicitly publishes it.
+- Sticky commercial pane never hides Buyer total, work-start gate, or CTA on mobile.
+
+## 8. SCREEN 05 - Buyer Brief Creation
+
+### 8.1 5W1H
+
+- **Who:** Buyer.
+- **What:** Create, save, preview, publish, archive, and republish a project brief.
+- **When:** Buyer has a hiring need and wants public proposals or a private invitation target.
+- **Where:** Buyer dashboard, My Briefs, or blank-state CTA.
+- **Why:** Strong scope inputs prevent bad matching, fee surprise, and later dispute friction.
+- **How:** One-page accordion form with live commercial summary, draft autosave, budget guardrail, visibility control, and publish state.
+
+### 8.2 Desktop wireframe
+
+~~~text
+[Sidebar] | New brief                                      [Save status]
+          | [Accordion form 66% ------------------------] [Sticky 33%]
+          | [1 Basics]                                    | [Commercial summary]
+          | [2 Scope + acceptance criteria]               | Pro fee
+          | [3 Budget + timeline]                         | Buyer fee 14%
+          | [4 Visibility]                                | Tax placeholder
+          | [5 Attachments]                               | Buyer total
+          |                                               | [Save draft] [Publish]
+~~~
+
+### 8.3 Sub-screen specifications
+
+#### 5.1 Single-Page Accordion Form
+
+Who: Buyer.  
+What: Brief form with Basics, Scope, Budget, Timeline, Visibility, Attachments.  
+When: Buyer starts a hiring request.  
+Where: Buyer dashboard and My Briefs > New brief.  
+Why: A clear, structured brief improves proposal quality and contract evidence.  
+How: Fields include title, category, objective, deliverables, acceptance criteria, exclusions, budget, timeline, visibility, attachments. Exclusions are required.  
+Connection: Save goes to 5.4; Publish creates 3.1 Brief card and 6.1 applicant context.
+
+#### 5.2 Sticky Live Preview and Fee Calculator
+
+Who: Buyer.  
+What: Real-time commercial summary.  
+When: Buyer enters or changes Pro fee/budget.  
+Where: Right sticky panel on desktop; top summary before CTA on mobile.  
+Why: Buyer sees true cost before publishing or hiring.  
+How: For ₹80,000, display Pro fee ₹80,000; Buyer fee 14% ₹11,200; applicable tax calculated by Finance if applicable; Buyer total ₹91,200 before tax.  
+Connection: Values pass to 6.2, 8.1, 9.1, and 11.7.
+
+#### 5.3 Visibility Toggle
+
+Who: Buyer.  
+What: Open versus Private brief visibility choice.  
+When: Brief creation/edit.  
+Where: Visibility accordion section.  
+Why: Buyers need confidentiality control for sensitive work.  
+How: Open to verified Pros or Private - invite only; display explicit consequence text.  
+Connection: Open publishes to 3.1 Brief feed; Private is available through 4.2 invitation.
+
+#### 5.4 Autosave
+
+Who: Buyer.  
+What: Persistent draft-saving indicator.  
+When: Form input changes and user pauses.  
+Where: Form header.  
+Why: Losing a detailed brief is a churn event.  
+How: States: Saving, Saved just now, Unable to save - Retry. Preserve unsaved local input where possible.  
+Connection: Draft list appears in Buyer dashboard/My Briefs.
+
+#### 5.5 Low-Budget Warning
+
+Who: Buyer.  
+What: Non-blocking budget quality guardrail.  
+When: Budget is below configured category expectation.  
+Where: Budget input helper and commercial summary.  
+Why: Underpriced briefs get fewer qualified responses.  
+How: Show amber helper: This budget may be below typical expectations for this category. You may receive fewer proposals.  
+Connection: Buyer can adjust budget or continue.
+
+#### 5.6 Brief Expiration and Archive
+
+Who: Buyer and system.  
+What: Inactivity archive/recovery state.  
+When: Brief reaches configured inactivity rule.  
+Where: My Briefs and discovery record.  
+Why: Stale demand damages Pro trust and feed quality.  
+How: Active, approaching inactivity, archived, republished states. Buyer gets Republish, Edit, Contact Support actions.  
+Connection: Republish returns brief to 3.1; archived proposal relationships update 6.5/6.7.
+
+#### 5.7 Fee Calculation and Rounding
+
+Who: Buyer, Finance Admin, system.  
+What: Calculation representation and finance-review state.  
+When: Fee changes; offer/payment/invoice is generated.  
+Where: 5.2, 6.2, 8.1, 9.1, 11.7.  
+Why: All commercial states need the same source values.  
+How: Persist Pro fee, Buyer-fee rate, calculated fee, applicable-tax placeholder, total, and finance rounding record. UI does not make unsupported legal tax claims.  
+Connection: Canonical fee object is reused throughout the contract lifecycle.
+
+### 8.4 Screen 05 rules
+
+- Buyer sees the 14% fee before publishing and again before payment.
+- Brief publishing validates title, category, scope, exclusions, budget, timeline, visibility, and Terms requirements.
+- Editing an active brief after proposals requires clear version/date display; proposal/contract snapshots retain the version they were based on.
+
+## 9. SCREEN 06 - Proposals, Applicants, Matching and Shortlist
+
+### 9.1 5W1H
+
+- **Who:** Buyer reviewing applicants; Pro submitting/managing proposals.
+- **What:** Apply, compare, shortlist, decline, counter, withdraw, expire, and reactivate a proposal.
+- **When:** A brief is open or an invited Pro receives a private brief.
+- **Where:** Buyer My Briefs > Applicants; Pro Find Briefs/My Proposals.
+- **Why:** Buyers need fast evidence-based comparison while Pros need fair, bounded application effort.
+- **How:** ATS-like split pane, structured evidence, live counter-offer fee calculation, transparent status, and anti-spam capacity controls.
+
+### 9.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Applicants for BRF-0892
+          | [Brief summary / budget / status]
+          | --------------------------------------------------------------
+          | [Applicant list 40%]        | [Applicant detail 60%]
+          | [Akhil / ₹85k / Shortlist]  | [Avatar + trust evidence]
+          | [Riya / ₹80k / Pending]     | [Cover letter]
+          | [Nisha / ₹78k / Pending]    | [Relevant portfolio]
+          |                             | [Commercial total]
+          |                             | [Shortlist] [Decline] [Message]
+~~~
+
+### 9.3 Sub-screen specifications
+
+#### 6.1 ATS-Lite Split Pane
+
+Who: Buyer.  
+What: Applicant list plus selected proposal detail.  
+When: Brief has one or more proposals.  
+Where: Buyer My Briefs > Applicants.  
+Why: Buyer should compare candidates without opening multiple tabs.  
+How: List has avatar, name, proposed fee, status, time. Detail has cover letter, evidence, availability, fee breakdown, actions.  
+Connection: Shortlist/decline updates proposal; Message goes to 7.1; Create offer goes to 8.1.
+
+#### 6.2 Counter-Offer Logic
+
+Who: Pro proposes; Buyer reviews.  
+What: Proposed fee different from brief budget and recalculated Buyer total.  
+When: Pro submits a counter price or Buyer revises an offer.  
+Where: 6.3 and 6.1 detail/commercial panel.  
+Why: Buyer must see out-of-pocket total before progressing.  
+How: Example counter ₹85,000 creates Buyer fee ₹11,900 and total ₹96,900 before applicable tax.  
+Connection: Accepted terms snapshot into 8.1 offer.
+
+#### 6.3 Pro Proposal Submission
+
+Who: Pro.  
+What: Structured proposal form.  
+When: Pro applies to open or private brief.  
+Where: 3.1 brief card and 4.1 brief detail.  
+Why: Relevant evidence and deliberate proposals improve Buyer decision quality.  
+How: Proposed fee, cover letter minimum, portfolio evidence, delivery approach, availability. Validate readiness from 1.13.  
+Connection: Missing payout readiness triggers 1.5; submit creates Buyer notification and 6.1 row.
+
+#### 6.4 Decline Proposal
+
+Who: Buyer.  
+What: Decline modal with structured reason.  
+When: Buyer decides not to continue with applicant.  
+Where: 6.1 detail actions.  
+Why: Prevents accidental decline and captures funnel insight.  
+How: Reasons: budget too high, skills mismatch, timeline mismatch, chose another Pro, brief changed, other; optional private note.  
+Connection: Pro notification 99.1; status becomes Declined.
+
+#### 6.5 Proposal Expiry
+
+Who: Buyer, Pro, system.  
+What: Stale proposal state and reactivation request.  
+When: Configured period passes with no action.  
+Where: Buyer applicant list and Pro My Proposals.  
+Why: Pros should not be bound indefinitely to old price/availability.  
+How: Pending, Shortlisted, Expired, Withdrawn, Reactivation requested.  
+Connection: Reactivation request notifies Pro; new acceptance uses current terms.
+
+#### 6.6 Proposal Limit and Cooldown
+
+Who: Pro.  
+What: Capacity-based active proposal limit.  
+When: Pro reaches configured active proposal count.  
+Where: Submit proposal action.  
+Why: v0.1 needs quality control without charging Pros to apply.  
+How: Default demo limit 10. Explain current limit and let Pro withdraw an existing proposal.  
+Connection: Withdraw updates available capacity; no data is lost.
+
+#### 6.7 Buyer Shortlist SLA and Auto-Close
+
+Who: Buyer, Pro, system.  
+What: Inactive Buyer handling for a brief with proposals.  
+When: Configured no-action period is reached.  
+Where: Buyer My Briefs and Pro proposal status.  
+Why: Pros should not feel their proposal disappears into a black hole.  
+How: Active, approaching inactivity, closed-no-action, republished. Notify all impacted Pros.  
+Connection: Closing ends pending proposals; republish creates a new active review phase.
+
+### 9.4 Screen 06 rules
+
+- Proposal terms retain versioned brief reference.
+- Buyer cannot create offer from a declined/expired proposal without current Pro confirmation.
+- Pro can save draft proposal; draft remains private.
+- Proposal metrics are internal; decline reasons are not exposed as raw analytics to the Pro.
+
+## 10. SCREEN 07 - Messaging and Scope Finalisation
+
+### 10.1 5W1H
+
+- **Who:** Buyer and Pro; Admin has read-only access only when authorized by a support/dispute context.
+- **What:** Contextual messaging, formal scope updates, file exchange, and circumvention prevention.
+- **When:** After invitation/proposal and throughout pre-contract discussion; limited scope change process after contract.
+- **Where:** Messages navigation, brief/proposal/contract detail CTA.
+- **Why:** Scope drift and off-platform communication create disputes, revenue leakage, and loss of evidence.
+- **How:** Chat stays beside immutable summary; system-created scope updates are accepted/declined; file validation and careful contact/payment detection protect the workflow.
+
+### 10.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Messages / QQ-0892
+          | [Chat 60% ---------------------------------] [Scope 40%]
+          | [Date separator]                             | [Brief title]
+          | [System event]                               | [Fee and timeline]
+          | [Buyer message]                              | [Deliverables]
+          | [Pro message + attachment]                   | [Exclusions]
+          | [Message composer + attachment]              | [Acceptance criteria]
+          |                                              | [Propose scope update]
+~~~
+
+### 10.3 Sub-screen specifications
+
+#### 7.1 Contextual Workspace
+
+Who: Buyer and Pro; authorized Admin read-only.  
+What: Chat next to immutable brief/scope summary.  
+When: Proposal/invitation discussion and active engagement.  
+Where: Messages and contract CTA.  
+Why: Retains contractual context while parties communicate.  
+How: Chat has messages, system events, attachments, composer. Sidebar has fee, timeline, deliverables, exclusions, acceptance criteria, revision count, contract status.  
+Connection: Propose change goes to 7.2; Contract action goes to 8.1.
+
+#### 7.2 Scope Update
+
+Who: Buyer and Pro.  
+What: Formal requested change to scope, fee, timeline, or acceptance criteria.  
+When: Before contract lock or through approved amendment process.  
+Where: Workspace sidebar action.  
+Why: Commercial changes must not be hidden in ordinary chat.  
+How: Requester enters change, fee delta, timeline delta, criteria impact, reason; recipient Accepts, Declines, or Requests changes.  
+Connection: Accepted pre-contract update refreshes 7.1 and 8.1; post-lock future amendment follows 11.9.
+
+#### 7.3 Scope Locked
+
+Who: Buyer and Pro.  
+What: Read-only summary after contract agreement.  
+When: Offer is accepted/contracted.  
+Where: 7.1 sidebar.  
+Why: Stops accidental casual changes to an agreed commercial scope.  
+How: Replace editable control with Scope locked by contract. Formal amendment only.  
+Connection: Future formal amendment -> 11.9.
+
+#### 7.4 File Attachment Validation
+
+Who: Buyer and Pro.  
+What: Upload success/error state for message attachments.  
+When: User attaches a file.  
+Where: Chat composer.  
+Why: Prevent malware/storage abuse while preserving evidence exchange.  
+How: Allow configured types up to 25MB; block executables; show upload progress, retry, remove, invalid/oversize error.  
+Connection: Valid attachment appears in 7.1 and audit/dispute evidence when applicable.
+
+#### 7.5 Circumvention and Sensitive-Contact Detection
+
+Who: Buyer, Pro, system, Risk/Admin reviewer.  
+What: Warning/interception for direct contact or payment attempts before active contract.  
+When: System detects configured phone/email/payment patterns.  
+Where: Chat composer.  
+Why: Keeps payments, evidence, and support inside QuickQuid.  
+How: Explain the block, allow Edit message and Report false positive; do not silently delete content.  
+Connection: False-positive report -> 99.2/12.14 context; approved message sends normally.
+
+### 10.4 Screen 07 rules
+
+- User messages are immutable after sending except allowed deletion policy; scope changes are separate system records.
+- Admin access must be role/audit controlled; normal Admin cannot browse all conversations.
+- Chat contact detection must allow support/appeal path to avoid inaccessible false positives.
+
+## 11. SCREEN 08 - Offer, Contract and Milestones
+
+### 11.1 5W1H
+
+- **Who:** Buyer drafts; Pro accepts/declines; authorized Admin can inspect completed contract record.
+- **What:** Formal commercial offer, milestone configuration, acceptance, and funding gate.
+- **When:** Buyer chooses a shortlisted/invited Pro after scope is clear.
+- **Where:** Applicant list, message workspace, rehire flow.
+- **Why:** Contract terms must become readable, reviewable, immutable evidence before work begins.
+- **How:** Document-like offer with scoped terms and up to four milestones; acceptance changes status to Accepted Pending Funding; manual payment remains a separate required step.
+
+### 11.2 Desktop wireframe
+
+~~~text
+[Sidebar] | Offer for QQ-0892
+          | [Offer document 800px ------------------------] [Summary rail]
+          | [Buyer / Pro]                                 | [Pro fee]
+          | [Scope / exclusions]                          | [Buyer fee]
+          | [Timeline / acceptance criteria]              | [Tax placeholder]
+          | [Milestone 1 through 4]                       | [Buyer total]
+          | [Revision/cancellation terms]                 | [Accept / Decline]
+~~~
+
+### 11.3 Sub-screen specifications
+
+#### 8.1 Immutable Offer Sheet
+
+Who: Buyer drafts; Pro accepts.  
+What: Formal offer with scope, commercial terms, and milestones.  
+When: Buyer selects Create offer.  
+Where: 6.1, 7.1, 11.5 rehire.  
+Why: Creates a shared source of truth before payment and delivery.  
+How: Buyer, Pro, brief version, scope, exclusions, timeline, Pro fee, Buyer fee, tax placeholder, milestones, criteria, revisions, cancellation terms. Maximum four milestones.  
+Connection: Pro Accept -> 8.2. Pro Decline -> 8.4.
+
+#### 8.2 Funding Interlock
+
+Who: Pro and Buyer.  
+What: Accepted contract waiting on Buyer funding evidence.  
+When: Pro accepts offer.  
+Where: Contract dashboard/workspace.  
+Why: Protects Pro from beginning unpaid work in manual v0.1 flow.  
+How: Status Accepted Pending Funding; Pro sees Work may not begin until QuickQuid confirms required payment evidence for Milestone 1.  
+Connection: Buyer CTA goes to 9.1; Pro sees 9.2.
+
+#### 8.3 Milestone Cap Tooltip
+
+Who: Buyer.  
+What: Explained limit on adding more than four milestones.  
+When: Buyer attempts a fifth milestone.  
+Where: 8.1 milestone composer.  
+Why: Converts an operational restriction into transparent product guidance.  
+How: Disable Add milestone and display v0.1 supports up to 4 milestones while payment verification and payout processing are handled manually.  
+Connection: Buyer edits existing milestones or continues.
+
+#### 8.4 Contract Decline
+
+Who: Pro.  
+What: Decline reason modal.  
+When: Pro rejects offer.  
+Where: 8.1 action rail.  
+Why: Keeps relationship in context and tells Buyer why negotiation did not progress.  
+How: Reasons include scope unclear, timeline too tight, budget too low, availability changed, other.  
+Connection: Creates system message in 7.1 and leaves Buyer able to revise/new offer.
+
+### 11.4 Screen 08 rules
+
+- Contract snapshots all commercial/scope data at acceptance.
+- Work cannot become active until canonical payment state is Payment Confirmed.
+- Buyer accepts only a current proposal; counter-offer terms must match 6.2 before offer creation.
+- Mobile shows commercial summary above acceptance CTA.
+
+## 12. SCREEN 09 - Buyer Payment, Admin Verification and Payout Status
+
+### 12.1 5W1H
+
+- **Who:** Buyer submits evidence; Pro sees protected waiting state; Finance/Admin matches and records payment/payout/refund actions; Risk sees reversal exceptions.
+- **What:** Manual payment evidence, verification, exception handling, payout status, and refund/chargeback controls.
+- **When:** After contract acceptance and before work; after milestone acceptance; during cancellation/reversal.
+- **Where:** Buyer Payments, contract detail, Pro dashboard, Finance/Admin queues.
+- **Why:** v0.1 trust depends on transparent manual operations, not invisible automated escrow.
+- **How:** Buyer submits structured UTR/reference; Finance matches evidence; Pro receives clear work gate; accepted delivery queues payout; exceptions have recovery paths.
+
+### 12.2 Desktop wireframe
+
+~~~text
+[Buyer screen]                 [Finance screen]
+[Contract/payment summary]     [Expected payment | Submitted evidence]
+[Approved payment instructions] [Bank evidence/match controls]
+[UTR / amount / date / method] [Confirm / Reject / Escalate]
+[Submit evidence]              [Audit history and notes]
+~~~
+
+### 12.3 Sub-screen specifications
+
+#### 9.1 Structured Payment Evidence
+
+Who: Buyer.  
+What: Payment instruction and evidence form.  
+When: Contract is Accepted Pending Funding.  
+Where: Buyer contract/dashboard payment CTA.  
+Why: UTR/reference matching is safer and faster than relying on screenshots.  
+How: Show approved payment instructions, contract ID, milestone, amount, reference. Collect UTR/transaction reference, amount, date, method, optional supporting screenshot, accuracy declaration.  
+Connection: Submit -> 9.2 Pro warning and 9.3 Finance queue.
+
+#### 9.2 Pro Pending Warning
+
+Who: Pro.  
+What: Read-only funding status tracker.  
+When: Buyer evidence is awaiting review/rejected.  
+Where: Pro dashboard/contract.  
+Why: Prevents unpaid work.  
+How: Payment verification pending. Expected Admin review target: 24 hours. Do not begin work until payment is confirmed.  
+Connection: Payment confirmed updates contract to Cleared to work and opens 10.1.
+
+#### 9.3 Admin Bank Statement Matcher
+
+Who: Finance Admin.  
+What: Payment evidence reconciliation workspace.  
+When: Buyer submits evidence.  
+Where: Admin Payment Verification queue.  
+Why: Admin needs expected amount/reference and received evidence in one decision context.  
+How: Left: Buyer/contract/UTR/expected amount. Right: bank evidence record, settlement date, amount, match confidence. Actions Confirm, Reject, Request information, Escalate.  
+Connection: Confirm -> 9.5 if threshold; otherwise Payment Confirmed. Reject -> 9.4.
+
+#### 9.4 Payment Rejected Recovery
+
+Who: Buyer.  
+What: Rejected evidence reason and resubmission path.  
+When: Finance cannot confirm evidence.  
+Where: Buyer Payment screen and notification.  
+Why: Buyer should correct a typo/issue without Support escalation.  
+How: Reason values: amount mismatch, reference not found, date mismatch, duplicate reference, unclear evidence, suspected risk. Unlock corrected resubmission.  
+Connection: Resubmit -> 9.1; Support -> 99.2.
+
+#### 9.5 Maker-Checker Authorization
+
+Who: Finance Maker and Finance Checker.  
+What: Second authorization for configured high-risk/payment thresholds.  
+When: Payment/payout crosses configured rule.  
+Where: Finance queue detail.  
+Why: Reduces single-person manual error/fraud risk.  
+How: Maker decision creates Pending Authorization. Checker sees evidence, rationale, maker identity/timestamp and chooses Authorize or Return for correction.  
+Connection: Authorize -> Payment Confirmed or approved payout path; action logs in 12.4.
+
+#### 9.6 Payout Failed
+
+Who: Pro and Finance Admin.  
+What: Payout exception and payout-detail update route.  
+When: Admin-recorded payout cannot complete.  
+Where: Pro dashboard/Payouts and Finance queue.  
+Why: Pro needs a clear reason/action rather than indefinite waiting.  
+How: Payout could not be completed. Review payout details and submit update for Admin verification.  
+Connection: Update goes to 1.7; new verification returns to Finance payout queue.
+
+#### 9.7 Buyer Cancel and Refund
+
+Who: Buyer, Finance Admin, Risk/Admin when policy review is needed.  
+What: Cancellation request and manual refund workflow.  
+When: Buyer requests cancellation before work or under approved conditions.  
+Where: Contract/workroom action and Refund queue.  
+Why: Buyer needs a transparent exit path; Finance needs a controlled trigger.  
+How: Buyer submits request; show work-start status/policy; Admin reviews; refund is manual and tracked. Never promise automatic full refund unless policy supports it.  
+Connection: Approved refund -> 12.7; rejection/needs review -> 11.2 dispute.
+
+#### 9.8 Over/Under Payment Resolver
+
+Who: Finance Admin.  
+What: Controlled handling for near-match payment amount.  
+When: Received amount differs from expected amount.  
+Where: 9.3 matcher action.  
+Why: Small discrepancies should not force a broken contract flow.  
+How: Display received, expected, difference. Actions: Hold for reconciliation, Apply to approved outstanding amount, Manual refund, Reject/request correction. No wallet.  
+Connection: Result updates payment record/audit; may return Buyer to 9.4.
+
+#### 9.9 Chargeback and Unauthorized Transaction Queue
+
+Who: Finance Admin, Risk Admin, impacted Buyer/Pro.  
+What: Reversal investigation and temporary controlled restrictions.  
+When: A post-confirmation bank reversal/unauthorized transaction is reported.  
+Where: Admin finance/risk queue; user dashboard status.  
+Why: QuickQuid needs recovery/reconciliation without declaring liability automatically.  
+How: States: reported, under review, provisional hold, recovery requested, resolved. Explain temporary restrictions and appeal/support.  
+Connection: May freeze payout/review state, create 11.2 dispute context, and record 12.4 audit.
+
+### 12.4 Screen 09 rules
+
+- Never use wallet language.
+- Never say funds are held in escrow unless separately approved.
+- Finance-only data and controls must not appear in Buyer/Pro frames.
+- A payment submission is not payment confirmation.
+- Payout processed is distinct from payout queued.
+- Every manual financial action creates an immutable audit record and notification.
+
+## 13. SCREEN 10 - Workroom, Delivery Vault and Revisions
+
+### 13.1 5W1H
+
+- **Who:** Buyer and Pro; authorized Support/Risk Admin read-only during support or dispute.
+- **What:** Milestone execution workspace for checklist-driven delivery, evidence, version history, revisions, acceptance, and inactivity escalation.
+- **When:** Contract has Payment Confirmed and is Cleared to work through milestone acceptance.
+- **Where:** Buyer/Pro Contracts and Workroom navigation.
+- **Why:** Delivery must be inspectable against agreed criteria so neither party relies only on chat memory.
+- **How:** Milestone stepper, immutable criteria, category-appropriate delivery evidence, structured revision requests, version history, and a manual payout queue trigger on acceptance.
+
+### 13.2 Desktop wireframe
+
+~~~text
+[Sidebar] | QQ-0892 / Milestone 1                              [Help]
+          | [Funding -> Work -> Submitted -> Review -> Accepted -> Payout]
+          | ---------------------------------------------------------------
+          | [Workroom 66% --------------------------------] [Scope rail 33%]
+          | [Milestone title + due context]                 | [Criteria]
+          | [Delivery evidence / versions]                  | [Revision count]
+          | [Activity timeline]                             | [Fee/status]
+          | [Submit / Request revision / Accept CTA]        | [Support]
+~~~
+
+### 13.3 Sub-screen specifications
+
+#### 10.1 Milestone Timeline and Acceptance Checklist
+
+Who: Buyer and Pro.  
+What: Milestone stepper and criteria checklist.  
+When: Work is active through payout queuing.  
+Where: Workroom header and right scope rail.  
+Why: Pro delivery and Buyer acceptance must reference what was agreed.  
+How: States: Funding, Work active, Submitted, Buyer review, Accepted, Payout queued. Pro cannot Submit for review until required criteria are checked.  
+Connection: Submit goes to 10.2/10.4 and state In review. Buyer review goes to 10.3 or 10.5.
+
+#### 10.2 Category-Specific Delivery Vault
+
+Who: Pro uploads; Buyer reviews; Admin sees during authorized support/dispute.  
+What: Deliverable evidence workspace.  
+When: Pro submits a milestone.  
+Where: Workroom delivery section.  
+Why: Different types of freelance work need evidence that can actually be reviewed.  
+How: Development supports staging/repository links plus fallback file/walkthrough. Design supports Figma link/preview plus file. Writing supports document link/PDF. Show upload/link validation and private access state.  
+Connection: Submission creates version entry in 10.4 and In review state.
+
+#### 10.3 Structured Revision Form
+
+Who: Buyer.  
+What: Criteria-linked revision request.  
+When: Buyer reviews a submitted delivery and it does not meet agreed criteria.  
+Where: Workroom review CTA.  
+Why: Vague requests create endless revisions and weak dispute evidence.  
+How: Select revision number, reason, affected acceptance criterion, detailed feedback, attachments.  
+Connection: Submit changes milestone to Revision requested and notifies Pro; Pro returns to 10.2.
+
+#### 10.4 Deliverable Version History
+
+Who: Buyer, Pro, authorized Admin.  
+What: Ordered record of submitted delivery versions.  
+When: Delivery has more than one submission or user opens history.  
+Where: Workroom drawer.  
+Why: Disputes need a stable record of what was delivered and changed.  
+How: Version, status, submitter, time, link/file, change note. Example values v1 Rejected, v2 In Review, v3 Current.  
+Connection: Evidence is readable in 11.2 and 11.3 dispute context.
+
+#### 10.5 Accept Milestone and Queue Payout
+
+Who: Buyer; Finance sees resulting queue.  
+What: High-confidence acceptance confirmation.  
+When: Buyer decides submitted milestone meets criteria.  
+Where: Workroom primary CTA.  
+Why: Acceptance should be deliberate because it creates a payout processing obligation.  
+How: Modal asks Buyer to confirm criteria were met. Copy: After acceptance, payout will be queued for Admin processing. Button is Accept milestone, not Release payout.  
+Connection: Status changes to Payout queued; Finance sees 12.5. Final milestone continues to 11.1.
+
+#### 10.6 Pro Inactivity Escalation
+
+Who: System, Buyer, Pro, Support/Admin.  
+What: Inactivity signal and support-review route.  
+When: Configured inactivity threshold is reached after Cleared to work.  
+Where: Workroom status and Admin support/dispute queue.  
+Why: Buyer needs a route when work appears abandoned, but Pro needs fair notice/exception handling.  
+How: Approaching inactivity, Admin review, paused, resumed, disputed states. Buyer sees QuickQuid has alerted Admin Support for review.  
+Connection: Admin can contact parties; unresolved case may open 11.2.
+
+### 13.4 Screen 10 rules
+
+- Do not force a third-party integration in v0.1; use approved evidence types with link/file fallback.
+- Deliverable assets are private to the contract unless a user explicitly chooses a public portfolio item later.
+- Buyer acceptance only queues payout; it does not claim instantaneous transfer.
+- Revision count comes from accepted offer/contract data.
+
+## 14. SCREEN 11 - Acceptance, Dispute, Completion, Review and Rehire
+
+### 14.1 5W1H
+
+- **Who:** Buyer, Pro, Support context, Risk/Admin mediator, Finance for money execution.
+- **What:** Completion state, review exchange, structured dispute process, mutual cancellation, invoice/tax placeholder, IP/defect-policy display, reputation appeal, and repeat-hire shortcut.
+- **When:** Milestone acceptance/final completion, problem escalation, cancellation, review, or repeat hiring.
+- **Where:** Contract detail, Workroom, dashboard history, Admin dispute queue.
+- **Why:** A marketplace earns long-term trust by resolving work and money outcomes consistently, not simply by matching users.
+- **How:** Completion uses a clear payout/review summary; disputes use structured claims/evidence; mutual cancellation uses explicit payout/refund proposal; reviews are paused during active dispute; rehire creates a new private brief from known context.
+
+### 14.2 Desktop wireframe
+
+~~~text
+[Sidebar] | QQ-0892 / Completion
+          | [Contract completion summary] [Payout status]
+          | [Milestones complete] [Review status] [Rehire]
+          | ---------------------------------------------------------
+          | [Review card] [Dispute action] [Cancellation action]
+          | [Completion history / invoice record / evidence]
+          | [Admin-only mediation panel appears only for Admin role]
+~~~
+
+### 14.3 Sub-screen specifications
+
+#### 11.1 Completion and Double-Blind Review
+
+Who: Buyer and Pro.  
+What: Completed-work summary and private review collection.  
+When: Final milestone is accepted or contract reaches completion rules.  
+Where: Contract completion screen and dashboard history.  
+Why: Completion needs visible payout status and a fair reputation mechanism.  
+How: Show accepted milestones, Pro fee, Buyer fee, finance tax placeholder, payout status, review form. Review is private until both submit or configured release time.  
+Connection: Review publish updates public profile 1.12/4.1; rehire goes to 11.5; dispute goes to 11.2.
+
+#### 11.2 Structured Dispute Initiation
+
+Who: Buyer or Pro.  
+What: Claim form that freezes relevant payout/review activity.  
+When: Party believes scope, quality, timeline, communication, payment, or delivery terms were breached.  
+Where: Workroom/contract action.  
+Why: Structured inputs accelerate triage and preserve evidence.  
+How: Select category, affected milestone, requested resolution, evidence, narrative, desired outcome. Set Disputed state and record evidence snapshot.  
+Connection: Other party receives 11.3 response task; review lock 11.13; Admin queue 12.1/12.16.
+
+#### 11.3 Counterclaim and Admin Mediation
+
+Who: Responding Buyer/Pro; Risk/Admin mediator.  
+What: Response workspace and mediation decision panel.  
+When: A dispute claim is filed.  
+Where: Contract dispute record; Admin Disputes queue.  
+Why: Both parties need equal chance to provide evidence, while Admin needs contract/workroom/ledger context.  
+How: Show initiating claim, response, immutable contract, delivery history, messages in authorized scope, payment ledger. Admin actions: full payout, partial payout/refund, refund, request evidence, escalate.  
+Connection: Decision triggers Finance queue where needed and 99.1 notifications.
+
+#### 11.4 Deadlock Escalation
+
+Who: Buyer, Pro, Risk/Admin, Ops Manager.  
+What: Controlled state when ordinary response phase is exhausted.  
+When: Both parties have submitted claims and matter needs formal mediation.  
+Where: Dispute detail.  
+Why: Stops harassment/evidence tampering and creates a measurable SLA.  
+How: Pause direct dispute chat; display Under Admin mediation; preserve evidence upload and support route.  
+Connection: 12.16 SLA timer starts; resolved outcome returns to 11.3 decision state.
+
+#### 11.5 Rehire Flow
+
+Who: Buyer.  
+What: Start a new private brief with a previously hired Pro preselected.  
+When: Buyer wants repeat work after a completed contract.  
+Where: Completion history and Pro profile.  
+Why: Repeat business is the highest-trust, lowest-friction marketplace path.  
+How: Rehire creates a new private brief with Pro selected; Buyer still reviews/updates scope, budget, timeline, and fee before offer.  
+Connection: Goes to 5.1/8.1; does not reuse old contract or payment state.
+
+#### 11.6 Mutual Mid-Contract Cancellation
+
+Who: Buyer and Pro; Finance/Admin executes after agreement.  
+What: Structured voluntary termination and proposed payout/refund split.  
+When: Parties agree work should stop before full completion.  
+Where: Contract actions.  
+Why: Provides an amicable alternative to hostile dispute.  
+How: Requester states completed work, payout amount, refund amount, reason. Other party accepts/declines. Admin manually executes approved outcome.  
+Connection: Accepted proposal creates 12.5 payout and/or 12.7 refund. Declined can go to 11.2.
+
+#### 11.7 Invoice and Tax Mapping
+
+Who: Buyer, Pro, Finance Admin.  
+What: Commercial completion record/invoice preview with finance-configurable tax treatment.  
+When: Contract or final milestone completion; enterprise/billing review.  
+Where: Completion detail and Finance record.  
+Why: Buyer needs transparent line items and Finance needs a stable mapping.  
+How: Show professional services, QuickQuid Buyer fee, applicable tax Finance review, Buyer total before applicable tax. Do not hardcode tax, TDS, TCS, or invoice issuer logic without approved configuration.  
+Connection: Uses 5.7 canonical fee data and links to 12.10 payout slip.
+
+#### 11.8 IP Ownership State
+
+Who: Buyer and Pro.  
+What: Contract-linked ownership status indicator.  
+When: Delivery/acceptance/completion is viewed.  
+Where: Contract completion and Workroom scope rail.  
+Why: Avoids ambiguous expectations around use of delivered work.  
+How: Display approved policy text: IP ownership follows the signed agreement and applicable payment terms. Do not let a UI status alone create legal transfer.  
+Connection: Contract terms and completed record.
+
+#### 11.9 Formal Contract Amendment Placeholder
+
+Who: Buyer, Pro, authorized Admin when necessary.  
+What: Reserved future formal amendment workflow after scope lock.  
+When: Post-contract commercial change requires terms beyond ordinary message update.  
+Where: Contract actions; not live until policy is approved.  
+Why: Keeps future extension point explicit without weakening v0.1 contract evidence.  
+How: Show reserved/future state only in prototype or disabled roadmap context.  
+Connection: Future amendment creates a new contract version/audit entry.
+
+#### 11.10 Post-Completion Defect Window
+
+Who: Buyer, Pro, Support/Risk.  
+What: Policy-linked defect reporting state.  
+When: After final acceptance for configured period.  
+Where: Completion screen.  
+Why: Buyer needs a clear path for covered critical defects; Pro needs bounded exposure.  
+How: States: active window, defect reported, policy closed, Admin review. Copy says report issues covered by agreed critical-defect policy.  
+Connection: Report creates 11.2 with category/policy context.
+
+#### 11.11 Review Appeal and Moderation
+
+Who: Pro, Buyer where policy permits, Risk/Admin.  
+What: Evidence-based request to review a published review.  
+When: Review is live and appeal window/policy permits.  
+Where: Review card and Admin moderation queue.  
+Why: Reputation must be protected from policy violations without removing negative but valid feedback.  
+How: User submits reason/evidence. Admin outcomes: uphold, remove for policy violation, request clarification, restore.  
+Connection: Outcome updates public review summary/profile and 12.4 audit.
+
+#### 11.12 Enterprise TDS Capture Overlay
+
+Who: Enterprise Buyer and Finance Admin.  
+What: Optional enterprise withholding/tax-document workflow.  
+When: Enterprise policy requires declaration/documentation.  
+Where: Payment/Invoice Finance overlay; not core consumer v0.1 path.  
+Why: Enterprise procurement may need finance-specific records.  
+How: Buyer declares withholding details, uploads configured document, Finance reviews, invoice mapping adjusts using approved configuration. Never hardcode rate.  
+Connection: 9.1/11.7/12.10 Finance record.
+
+#### 11.13 Review Extortion Interlock
+
+Who: Buyer, Pro, system.  
+What: Review form lock while contract has active dispute.  
+When: 11.2 is active.  
+Where: Completion/review area.  
+Why: Keeps dispute resolution focused on contract evidence rather than reputation threats.  
+How: Disable review form and state Reviews are paused while this contract is under dispute review.  
+Connection: Resolution unlocks review according to policy.
+
+### 14.4 Screen 11 rules
+
+- Dispute state freezes only the relevant payout/review activity; system should clearly show what is paused.
+- Admin decision and money movement are separate: Risk resolves outcome, Finance executes payout/refund under permission controls.
+- Rehire is always a new brief/contract/payment lifecycle.
+- Tax, invoice, ownership, defect, and dispute-finality language must be configurable/counsel-approved before production.
+
+## 15. SCREEN 12 - Admin Operations, Trust, Support and Reconciliation
+
+### 15.1 5W1H
+
+- **Who:** Support Tier 1, Finance Tier 2, Risk Tier 3, Ops Manager.
+- **What:** Internal operational control room for KYC, payment verification, payouts, refunds, disputes, risk, support, audit, offline instruments, and escalations.
+- **When:** Any user submission/exception creates an Admin-owned task or SLA condition.
+- **Where:** Internal Admin navigation only.
+- **Why:** v0.1 manual payments and trust controls need precise operational queue ownership and separation of duties.
+- **How:** Queue dashboard, table-detail workspaces, strict permissions, maker-checker, masked reveals, audit trail, SLA timers, and handoffs between Support, Finance, Risk, and Ops.
+
+### 15.2 Desktop wireframe
+
+~~~text
+[Admin sidebar] | Operations                               [Role: Finance]
+                | [Queue cards: KYC | Payments | Payouts | Refunds | Disputes]
+                | [SLA breaches] [Trust and Safety] [Support]
+                | ------------------------------------------------------------
+                | [Queue table ----------------------------------------------]
+                | Reference | user | amount | status | age | owner | action
+                | [Selected item detail / evidence / decision / audit trail]
+~~~
+
+### 15.3 Sub-screen specifications
+
+#### 12.1 Operations Dashboard and Queue Grid
+
+Who: Support, Finance, Risk, Ops Manager.  
+What: Queue count/status overview.  
+When: Admin signs in or returns to Operations.  
+Where: Admin default route.  
+Why: Manual operations need a shared view of backlog and ownership.  
+How: Queue cards for KYC, Payment Verification, Payouts, Refunds, Disputes, Support, Trust and Safety, SLA breaches. Each displays count, oldest item, assigned team, SLA status, Open queue CTA.  
+Connection: Card opens relevant 12.2 table/detail.
+
+#### 12.2 SLA Queue Tables
+
+Who: Authorized Admin role.  
+What: Filterable operational queue table.  
+When: Admin opens a queue.  
+Where: Admin internal route.  
+Why: Staff need priority/order/ownership before opening records.  
+How: Columns reference, user, contract, amount, status, owner, created time, time pending, risk flag, next action. States normal, approaching, breached, paused with reason.  
+Connection: Row opens respective detail workspace such as 1.3, 9.3, 11.3, or 12.7.
+
+#### 12.3 Maker-Checker Confirmation
+
+Who: Finance Maker, Finance Checker, Ops Manager observes escalation.  
+What: Two-person authorization state for configured high-risk money actions.  
+When: Configured threshold/rule is met.  
+Where: Payment/payout detail action.  
+Why: Prevents a single manual error or compromised account from moving money.  
+How: Maker confirms/recommends; status becomes Pending Authorization; Checker reviews and authorizes/returns/rejects with reason.  
+Connection: Final decision updates 9.5/12.5/12.7 and 12.4 audit.
+
+#### 12.4 Audit Log and Masked Reveal
+
+Who: Risk Admin and permitted audit viewer.  
+What: Immutable Admin-action timeline plus sensitive-data reveal record.  
+When: Any privileged action occurs or user opens audit log.  
+Where: Admin Audit Log and record side panel.  
+Why: Financial/trust workflows require traceability.  
+How: Event ID, Admin ID, role, action, entity, old/new state, time, reason. Sensitive reveal requires reason and allowed re-auth step; data re-masks after configured interval.  
+Connection: Every Admin decision routes here automatically.
+
+#### 12.5 Manual Payout Batch Export
+
+Who: Finance Admin; Checker for configured threshold.  
+What: Payout-queued record selection, export, processing record, and reconciliation state.  
+When: Buyer accepts a milestone or dispute/cancellation creates payout decision.  
+Where: Admin Payouts queue.  
+Why: v0.1 needs controlled batch operation without payment-provider automation.  
+How: Select payout records, review total, maker/checker state, secure export, manual bank processing, attach reference/proof, mark processed, reconcile. Sensitive beneficiary data stays masked outside authorized export.  
+Connection: Payout processed updates 9.6/11.1/12.10 and notification 99.1.
+
+#### 12.6 Suspend User Interlock
+
+Who: Risk Admin.  
+What: Restrict/suspend account decision with active-obligation review.  
+When: Risk violation requires account action.  
+Where: User risk record and Trust/Safety queue.  
+Why: Abrupt suspension can strand active contracts, payments, or evidence.  
+How: Require reason; show active contracts, pending payments/payouts, disputes, retention obligations. Actions: restrict selected actions, request review, suspend, cancel.  
+Connection: Suspension writes 12.4; active financial obligations route to 11.3/12.5/12.7.
+
+#### 12.7 Manual Refund Queue
+
+Who: Finance Admin; Checker where rule requires.  
+What: Approved manual refund record and execution workflow.  
+When: Buyer cancellation, payment correction, or dispute outcome requires refund.  
+Where: Admin Refunds queue.  
+Why: Refunds must be traceable and cannot be hidden as a wallet adjustment.  
+How: Record refund reference, contract, amount, reason, approver, masked beneficiary token, transfer reference, status. Review, execute manually, attach proof, mark refunded, notify Buyer.  
+Connection: Updates 9.7/9.8/11.3 and 99.1.
+
+#### 12.8 Admin Permission Matrix
+
+Who: All Admin roles and Ops Manager.  
+What: Visible role-permission reference/denial behavior.  
+When: Admin opens settings or attempts restricted action.  
+Where: Admin Settings and inline permission state.  
+Why: Separation of duties is a product behavior, not an unwritten process.  
+How: Support can handle KYC/support but not money. Finance can handle payment/payout/refund but not suspension. Risk can handle risk/dispute/audit but not money. Ops can manage SLA/assignment but not bypass controls.  
+Connection: Restricted attempts show permission-denied explanation and do not expose action controls.
+
+#### 12.9 Reconciliation Import Placeholder
+
+Who: Finance Admin.  
+What: Reserved future reconciliation-import extension.  
+When: Future bank/PSP integration is approved.  
+Where: Admin Finance > Reconciliation.  
+Why: Keeps future boundary explicit without adding fake v0.1 automation.  
+How: Disabled roadmap/prototype frame only; no active v0.1 control.  
+Connection: Future import reconciles 9.3/12.5 records.
+
+#### 12.10 Pro Payout Slip and Deductions
+
+Who: Pro and Finance Admin.  
+What: Payout receipt/breakdown.  
+When: Finance records payout processing.  
+Where: Pro Payouts and contract completion; Finance payout record.  
+Why: Pro needs a clear explanation of agreed fee, QuickQuid fee treatment, and any disclosed deduction.  
+How: Show agreed Pro fee, QuickQuid platform commission ₹0, statutory withholding if applicable, disclosed provider charge if applicable, net payout, payout reference. Do not hardcode a tax rate.  
+Connection: Linked from 9.6 and 11.1.
+
+#### 12.11 Account Deletion and Data Retention
+
+Who: Buyer/Pro requestor; Risk/Admin processor.  
+What: Account deactivation, eligible-data purge, and retained-record notice.  
+When: User requests deletion.  
+Where: Settings > Account; Admin privacy queue.  
+Why: User needs control while open obligations and lawful records cannot be mishandled.  
+How: Check active contracts/pending payouts, deactivate account, identify record categories for retention, purge eligible profile data, confirm outcome.  
+Connection: Pending financial obligations route to relevant contract/payout state; request/audit uses 12.4.
+
+#### 12.12 Personal Data Export
+
+Who: Buyer/Pro requestor; authorized Risk/Admin.  
+What: Request, scope review, redaction, generation, secure delivery, completion record.  
+When: User selects Request my data.  
+Where: Settings privacy; Admin privacy queue.  
+Why: Users need a structured access path without disclosing other-party sensitive data.  
+How: Verify requester, review scope, redact other-party data, generate configured JSON/CSV, send time-limited link, record completion.  
+Connection: Notification uses 99.1; audit uses 12.4.
+
+#### 12.13 Offline Instrument Logger
+
+Who: Finance Admin.  
+What: Record for a non-digital payment instrument against contract/payment reference.  
+When: Approved business process receives supported offline instrument.  
+Where: Admin Finance > Offline instruments.  
+Why: Enterprise/manual flows may need reconciliation before the system can progress.  
+How: Contract/reference, instrument type, bank, instrument number, amount, received date, expected settlement date, scan, owner, status. States logged, pending settlement, cleared, dishonoured, escalated.  
+Connection: Cleared can update 9.3; dishonoured goes to 12.15.
+
+#### 12.14 Trust and Safety / IP Takedown Queue
+
+Who: Risk Admin, external complainant, Support intake.  
+What: Report, evidence, review, restriction, resolution, and escalation workflow.  
+When: User/external party reports prohibited content, IP issue, or safety issue.  
+Where: Report action on brief/profile/workroom; Admin Trust and Safety queue.  
+Why: Marketplace content/behavior needs an accountable review path.  
+How: Capture complainant, affected entity, allegation, evidence, urgency, owner, history, resolution. Actions: request information, restrict visibility, suspend content/account, restore, escalate to counsel.  
+Connection: May invoke 12.6; always logs 12.4 and notifies affected parties.
+
+#### 12.15 Cheque Bounce Escalation Queue
+
+Who: Finance Admin, Risk Admin, authorized legal owner.  
+What: Dishonoured offline-instrument operational escalation.  
+When: 12.13 record is marked dishonoured.  
+Where: Admin Finance/Risk exception queue.  
+Why: Operational/legal review deadlines must be visible, not hidden in a spreadsheet.  
+How: Mark dishonoured, restrict affected workflow according to approved policy, notify owner, assign legal review, track deadline, record payment/escalation. System does not provide legal advice.  
+Connection: Creates audit and may affect 9.9/11.2.
+
+#### 12.16 Dispute Resolution SLA and Auto-Escalation
+
+Who: Risk/Admin mediator and Ops Manager.  
+What: Timed dispute ownership/escalation state.  
+When: 11.4 Deadlock starts.  
+Where: Admin Disputes queue.  
+Why: Frozen money and unresolved conflict damage both marketplace sides quickly.  
+How: Timer states 0-5 days normal, 5-7 approaching, 7+ breached, 14+ Ops Manager escalation. Actions assign, request evidence, resolve per approved policy, escalate, notify.  
+Connection: Resolution returns to 11.3 decision and Finance execution if required.
+
+### 15.4 Screen 12 rules
+
+- Admin navigation and action availability must be filtered by role permission before the page renders.
+- Every money action uses a clear maker/checker path when configured.
+- Support, Finance, Risk, and Ops roles own different queues; a queue can be reassigned but responsibility history remains.
+- All exception screens must show contract/payment reference and current user-facing status to prevent contradictory support messages.
+- Reserved/future operations are visually marked and not treated as live automation.
+
+## 16. SCREEN 99 - Transactional Communications and Support
+
+### 16.1 5W1H
+
+- **Who:** Buyer, Pro, system, Support, Admin.
+- **What:** Transactional email/push/in-app event communications and contextual support ticketing.
+- **When:** Verification, proposal, contract, payment, delivery, payout, dispute, and support state changes occur.
+- **Where:** Notification drawer, email/push channel, floating Help widget, Support queue.
+- **Why:** Manual v0.1 states create anxiety unless the user receives accurate next-step communication.
+- **How:** Event-driven notification matrix with exact entity reference and deep link; support ticket includes contract/payment context automatically.
+
+### 16.2 Desktop wireframe
+
+~~~text
+[Any authenticated screen]
+                                              [Bell] [Help]
+                                                   |
+                              [Notification drawer / contextual support modal]
+                              [Event] [Reference] [Status] [Open action]
+                              [Category] [Description] [Attached context]
+                              [Submit ticket]
+~~~
+
+### 16.3 Sub-screen specifications
+
+#### 99.1 Critical Notification Matrix
+
+Who: Buyer, Pro, system.  
+What: In-app/email/push notification record for important state changes.  
+When: KYC approved, contract accepted, evidence submitted, payment confirmed/rejected, delivery submitted, payout queued/processed, dispute opened/resolved.  
+Where: Bell drawer, configured off-app channel, relevant dashboard.  
+Why: User must know whether they should act, wait, or begin work.  
+How: Every notification includes actor-safe copy, reference ID, state time, CTA/deep link. Messages reflect recorded truth, not optimistic assumption.  
+Connection: Notification opens exact entity/screen.
+
+#### 99.2 In-App Support Widget
+
+Who: Buyer and Pro; Support Tier 1 receives ticket.  
+What: Structured support-ticket creation surface.  
+When: User needs help with current product context.  
+Where: Floating Help control and Settings.  
+Why: Email without context slows manual support and loses transaction reference.  
+How: Categories Payment issue, Contract issue, Verification, Payout, Dispute, Bug, Other. Automatically attach contract ID, payment reference, current status, latest event. States submitted, assigned, waiting for user, waiting for Admin, resolved, reopened.  
+Connection: Ticket appears in 12.1/12.2 Support queue; updates notification stream.
+
+### 16.4 Screen 99 rules
+
+- Notification copy must distinguish submitted, under review, confirmed, queued, and processed.
+- Do not say payout sent to bank before Finance records the appropriate state.
+- Support ticket attachment respects role permissions and does not reveal counterparty private data.
+
+## 17. End-to-End Prototype Connections
+
+### 17.1 Buyer primary flow
+
+~~~text
+1.1 Role selection
+  -> 1.2 Readiness
+  -> 1.11 Profile
+  -> 3.1 Find Talent OR 5.1 Post Brief
+  -> 4.1 Detail
+  -> 4.2 Invite OR 6.1 Applicants
+  -> 7.1 Messaging
+  -> 8.1 Offer
+  -> 8.2 Pending Funding
+  -> 9.1 Payment Evidence
+  -> 9.3 Finance verification
+  -> 10.1 Workroom
+  -> 10.5 Accept milestone
+  -> 11.1 Completion/Review
+  -> 11.5 Rehire
+~~~
+
+### 17.2 Pro primary flow
+
+~~~text
+1.1 Role selection
+  -> 1.2 Readiness
+  -> 1.11 Profile
+  -> 1.3 Verification
+  -> 1.4 Pending/Rejected
+  -> 1.13 Approved eligibility
+  -> 3.1 Find Briefs
+  -> 6.3 Proposal
+  -> 7.1 Messaging
+  -> 8.2 Pending Funding
+  -> 9.2 Do not begin work
+  -> 10.2 Delivery
+  -> 10.3 Revision if requested
+  -> 10.5 Buyer acceptance
+  -> 12.10 Payout slip
+  -> 11.1 Review
+~~~
+
+### 17.3 Admin payment flow
+
+~~~text
+12.1 Operations
+  -> 12.2 Payment queue
+  -> 9.3 Bank statement matcher
+  -> 9.4 Reject and request correction
+     OR
+  -> 9.5 Maker-checker
+  -> Payment Confirmed
+  -> 99.1 User notifications
+  -> 10.1 Cleared to work
+~~~
+
+### 17.4 Dispute flow
+
+~~~text
+10.1 Workroom
+  -> 11.2 Dispute initiation
+  -> 11.3 Counterclaim/mediation
+  -> 11.4 Deadlock when necessary
+  -> 12.16 SLA escalation
+  -> 11.3 Resolution
+  -> 12.5 Payout or 12.7 Refund
+  -> 11.13 Review unlock by policy
+~~~
+
+## 18. Engineer Build Acceptance Checklist
+
+### Product logic
+
+- [ ] Pro never appears to pay QuickQuid a platform commission.
+- [ ] Buyer sees 14% fee before publishing/offer/payment.
+- [ ] Payment evidence submitted is distinct from Payment Confirmed.
+- [ ] Pro cannot begin work before Payment Confirmed.
+- [ ] Buyer acceptance queues payout; it does not claim instant transfer.
+- [ ] No v0.1 wallet or automated escrow language exists.
+- [ ] Maximum four milestones is enforced and explained.
+- [ ] v0.2 gigs are visibly separated from live v0.1 routes.
+
+### Permissions and data
+
+- [ ] Buyer, Pro, Support, Finance, Risk, and Ops see only their allowed controls.
+- [ ] Public profile never renders sensitive payout/KYC/billing/risk data.
+- [ ] Admin sensitive-data reveal requires authorization/reason/audit event.
+- [ ] Risk decision and Finance money execution are distinct permissions.
+- [ ] Every Admin action creates an audit event.
+- [ ] Existing contract snapshots survive profile/brief edits.
+
+### UX states
+
+- [ ] Every primary screen has default, loading, empty, validation error, permission denied, pending, success, rejected/recovery, SLA warning, and mobile variants where relevant.
+- [ ] Every blocking state has explanation and recovery path.
+- [ ] Every financial event has reference ID, timestamp, and user-facing next action.
+- [ ] Notifications deep-link to the exact record and current state.
+- [ ] Mobile does not hide price, warnings, or primary CTA.
+
+### Prototype demo states
+
+- [ ] New Buyer with no projects.
+- [ ] Buyer with open brief and applicants.
+- [ ] Buyer awaiting payment verification.
+- [ ] Pro with incomplete profile/payout readiness.
+- [ ] Pro approved and available.
+- [ ] Pro payout failed.
+- [ ] Finance Maker awaiting Checker.
+- [ ] Risk reviewer with duplicate-device signal.
+- [ ] Disputed contract.
+- [ ] v0.2 Pro gig draft and Admin gig review.
+
+## 19. Open Decisions Before Production
+
+These are deliberately shown as configurable product policies, not hardcoded legal or financial facts:
+
+1. Exact verification-document policy and collection thresholds.
+2. Finance-approved maker/checker thresholds.
+3. Brief/proposal inactivity periods and proposal cap.
+4. Tax, invoice, TDS/TCS/GST handling and rounding policy.
+5. Cancellation, refund, defect-window, IP, and dispute-resolution contract language.
+6. Data retention/export/deletion policy.
+7. Payment rail, bank instructions, payout batch format, and reconciliation method.
+8. v0.2 gig moderation policy and earned-rate program eligibility rules.
+
