@@ -36,7 +36,7 @@ import {
   Calendar, UserCog, BellOff, FileWarning, ListChecks, RefreshCw, Filter,
 } from "lucide-react";
 import {
-  PageHeader, EmptyState, SectionCard, MaskedField, QQProgress,
+  PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline,
 } from "@/components/qq/shared";
 import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
@@ -53,7 +53,7 @@ import {
 import type {
   ProProfile, Brief, Proposal, Contract, Milestone, Payout, Dispute, Review,
   GigDraft, PortfolioItem, DeliveryVersion, VerificationStatus, ProposalStatus,
-  ContractStatus, MilestoneStatus, DisputeCategory,
+  ContractStatus, MilestoneStatus, DisputeCategory, PaymentEvidence, AuditEvent, KycSubmission,
 } from "@/lib/qq/types";
 
 // ============================================================
@@ -149,7 +149,7 @@ function hasFundingPending(contracts: Contract[]): boolean {
 // ============================================================
 
 export function ProDashboard() {
-  const { currentUserId, navigate, proposals, payouts, contracts, setKycModal } = useQQ();
+  const { currentUserId, navigate, proposals, payouts, contracts, setKycModal, audit, payments, kyc } = useQQ();
   const profile = useMyProProfile();
   const myContracts = useMyContracts();
   const { toast } = useToast();
@@ -337,8 +337,98 @@ export function ProDashboard() {
           </SectionCard>
         </div>
       </div>
+
+      <SectionCard title="Recent activity" description="Latest events across your proposals, contracts, payouts, and milestones.">
+        <ActivityTimeline
+          events={buildProTimeline(myContracts, proposals, payouts, payments, audit, kyc, currentUserId ?? "")}
+          emptyMessage="No activity yet. Browse briefs or submit a proposal to get started."
+        />
+      </SectionCard>
     </div>
   );
+}
+
+function buildProTimeline(
+  contracts: Contract[],
+  proposals: Proposal[],
+  payouts: Payout[],
+  payments: PaymentEvidence[],
+  audit: AuditEvent[],
+  kyc: KycSubmission[],
+  userId: string,
+) {
+  const events: { id: string; tone?: "info" | "success" | "warning" | "critical" | "neutral"; title: string; description?: string; timestamp: string; actor?: string }[] = [];
+  const myContractIds = new Set(contracts.map((c) => c.id));
+
+  // Proposals
+  proposals.filter((p) => p.proId === userId).forEach((p) => {
+    events.push({
+      id: p.id,
+      tone: p.status === "shortlisted" ? "success" : p.status === "declined" ? "critical" : "info",
+      title: `Proposal ${p.status.replace(/_/g, " ")}`,
+      description: `${p.id} · ${p.briefTitle} · ${formatINR(p.proposedFee)}`,
+      timestamp: p.createdAt,
+    });
+  });
+
+  // Contracts
+  contracts.forEach((c) => {
+    const fundingPending = c.milestones.some((m) => m.status === "funding_pending");
+    events.push({
+      id: c.id,
+      tone: c.status === "completed" ? "success" : c.status === "disputed" ? "critical" : fundingPending ? "warning" : "info",
+      title: `Contract ${c.id} ${c.status.replace(/_/g, " ")}`,
+      description: `${c.briefTitle} · ${c.buyerName}`,
+      timestamp: c.createdAt,
+    });
+  });
+
+  // Payouts
+  payouts.filter((p) => p.proId === userId).forEach((p) => {
+    events.push({
+      id: p.id,
+      tone: p.status === "processed" ? "success" : p.status === "failed" ? "critical" : "info",
+      title: `Payout ${p.status.replace(/_/g, " ")}`,
+      description: `${p.id} · ${p.milestoneLabel} · ${formatINR(p.netPayout)}${p.reference ? " · " + p.reference : ""}`,
+      timestamp: p.processedAt ?? p.queuedAt,
+    });
+  });
+
+  // Payment confirmations on my contracts
+  payments.filter((p) => myContractIds.has(p.contractId)).forEach((p) => {
+    events.push({
+      id: p.id,
+      tone: p.status === "payment_confirmed" ? "success" : p.status === "payment_rejected" ? "critical" : "warning",
+      title: `Payment ${p.status.replace(/_/g, " ")}`,
+      description: `${p.id} · ${p.milestoneLabel} · ${formatINR(p.amountDue)}`,
+      timestamp: p.resolvedAt ?? p.submittedAt,
+    });
+  });
+
+  // KYC events
+  kyc.filter((k) => k.userId === userId).forEach((k) => {
+    events.push({
+      id: k.id,
+      tone: k.status === "approved" ? "success" : k.status === "rejected" ? "critical" : "warning",
+      title: `Verification ${k.status.replace(/_/g, " ")}`,
+      description: k.rejectionReason ?? "Identity and payout details review",
+      timestamp: k.resolvedAt ?? k.submittedAt,
+    });
+  });
+
+  // Audit events for my entities
+  audit.filter((a) => myContractIds.has(a.entityId)).slice(0, 5).forEach((a) => {
+    events.push({
+      id: a.id,
+      tone: a.maskedReveal ? "warning" : "neutral",
+      title: a.action,
+      description: `${a.entity} ${a.entityId}${a.reason ? " · " + a.reason : ""}`,
+      timestamp: a.timestamp,
+      actor: a.adminId,
+    });
+  });
+
+  return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10);
 }
 
 // ============================================================

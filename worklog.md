@@ -434,3 +434,40 @@ The prototype was stable after Round 5 (media components built: VaultDeliverable
 - Add real base64 image upload support for review images and portfolio items.
 - Migrate remaining inline alert banners to the shared AlertBanner component.
 - Add the activity timeline to the Pro dashboard (proposals, contracts, payouts).
+
+---
+
+## Cron Review Round 7 — Pro Activity Timeline, Fuller Gigs Feed, Polish
+
+### Current project status assessment
+The prototype was stable after Round 6 (media components integrated into live screens). This round focused on the recommended next-phase priorities: (1) adding the activity timeline to the Pro dashboard for parity with the buyer dashboard, (2) adding more live gig seeds to make the buyer gigs feed grid look fuller, and (3) fixing minor polish issues (DialogContent aria warning, mobile timeline text wrapping).
+
+### Completed modifications
+
+**New features:**
+1. **Pro dashboard activity timeline** — Added a "Recent activity" section to the Pro dashboard with the shared `ActivityTimeline` component. Aggregates events from proposals (status changes), contracts (status + funding pending), payouts (queued/processed/failed), payment confirmations on the Pro's contracts, KYC verification events, and audit events for the Pro's entities. Sorted by recency, capped at 10. VLM-confirmed: "timeline very clear, color-coded status dots, all key event types present and legible, clean layout." (`src/components/qq/screens/pro/ProScreens.tsx`)
+2. **3 new live gig seeds** — Added GIG-3007 (Priya Nair, "Production Next.js SaaS dashboard", ₹75,000, 312 views, 14 requests, 4.9★), GIG-3008 (Rahul Verma, "Complete brand identity system", ₹50,000, 198 views, 9 requests, 4.8★), and GIG-3009 (Akhil Menon, "UX audit + usability report", ₹35,000, 156 views, 7 requests, 4.7★). All `approved_live` status. The buyer gigs feed now shows 4 live gigs instead of 1. VLM-confirmed: "4 gig cards in responsive grid, distinct colors, Video preview badges on alternating cards." (`src/lib/qq/seed.ts`)
+
+**Polish:**
+3. **DialogContent aria-describedby fix** — Added `aria-describedby={undefined}` to the CommandPalette's DialogContent to suppress the "Missing Description" accessibility warning. (`src/components/qq/shell/CommandPalette.tsx`)
+4. **Mobile timeline text clamping** — Added `line-clamp-2` to ActivityTimeline event titles and descriptions, and `mt-0.5` to the timestamp for better vertical alignment. Fixes the mobile vertical rhythm issue where long titles wrapped to 2-3 lines unevenly. (`src/components/qq/shared/index.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Pro dashboard shows "Recent activity" timeline with 3 proposal events, 4 contract events, 6 payout events, 1 verification event (VLM-confirmed). Buyer → Talent → Gigs tab shows 4 live gigs (VLM-confirmed: "4 gig cards, distinct colors, Video preview badges"). No console/runtime errors.
+- VLM screenshot reviews confirmed: Pro timeline "color-coded dots, all event types visible, clean layout", gigs feed "4 cards in responsive grid, distinct colors, Video preview badges".
+
+### Unresolved issues / risks + next-phase priorities
+1. **Inline alert banners** — Some buyer/admin screens still use inline `<div>` alert banners rather than the shared `AlertBanner` component. **Priority: medium** (consistency, dark-mode).
+2. **Pro profile editor portfolio preview** — The ProProfile editor still uses old PortfolioItemCard for editing. Could use PortfolioGallery for the preview pane. **Priority: low**.
+3. **4th gig card creates empty space** — VLM noted the 4th card in a 3-column grid leaves awkward empty space below. Could add a 5th gig or use a different grid layout. **Priority: low** (cosmetic).
+4. **Help FAB overlaps content** — VLM noted the floating Help button partially obscures the 3rd gig card text. Could adjust FAB position or add bottom padding. **Priority: low**.
+5. **Real image upload** — Review images and portfolio items still use color gradients instead of real base64 images. **Priority: low** (prototype limitation).
+
+### Recommended next-phase focus
+- Migrate remaining inline alert banners to shared `AlertBanner` for dark-mode consistency.
+- Add a 5th live gig seed or adjust grid to avoid the 4th-card empty space.
+- Adjust the Help FAB position to avoid overlapping gig card content.
+- Update the ProProfile editor's preview pane to use PortfolioGallery.
+- Consider adding real base64 image upload support for portfolio items and review images.

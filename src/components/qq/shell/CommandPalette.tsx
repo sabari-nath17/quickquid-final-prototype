@@ -137,7 +137,7 @@ export function CommandPalette() {
 
   return (
     <Dialog open={commandOpen} onOpenChange={setCommandOpen}>
-      <DialogContent className="max-w-[560px] p-0 gap-0 overflow-hidden top-[20%] translate-y-0" showCloseButton={false}>
+      <DialogContent className="max-w-[560px] p-0 gap-0 overflow-hidden top-[20%] translate-y-0" showCloseButton={false} aria-describedby={undefined}>
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <div className="flex items-center gap-2 border-b border-border px-3">
           <Search className="size-4 text-muted-foreground" />

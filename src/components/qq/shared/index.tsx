@@ -340,12 +340,12 @@ export function ActivityTimeline({
               <Icon className="size-2.5 text-white" />
             </div>
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-sm font-medium text-foreground">{e.title}</div>
-                {e.description && <p className="text-xs text-muted-foreground mt-0.5">{e.description}</p>}
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-foreground line-clamp-2">{e.title}</div>
+                {e.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.description}</p>}
                 {e.actor && <span className="text-[10px] text-muted-foreground/80">by {e.actor}</span>}
               </div>
-              <time className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">{timeAgo(e.timestamp)}</time>
+              <time className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{timeAgo(e.timestamp)}</time>
             </div>
           </div>
         );
