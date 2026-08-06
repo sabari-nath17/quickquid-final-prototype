@@ -168,6 +168,7 @@ export function VaultDeliverable({
 
 function VaultFileRow({ file, locked, unlocked }: { file: VaultFile; locked: boolean; unlocked: boolean }) {
   const isLink = file.type === "link";
+  const isReviewable = !locked && !unlocked;
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border overflow-hidden">
@@ -222,7 +223,7 @@ function VaultFileRow({ file, locked, unlocked }: { file: VaultFile; locked: boo
           {file.size ? `${file.size}` : ""}
           {locked && " · Watermarked preview only"}
           {unlocked && " · Ready to download"}
-          {state === "reviewable" && " · Full preview available"}
+          {isReviewable && " · Full preview available"}
         </div>
       </div>
 

@@ -348,3 +348,51 @@ The prototype was stable after Round 3 (toast z-index fix, role-selection polish
 - Migrate remaining inline alert banners to shared `AlertBanner` for dark-mode consistency.
 - Consider a filter sidebar redesign (sticky reset, tag-chip filters) for the talent discovery screen.
 - Add a contract completion celebration screen with review submission confirmation.
+
+---
+
+## Cron Review Round 5 — Media & Asset Flow Blueprint + Project Lifecycle UI
+
+### Current project status assessment
+The prototype was stable after Round 4 (activity timeline, replay tour, gig seeds, messaging sticky). This round responded to a detailed design brief requesting: (1) a complete Visual Asset Blueprint covering 5 media touchpoints (profile pictures, gig thumbnails, portfolios, The Vault, review images), and (2) a Project Lifecycle UI spec with 4 states (starting, ongoing, issues, finalized) using concrete Sarah/Alex demo data. I produced the full UX specification document AND implemented the key media components in the live prototype.
+
+### Completed modifications
+
+**Design specification:**
+1. **QUICKQUID_MEDIA_LIFECYCLE_SPEC.md** — 24KB UX spec covering all 5 media touchpoints (aspect ratios, states, micro-interactions, competitor references) + 4 lifecycle states (primary goal, demo data, ASCII wireframes, admin background actions) + end-to-end media flow. Includes ASCII wireframes for the Gig Preview Card and The Vault (locked vs unlocked).
+
+**New shared components (4):**
+2. **VaultDeliverable** (`src/components/qq/shared/VaultDeliverable.tsx`) — The secure deliverable component with 3 states: locked (blur(8px) + "QUICKQUID · PENDING" watermark + 🔒), reviewable (unblurred, no download), unlocked (crisp, download enabled, ✅). Shows file rows with type-specific icons (image/video/figma/zip/link), size, status. Commercial summary (Pro fee, Buyer fee, total). Action buttons context-aware (Submit payment / Accept milestone / Download all). Includes `VaultDemo` helper with interactive state switching.
+3. **PortfolioGallery** (`src/components/qq/shared/PortfolioGallery.tsx`) — Masonry grid (1/2/3 columns responsive) with click → full-screen lightbox. Supports image/video/link types. Lightbox has next/prev arrows, keyboard nav (←/→/Esc), zoom toggle, item counter, featured badge, play icon overlay for videos.
+4. **ReviewWithImages** (`src/components/qq/shared/ReviewWithImages.tsx`) — Review card with optional image attachments (up to 5, 48px thumbnails). Click thumbnail → lightbox. Double-blind visibility logic (hidden until both submit). Star rating, avatar, role, timestamp.
+5. **VideoGigCard** (`src/components/qq/shared/VideoGigCard.tsx`) — Gig card with 16:9 cover, hover-to-preview video (muted autoplay simulation, play/pause indicator, mute toggle on hover), low-res detection note, Live pulse indicator, rating badge, views/requests metrics, Verified Pro badge.
+
+**New screen:**
+6. **MediaLifecycleDemo** (`src/components/qq/screens/admin/MediaLifecycleDemo.tsx`) — Comprehensive showcase screen implementing the full spec: Part A (5 media touchpoints with live demos of each component) + Part B (4 lifecycle states in tabbed view with Sarah/Alex demo data, concrete demo data tables, admin background actions) + end-to-end flow diagram. Accessible from AdminNotes → "Media & Lifecycle showcase" button. Interactive Vault state switching (locked → reviewable → unlocked).
+
+**Integration:**
+7. **VaultDeliverable wired into Pro workroom** — Replaced the minimal vault links in the Pro contract workroom with the rich VaultDeliverable component. Automatically derives vault state from milestone status (funding_pending → locked, accepted/payout_processed → unlocked, else reviewable). Maps delivery versions to vault files with type detection (figma/github/pdf/zip/image). VLM-confirmed: "Payment confirmed · Unlocked badge, green checkmark, Download buttons."
+8. **Router + nav** — Added `media_lifecycle_demo` to ViewName types, ROUTES map, breadcrumb labels, and AdminNotes button.
+
+**Bug fix:**
+9. **VaultFileRow `state` reference error** — `VaultFileRow` referenced `state` (parent prop) which wasn't in scope, causing a runtime crash. Fixed by deriving `isReviewable = !locked && !unlocked` locally.
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Admin → Admin notes → "Media & Lifecycle showcase" → Media demo screen renders all 5 touchpoints + 4 lifecycle tabs + end-to-end flow. Interactive Vault state switching works (locked → watermarked, unlocked → download). Switched to Pro → completed contract QQ-0680 → Workroom tab → VaultDeliverable shows "Payment confirmed · Unlocked" with download buttons. VLM-confirmed vault rendering.
+- All new components compile and render without console/runtime errors.
+
+### Unresolved issues / risks + next-phase priorities
+1. **VideoGigCard not yet in buyer talent/gigs feed** — The VideoGigCard is showcased in the Media demo but the actual buyer talent/gigs feed still uses the basic GigCard. Could swap it in for v0.2 gigs. **Priority: medium**.
+2. **PortfolioGallery not yet in public profile** — The gallery is showcased in the Media demo but the actual public profile still uses PortfolioItemCard grid. Could integrate the masonry + lightbox. **Priority: medium**.
+3. **ReviewWithImages not yet in contract completion** — The component is showcased but the actual review form/section doesn't support image uploads yet. Could wire it into the completion/review flow. **Priority: medium**.
+4. **Vault watermarked blur is CSS-only** — The blur effect is CSS `blur(8px)` on a gradient, not on a real image. In production this would blur the actual uploaded image. For the prototype it demonstrates the visual effect. **Priority: low** (prototype limitation).
+5. **Media demo screen only accessible from AdminNotes** — Could add it to the sidebar nav for ops_manager/admin_support, or make it accessible to all roles. **Priority: low**.
+
+### Recommended next-phase focus
+- Swap VideoGigCard into the buyer talent/gigs feed for v0.2 gigs.
+- Integrate PortfolioGallery into the public profile (replace PortfolioItemCard grid).
+- Wire ReviewWithImages into the contract completion review form (add image upload to the review submission).
+- Add the media demo to the sidebar nav for admin roles.
+- Consider adding real image upload support (base64 storage) for portfolio items and review images.

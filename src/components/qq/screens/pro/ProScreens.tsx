@@ -38,6 +38,7 @@ import {
 import {
   PageHeader, EmptyState, SectionCard, MaskedField, QQProgress,
 } from "@/components/qq/shared";
+import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
 import {
@@ -1803,6 +1804,32 @@ function WorkroomTab({ contract, currentMilestone }: { contract: Contract; curre
                 <div className="mt-1 text-xs text-muted-foreground">Latest: v{ms.versions[ms.versions.length - 1].version} · {ms.versions[ms.versions.length - 1].status.replace(/_/g, " ")}</div>
               </div>
             )}
+
+            {/* Rich Vault deliverable view — shows watermarked/locked → unlocked transition */}
+            {ms.versions.length > 0 && (() => {
+              const vaultState: VaultState = ms.status === "funding_pending" || ms.status === "not_started" ? "locked"
+                : ms.status === "accepted" || ms.status === "payout_queued" || ms.status === "payout_processed" ? "unlocked"
+                : "reviewable";
+              const vaultFiles: VaultFile[] = ms.versions.map((v) => ({
+                id: v.id,
+                name: v.link.includes(".") ? v.link.split("/").pop() || v.link : `${ms.label}_v${v.version}`,
+                type: v.link.includes("figma") ? "figma" as const : v.link.includes("github") ? "link" as const : v.link.endsWith(".pdf") ? "pdf" as const : v.link.endsWith(".zip") ? "zip" as const : "image" as const,
+                size: "—",
+                url: v.link,
+                thumbColor: "#7C3AED",
+              }));
+              return (
+                <div className="mt-3">
+                  <VaultDeliverable
+                    milestoneLabel={ms.label}
+                    milestoneDescription={ms.description}
+                    state={vaultState}
+                    files={vaultFiles}
+                    proFee={ms.proFee}
+                  />
+                </div>
+              );
+            })()}
 
             <div className="flex flex-wrap gap-2">
               {canSubmit && (

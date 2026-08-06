@@ -12,6 +12,7 @@ import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
 import { ProDashboard, ProProfile, ProBriefs, ProProposals, ProContract, ProPayouts, ProGigs, ProGigNew, ProGigDetail } from "@/components/qq/screens/pro/ProScreens";
 import { AdminOperations, AdminKyc, AdminPayments, AdminPayouts, AdminRefunds, AdminDisputes, AdminTrust, AdminAudit, AdminGigModeration, AdminNotes } from "@/components/qq/screens/admin/AdminScreens";
+import { MediaLifecycleDemo } from "@/components/qq/screens/admin/MediaLifecycleDemo";
 import { SupportScreen, PublicProfileScreen, BriefDetailPublic, NotificationsScreen } from "@/components/qq/screens/support/SupportScreens";
 import type { ViewName } from "@/lib/qq/types";
 
@@ -46,6 +47,7 @@ const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
   admin_audit: AdminAudit,
   admin_gig_moderation: AdminGigModeration,
   admin_notes: AdminNotes,
+  media_lifecycle_demo: MediaLifecycleDemo,
   support: SupportScreen,
   public_profile: PublicProfileScreen,
   brief_detail_public: BriefDetailPublic,
@@ -97,6 +99,7 @@ function Breadcrumb() {
     admin_audit: "Audit log",
     admin_gig_moderation: "Gig moderation (v0.2)",
     admin_notes: "Admin notes",
+    media_lifecycle_demo: "Media & lifecycle",
     support: "Support",
     public_profile: "Public profile",
     brief_detail_public: "Brief",

@@ -39,7 +39,7 @@ import {
   Landmark, Receipt, Wallet, FileWarning, FileCheck2,
   DownloadCloud, AlertOctagon, Gavel, Hourglass, BadgeCheck, Info, UserCog,
   ChevronRight, MessageSquareOff, Fingerprint, ScrollText, ListChecks,
-  RefreshCcw, Palette, GraduationCap,
+  RefreshCcw, Palette, GraduationCap, Sparkles,
 } from "lucide-react";
 
 // ===================== Helpers =====================
@@ -2469,8 +2469,13 @@ export function AdminNotes() {
             )}
           </Card>
         </div>
-        <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Tip:</strong> Press <kbd className="rounded border border-border bg-background px-1 mx-0.5">⌘K</kbd> / <kbd className="rounded border border-border bg-background px-1 mx-0.5">Ctrl+K</kbd> anywhere to open the command palette — search screens, briefs, contracts, switch roles, or run these actions without navigating here.
+        <div className="mt-3 flex flex-col sm:flex-row items-start gap-3">
+          <div className="flex-1 rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+            <strong className="text-foreground">Tip:</strong> Press <kbd className="rounded border border-border bg-background px-1 mx-0.5">⌘K</kbd> / <kbd className="rounded border border-border bg-background px-1 mx-0.5">Ctrl+K</kbd> anywhere to open the command palette — search screens, briefs, contracts, switch roles, or run these actions without navigating here.
+          </div>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate("media_lifecycle_demo")}>
+            <Sparkles className="size-3.5" /> Media & Lifecycle showcase
+          </Button>
         </div>
       </SectionCard>
 
