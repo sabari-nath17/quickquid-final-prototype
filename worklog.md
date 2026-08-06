@@ -551,3 +551,40 @@ The prototype was stable after Round 8 (ProProfile crash fix, AlertBanner migrat
 - Add Priya Nair and Rahul Verma to the demo role switcher for richer Pro testing.
 - Add more reviews to the completed QQ-0680 contract (e.g., a 4-star review with images).
 - Consider adding a contract with an active dispute (currently DSP-7001 is on QQ-0650 which isn't in the buyer/pro contract lists).
+
+---
+
+## Cron Review Round 10 — Expanded Role Switcher, Active Dispute, Review Images, FAB Fix
+
+### Current project status assessment
+The prototype was stable after Round 9 (Select audit, seeded lifecycle states, 6th gig, admin AlertBanner). This round focused on: (1) adding Priya Nair and Rahul Verma to the demo role switcher for richer Pro testing, (2) adding an active dispute (DSP-7002) on a contract accessible to Northstar Labs so both buyer and pro can see it, (3) adding review images to the completed QQ-0680 contract, and (4) moving the Help FAB to the bottom-left to avoid overlapping gig card content.
+
+### Completed modifications
+
+**New features:**
+1. **Expanded demo role switcher** — Added Priya Nair (PRO-2099) and Rahul Verma (PRO-2101) to the demo role switcher alongside Akhil Menon. Reviewers can now sign in as any of the 3 Pros to test their respective contracts, proposals, gigs, and payouts. Verified: all 3 Pro accounts appear in the switcher. (`src/components/qq/shell/Shell.tsx`)
+2. **Active dispute (DSP-7002) on QQ-0725** — Added a scope dispute on the "Dashboard redesign" contract (Northstar Labs ↔ Priya Nair). Buyer raised: "Hi-fi designs v1 missing filter active/empty/loading states." Pro counterclaim: "Filter states not explicitly in acceptance criteria, would require ₹5,000 additional fee." Status `opened`, owner Deepa R (Risk T3). Contract QQ-0725 status updated to `disputed`. Both buyer (Northstar Labs) and pro (Priya Nair) can now see this dispute in their dashboards and contract Disputes tab. Verified: DSP-7002 visible on the Disputes tab with scope category, filter states narrative, and counterclaim. (`src/lib/qq/seed.ts`)
+3. **Review images on REV-1001** — Added 3 photo attachments to the buyer's 5-star review on the completed QQ-0680 contract: "Ops console — dashboard screen", "Design tokens delivered", "Handoff documentation" (purple, teal, gold thumbnails). VLM-confirmed: "3 colored square thumbnails, '3 photos attached' count, 5-star rating visible." (`src/lib/qq/seed.ts`)
+
+**Styling polish:**
+4. **Help FAB moved to bottom-left** — Moved the floating Help button from `right-4/right-6` to `left-4/left-6` to avoid overlapping gig card content in the rightmost grid column. The FAB is now in the bottom-left corner where it doesn't interfere with card content. (`src/components/qq/shell/SupportWidget.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Role switcher shows 3 Pros (Akhil, Priya, Rahul). Buyer dashboard shows QQ-0725 "Dashboard redesign" with `disputed` status. Contract → Disputes tab shows DSP-7002 with scope category + filter states narrative + counterclaim. Completed contract QQ-0680 → Completion tab shows review with 3 photo thumbnails + "3 photos attached" (VLM-confirmed). All clean, no console/runtime errors.
+- VLM screenshot review confirmed: "3 colored square thumbnails, '3 photos attached' count, 5-star rating visible."
+
+### Unresolved issues / risks + next-phase priorities
+1. **Remaining admin inline banners** — A few admin screens still have inline amber/red banners (KYC risk flag, chargeback, cheque bounce). Could migrate to AlertBanner. **Priority: low**.
+2. **Real image upload** — Review images and portfolio items still use color gradients. **Priority: low** (prototype limitation).
+3. **Pro side of dispute** — Priya can now see QQ-0725 (disputed) in her dashboard, but the Pro contract Disputes tab hasn't been tested for Priya's view. Could verify. **Priority: low**.
+4. **Dispute SLA timer** — DSP-7002's `slaOpenedAt` is Jan 16, 2025. After auto-normalize, it should show a realistic SLA state. Could verify. **Priority: low**.
+5. **More reviews with images** — Only REV-1001 has images. Could add images to more reviews for a richer "Live Portfolio" feel. **Priority: low**.
+
+### Recommended next-phase focus
+- Verify the Pro side of the dispute (sign in as Priya, open QQ-0725, check Disputes tab).
+- Migrate remaining admin inline amber/red banners to AlertBanner.
+- Add images to more reviews (e.g., a 4-star review with constructive feedback + photos).
+- Consider adding a contract completion celebration screen (confetti or success animation) for the "Aha!" moment.
+- Add a "Rehire" flow demo on the completed contract.

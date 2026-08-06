@@ -367,7 +367,7 @@ export const SEED_CONTRACTS: Contract[] = [
       { id: "M-2", index: 2, label: "M2", description: "Hi-fi designs", proFee: 30000, status: "rejected", acceptanceCriteria: ["All 8 screens approved", "Design tokens documented"], versions: [{ id: "V-4", version: 1, status: "rejected", submitter: "pro", timestamp: "2025-01-15T10:00:00Z", link: "https://figma.com/dashboard-v1", changeNote: "Hi-fi v1 — missing filter states" }, { id: "V-5", version: 2, status: "in_review", submitter: "pro", timestamp: "2025-01-19T10:00:00Z", link: "https://figma.com/dashboard-v2", changeNote: "Hi-fi v2 — added filter states + empty states" }] },
       { id: "M-3", index: 3, label: "M3", description: "Handoff", proFee: 20000, status: "not_started", acceptanceCriteria: ["Design tokens + docs delivered"], versions: [] },
     ],
-    status: "active",
+    status: "disputed",
     createdAt: "2025-01-03T09:00:00Z",
     cancellationTerms: "Either party may request cancellation. Refund is governed by work-start status and Finance review. No automatic refund.",
     currentMilestoneId: "M-2",
@@ -471,6 +471,23 @@ export const SEED_DISPUTES: Dispute[] = [
     slaOpenedAt: "2025-01-02T09:00:00Z",
     owner: "Deepa R (Risk T3)",
   },
+  {
+    id: "DSP-7002",
+    contractId: "QQ-0725",
+    raisedBy: "buyer",
+    raisedByName: "Northstar Labs",
+    category: "scope",
+    affectedMilestone: "M2",
+    requestedResolution: "Additional revision needed — filter states were not in the original scope but are required for the dashboard to function.",
+    narrative: "The hi-fi designs (v1) are missing the filter active, empty, and loading states. These are essential for the dashboard to be usable. The Pro marked them as out of scope, but they were implied by 'All 8 screens approved' in the acceptance criteria.",
+    evidence: ["Dashboard_v1_screenshot.png", "Acceptance_criteria_M2.pdf", "Scope_of_work.docx"],
+    desiredOutcome: "Pro to add filter states in v2 at no additional cost",
+    status: "opened",
+    counterclaim: "Pro (Priya Nair) states the filter states were not explicitly listed in the acceptance criteria and would require additional effort. Offers to add them for ₹5,000 additional fee.",
+    createdAt: "2025-01-16T14:00:00Z",
+    slaOpenedAt: "2025-01-16T14:00:00Z",
+    owner: "Deepa R (Risk T3)",
+  },
 ];
 
 export const SEED_REVIEWS: Review[] = [
@@ -485,6 +502,11 @@ export const SEED_REVIEWS: Review[] = [
     visible: true,
     bothSubmitted: true,
     createdAt: "2025-01-17T10:00:00Z",
+    images: [
+      { id: "ri-1", color: "#7C3AED", label: "Ops console — dashboard screen" },
+      { id: "ri-2", color: "#0891B2", label: "Design tokens delivered" },
+      { id: "ri-3", color: "#CA8A04", label: "Handoff documentation" },
+    ],
   },
   {
     id: "REV-1002",

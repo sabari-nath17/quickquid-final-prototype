@@ -54,7 +54,7 @@ export function SupportWidget() {
     <>
       <button
         onClick={() => setSupportWidget(true)}
-        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-foreground text-background shadow-lg px-3.5 py-2 text-xs font-medium hover:opacity-90 transition-opacity"
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-foreground text-background shadow-lg px-3.5 py-2 text-xs font-medium hover:opacity-90 transition-opacity"
         aria-label="Help"
       >
         <HelpCircle className="size-3.5" /> Help
