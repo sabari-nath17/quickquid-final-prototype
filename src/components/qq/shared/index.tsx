@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Inbox, RefreshCw, Loader2, Eye, EyeOff, Clock, Info, CheckCircle2, ShieldAlert } from "lucide-react";
+import { timeAgo } from "@/lib/qq/format";
 import { StatusBadge } from "./StatusBadge";
 
 export function PageHeader({
@@ -303,6 +304,52 @@ export function AuditRow({ event }: { event: { id: string; adminId: string; admi
       <div className="col-span-6 sm:col-span-2 text-muted-foreground">{event.adminId} · {event.adminRole}</div>
       <div className="col-span-6 sm:col-span-2 text-muted-foreground">{new Date(event.timestamp).toLocaleString("en-IN")}</div>
       {event.reason && <div className="col-span-12 text-xs text-muted-foreground">Reason: {event.reason}</div>}
+    </div>
+  );
+}
+
+type TimelineTone = "info" | "success" | "warning" | "critical" | "neutral";
+const timelineTones: Record<TimelineTone, { dot: string; icon: React.ComponentType<{ className?: string }> }> = {
+  info: { dot: "bg-sky-500", icon: Info },
+  success: { dot: "bg-emerald-500", icon: CheckCircle2 },
+  warning: { dot: "bg-amber-500", icon: AlertTriangle },
+  critical: { dot: "bg-red-500", icon: ShieldAlert },
+  neutral: { dot: "bg-muted-foreground", icon: Clock },
+};
+
+export function ActivityTimeline({
+  events,
+  emptyMessage = "No activity yet.",
+}: {
+  events: { id: string; tone?: TimelineTone; title: string; description?: string; timestamp: string; actor?: string }[];
+  emptyMessage?: string;
+}) {
+  if (events.length === 0) {
+    return <div className="rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">{emptyMessage}</div>;
+  }
+  return (
+    <div className="relative space-y-4 pl-6">
+      <div className="absolute left-2 top-2 bottom-2 w-px bg-border" aria-hidden />
+      {events.map((e) => {
+        const tone = e.tone ?? "neutral";
+        const cfg = timelineTones[tone];
+        const Icon = cfg.icon;
+        return (
+          <div key={e.id} className="relative">
+            <div className={cn("absolute -left-6 top-0.5 z-10 flex size-4 items-center justify-center rounded-full ring-2 ring-background", cfg.dot)}>
+              <Icon className="size-2.5 text-white" />
+            </div>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-foreground">{e.title}</div>
+                {e.description && <p className="text-xs text-muted-foreground mt-0.5">{e.description}</p>}
+                {e.actor && <span className="text-[10px] text-muted-foreground/80">by {e.actor}</span>}
+              </div>
+              <time className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">{timeAgo(e.timestamp)}</time>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

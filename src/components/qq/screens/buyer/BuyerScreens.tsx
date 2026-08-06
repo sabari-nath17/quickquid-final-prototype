@@ -34,7 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow,
+  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow, ActivityTimeline,
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
@@ -50,7 +50,7 @@ import {
 } from "@/lib/qq/format";
 import type {
   Brief, Proposal, Contract, PaymentEvidence, Milestone, BuyerProfile,
-  BriefVisibility, DisputeCategory, PaymentMethod, GigDraft, ProProfile,
+  BriefVisibility, DisputeCategory, PaymentMethod, GigDraft, ProProfile, AuditEvent,
 } from "@/lib/qq/types";
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Banknote, Bell,
@@ -97,7 +97,7 @@ function StickyCtaBar({ children }: { children: React.ReactNode }) {
 export function BuyerDashboard() {
   const {
     currentUserId, contracts, briefs, proposals, payments, payouts,
-    navigate, users, proProfiles,
+    navigate, users, proProfiles, audit,
   } = useQQ();
 
   const myContracts = contracts.filter((c) => c.buyerId === currentUserId);
@@ -308,8 +308,60 @@ export function BuyerDashboard() {
           </div>
         )}
       </SectionCard>
+
+      <SectionCard title="Recent activity" description="Latest events across your briefs, contracts, and payments.">
+        <ActivityTimeline
+          events={buildBuyerTimeline(myContracts, myBriefs, payments, audit, currentUserId ?? "")}
+          emptyMessage="No activity yet. Post a brief or browse talent to get started."
+        />
+      </SectionCard>
     </div>
   );
+}
+
+function buildBuyerTimeline(contracts: Contract[], briefs: Brief[], payments: PaymentEvidence[], audit: AuditEvent[], userId: string) {
+  const events: { id: string; tone?: "info" | "success" | "warning" | "critical" | "neutral"; title: string; description?: string; timestamp: string; actor?: string }[] = [];
+  const myContractIds = new Set(contracts.map((c) => c.id));
+  const myBriefIds = new Set(briefs.map((b) => b.id));
+  payments.filter((p) => myContractIds.has(p.contractId)).forEach((p) => {
+    events.push({
+      id: p.id,
+      tone: p.status === "payment_confirmed" ? "success" : p.status === "payment_rejected" ? "critical" : "warning",
+      title: `Payment ${p.status.replace(/_/g, " ")}`,
+      description: `${p.id} · ${p.milestoneLabel} · ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.amountDue)} via ${p.method}`,
+      timestamp: p.submittedAt,
+      actor: `UTR ${p.utr}`,
+    });
+  });
+  contracts.forEach((c) => {
+    events.push({
+      id: c.id,
+      tone: c.status === "completed" ? "success" : c.status === "disputed" ? "critical" : "info",
+      title: `Contract ${c.id} ${c.status.replace(/_/g, " ")}`,
+      description: `${c.briefTitle} · ${c.proName}`,
+      timestamp: c.createdAt,
+    });
+  });
+  briefs.forEach((b) => {
+    events.push({
+      id: b.id,
+      tone: b.status === "approaching_inactivity" ? "warning" : "info",
+      title: `Brief ${b.id} ${b.status.replace(/_/g, " ")}`,
+      description: b.title,
+      timestamp: b.createdAt,
+    });
+  });
+  audit.filter((a) => myContractIds.has(a.entityId) || myBriefIds.has(a.entityId)).slice(0, 5).forEach((a) => {
+    events.push({
+      id: a.id,
+      tone: a.maskedReveal ? "warning" : "neutral",
+      title: a.action,
+      description: `${a.entity} ${a.entityId}${a.reason ? " · " + a.reason : ""}`,
+      timestamp: a.timestamp,
+      actor: a.adminId,
+    });
+  });
+  return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10);
 }
 
 function QuickStats({ stats }: { stats: { label: string; value: number; icon: React.ComponentType<{ className?: string }> }[] }) {
@@ -2989,7 +3041,7 @@ export function BuyerMessages() {
         </Card>
 
         {/* Immutable brief & scope summary */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <SectionCard title="Brief & scope summary" description="Immutable reference. Locked for the contract.">
             <div className="space-y-3 text-sm">
               <div>

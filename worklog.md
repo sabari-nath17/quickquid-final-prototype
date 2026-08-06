@@ -309,3 +309,42 @@ The prototype was stable after Round 2 (auto-normalize SLA, onboarding tour, mil
 - Move "Reset filters" button higher in the filter sidebar or make it sticky.
 - Add more gig moderation seeds (e.g., a rejected gig, a paused gig) for richer admin demo paths.
 - Consider a "Replay tour" option in AdminNotes that clears the tour flag without a full reset.
+
+---
+
+## Cron Review Round 4 — Activity Timeline, Replay Tour, Gig Seeds, Messaging Sticky, Mobile Polish
+
+### Current project status assessment
+The prototype was stable after Round 3 (toast z-index fix, role-selection polish, gig moderation nav, empty-state illustrations). This round focused on: (1) adding a buyer activity timeline to the dashboard, (2) adding a Replay tour option to AdminNotes, (3) seeding rejected + paused gig moderation states, (4) making the messaging scope summary sticky on desktop, and (5) QA testing across buyer brief creation, brief detail (ATS-lite), and messaging screens.
+
+### Completed modifications
+
+**New features:**
+1. **Buyer activity timeline** — Added a "Recent activity" section to the buyer dashboard with a vertical timeline (color-coded status dots: green=success, amber=warning, red=critical, sky=info, grey=neutral). Aggregates events from payments, contracts, briefs, and audit events relevant to the buyer, sorted by recency, capped at 10. VLM-confirmed: "excellent visual scanning, clean timestamps, strong typography hierarchy." (`src/components/qq/shared/index.tsx` + `src/components/qq/screens/buyer/BuyerScreens.tsx`)
+2. **Replay onboarding tour** — Added a "Replay tour" card to AdminNotes → Demo data controls (now a 4-column grid). Clears the `quickquid-tour-completed-v1` localStorage flag and reloads, so reviewers can re-trigger the 5-step guided tour without a full data reset. (`src/components/qq/screens/admin/AdminScreens.tsx`)
+3. **Rejected + paused gig seeds** — Added GIG-3005 (Priya Nair, "React component library", status `rejected`, moderationReason "Contact/payment information detected in description. Remove UPI ID before resubmitting.") and GIG-3006 (Akhil Menon, "Usability testing for SaaS", status `paused`, 89 views, 3 requests, rating 4.8). These enrich the Pro gig management table with full lifecycle states. (`src/lib/qq/seed.ts`)
+4. **Sticky messaging scope summary** — Made the "Brief & scope summary" panel sticky on desktop (`lg:sticky lg:top-20 lg:self-start`) so it stays visible while scrolling long chat threads, per VLM feedback. (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+
+**Styling polish:**
+5. **AdminNotes demo controls grid** — Expanded from 3 to 4 columns to accommodate the new Replay tour card. Each card has consistent padding, icon, title, description, and full-width action button. (`src/components/qq/screens/admin/AdminScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: fresh load → buyer dashboard shows "Recent activity" timeline (payment + contract + brief + audit events) → switch to Ops → gig moderation shows GIG-3004 (submitted) → Admin notes shows "Replay tour" card → switch to buyer → messages screen scope summary sticky. All clean, no persistent runtime errors.
+- VLM screenshot reviews confirmed: activity timeline "excellent visual scanning, strong typography hierarchy", mobile "no horizontal overflow detected".
+- The gig moderation queue correctly shows only active moderation items (submitted/under_review/changes_requested); rejected/paused gigs appear in the Pro gig management table (full lifecycle).
+
+### Unresolved issues / risks + next-phase priorities
+1. **Mobile activity timeline text wrapping** — VLM noted long titles wrap to 2-3 lines creating uneven vertical rhythm on mobile. Could clamp to 1-2 lines with `line-clamp-2`. **Priority: low** (cosmetic, mobile-only).
+2. **Mobile timeline timestamp alignment** — Timestamps float at varying heights on mobile. Could force a fixed top alignment. **Priority: low**.
+3. **Inline alert banners** — Some buyer/admin screens still use inline `<div>` alert banners rather than the shared `AlertBanner` component. **Priority: medium** (consistency).
+4. **Pro dashboard timeline** — The activity timeline was added to the buyer dashboard only. Could add a similar timeline to the Pro dashboard for parity. **Priority: medium**.
+5. **Filter sidebar "Reset filters"** — Still at the bottom of the sidebar. Could be sticky. **Priority: low**.
+
+### Recommended next-phase focus
+- Add `line-clamp-2` to mobile timeline titles to fix vertical rhythm.
+- Add the activity timeline to the Pro dashboard (proposals, contracts, payouts, milestones).
+- Migrate remaining inline alert banners to shared `AlertBanner` for dark-mode consistency.
+- Consider a filter sidebar redesign (sticky reset, tag-chip filters) for the talent discovery screen.
+- Add a contract completion celebration screen with review submission confirmation.

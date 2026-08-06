@@ -39,7 +39,7 @@ import {
   Landmark, Receipt, Wallet, FileWarning, FileCheck2,
   DownloadCloud, AlertOctagon, Gavel, Hourglass, BadgeCheck, Info, UserCog,
   ChevronRight, MessageSquareOff, Fingerprint, ScrollText, ListChecks,
-  RefreshCcw, Palette,
+  RefreshCcw, Palette, GraduationCap,
 } from "lucide-react";
 
 // ===================== Helpers =====================
@@ -2440,7 +2440,7 @@ export function AdminNotes() {
       />
 
       <SectionCard title="Demo data controls" description="Prototype-only tools for reviewers. Reset clears localStorage; Normalize shifts SLA timestamps to 'now' so queue states look realistic.">
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="p-4">
             <div className="font-medium flex items-center gap-2"><RefreshCcw className="size-4 text-primary" />Normalize SLA timestamps</div>
             <p className="text-xs text-muted-foreground mt-1.5">Shifts all queue item timestamps forward so SLA timers show normal / approaching / breached states relative to today (instead of Jan 2025 seed dates).</p>
@@ -2450,6 +2450,11 @@ export function AdminNotes() {
             <div className="font-medium flex items-center gap-2"><Palette className="size-4 text-primary" />Theme: {theme}</div>
             <p className="text-xs text-muted-foreground mt-1.5">Toggle light/dark mode. Also available from the header sun/moon icon. Persists across reloads.</p>
             <Button size="sm" variant="outline" className="mt-3 w-full" onClick={toggleTheme}>Switch to {theme === "light" ? "dark" : "light"}</Button>
+          </Card>
+          <Card className="p-4">
+            <div className="font-medium flex items-center gap-2"><GraduationCap className="size-4 text-primary" />Onboarding tour</div>
+            <p className="text-xs text-muted-foreground mt-1.5">Re-show the 5-step guided tour (role switcher, ⌘K command palette, locked business rules, dark mode). Useful for demo walkthroughs.</p>
+            <Button size="sm" variant="outline" className="mt-3 w-full" onClick={() => { try { localStorage.removeItem("quickquid-tour-completed-v1"); } catch { /* ignore */ } navigate("admin_operations"); setTimeout(() => window.location.reload(), 100); }}>Replay tour</Button>
           </Card>
           <Card className="p-4 border-destructive/30">
             <div className="font-medium flex items-center gap-2 text-destructive"><AlertOctagon className="size-4" />Reset all demo data</div>
