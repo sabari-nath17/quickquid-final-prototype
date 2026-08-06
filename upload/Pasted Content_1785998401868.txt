@@ -1,0 +1,1084 @@
+# QuickQuid Full Prototype Master Prompt for z.ai
+
+Copy everything below into z.ai as one complete build instruction.
+
+---
+
+## SYSTEM ROLE
+
+You are a principal product designer, senior frontend architect, and marketplace operations UX expert. Build a high-fidelity, responsive, clickable web prototype for **QuickQuid**, a trust-first two-sided freelance and gig marketplace.
+
+You must produce the working prototype, not a product explanation, design essay, partial mockup, or landing page. Every screen, sub-screen, role, state, modal, drawer, error, empty state, and workflow listed below must be represented and connected.
+
+Do not omit screens because they are operational, administrative, legal, payment-related, or edge cases. The operational workflows are part of the product experience.
+
+If the environment supports code, build the prototype as a responsive web application using the available stack. Prefer React + TypeScript + Tailwind CSS or the closest supported equivalent. Use a component system, local mock data, client-side state, and localStorage persistence where possible. If the environment is a visual prototyping tool, create the equivalent connected screens and variants.
+
+Do not ask for clarification. Make reasonable product decisions from this specification and record any unavoidable implementation assumption in an in-app Admin Notes panel or a final `Assumptions` file.
+
+## PRODUCT CONTEXT
+
+QuickQuid connects Buyers with vetted independent professionals, currently focused on a trust-first, manually operated v0.1 marketplace.
+
+### Current release: v0.1
+
+- Responsive web only. Desktop target: 1440px. Mobile target: 390px.
+- Buyer and Pro accounts are created through role selection.
+- Buyers can discover talent, create briefs, shortlist Pros, message, create contracts, submit payment evidence, and manage projects.
+- Pros can create profiles, submit proposals, manage availability, communicate, deliver work, and receive manually processed payouts.
+- Admin, Support, Finance, Risk, and Ops Manager users operate internal queues.
+- Payments are manually verified by QuickQuid Admin.
+- There is no automated escrow in v0.1.
+- There is no wallet in v0.1.
+- There is no automatic payout API in v0.1.
+- Pro work must not begin until QuickQuid confirms the required payment evidence.
+- Payment evidence uses a structured transaction reference/UTR form. Supporting screenshots are optional and secondary.
+- Admin manually verifies payment settlement and manually processes payouts/refunds.
+- v0.1 supports a maximum of four milestones per contract.
+
+### Future releases
+
+- **v0.2:** Productized gigs created and published by Pros.
+- **v0.3:** Paid priority gig feed.
+- Cross-border, Teams, Enterprise, Learn, and Field are future expansion overlays. Do not present them as live v0.1 functionality. Enterprise tax capture may appear as a clearly labelled optional overlay.
+
+## LOCKED BUSINESS RULES
+
+These rules are mandatory. Do not alter them, reinterpret them, or invent a different monetization model.
+
+1. QuickQuid deducts **0% platform commission from the Pro’s professional fee**.
+2. The Pro receives the full agreed professional fee, subject only to disclosed statutory withholding or approved bank/provider charges where applicable.
+3. The Buyer pays the QuickQuid fee on top of the Pro fee.
+4. The controlled beta Buyer fee is **14%**.
+5. The intended future standard target is 13%, with possible earned rate reductions for eligible Pros. Do not show 13% or an earned ladder as active in v0.1.
+6. Always display the Pro fee and Buyer fee as separate line items.
+7. Example: Pro fee ₹80,000; Buyer fee 14% ₹11,200; Buyer total ₹91,200 before applicable taxes.
+8. Example counter-offer: Pro fee ₹85,000; Buyer fee 14% ₹11,900; Buyer total ₹96,900 before applicable taxes.
+9. Never display “the Pro pays 14%.”
+10. Never imply that QuickQuid automatically holds money in escrow.
+11. Never display or implement “Add to Wallet” in v0.1.
+12. Use the states `Payment evidence submitted`, `Under Admin Verification`, `Payment Confirmed`, `Payout Queued`, and `Payout Processed`.
+13. “Accept milestone” queues a manual payout; it does not instantly release money.
+14. A Pro must see `Do not begin work until payment is confirmed` whenever funding is not confirmed.
+15. The Buyer fee is shown before the Buyer submits payment.
+16. Taxes are shown as `Calculated by Finance if applicable` until the tax configuration is approved.
+17. Never hardcode TDS, GST, TCS, or legal rates as universal truths.
+
+## DESIGN DIRECTION
+
+Design QuickQuid as a serious, modern, trust-first marketplace operations product. It should feel faster and clearer than legacy freelance platforms without becoming a generic social network or marketing website.
+
+### Visual principles
+
+- The first signed-in screen is the working dashboard, not a marketing hero.
+- Use restrained white, charcoal, deep ink, green success, amber pending, orange warning, and red critical states.
+- Avoid dominant purple gradients, decorative blobs, oversized empty hero sections, and excessive rounded cards.
+- Use cards only for repeated records, modals, framed tools, and queue items.
+- Do not put cards inside cards.
+- Use 8px maximum radius unless a component requires otherwise.
+- Use Lucide or the available icon library for icons.
+- Every icon-only button must have a tooltip or accessible label.
+- Use visible text plus icon for high-risk status; never color alone.
+- Use stable dimensions for buttons, table rows, boards, tiles, and sticky panels.
+- Do not use negative letter spacing or viewport-scaled font sizes.
+- Keep all text inside its parent container at desktop and mobile sizes.
+
+### Layout tokens
+
+- Desktop frame: 1440 x 1024.
+- Mobile frame: 390 x 844.
+- App shell: horizontal layout.
+- Sidebar: 240px fixed on desktop; drawer/bottom navigation on mobile.
+- Main content: max-width 1200px, vertical layout, 24px section gap.
+- Standard card: 8px radius, 1px border, 24px padding.
+- Compact card: 8px radius, 16px padding.
+- Form stack: 16px vertical gap.
+- Section stack: 32px vertical gap.
+- Button: 44px desktop, 48px mobile.
+- Table row: minimum 64px.
+- Modal: maximum 560px wide and 720px high.
+- Drawer: 420px wide desktop; full-width mobile.
+
+## ROLE MODEL
+
+Implement role-aware routing and navigation.
+
+### Visitor
+
+Can see the role-selection entry screen and public profile/detail preview.
+
+### Buyer
+
+Can discover Pros, create briefs, invite Pros, review proposals, message, create offers, submit payments, review deliverables, accept milestones, request cancellation/refunds, dispute, review, rehire, manage profile, and open support tickets.
+
+### Pro
+
+Can create and customize a profile, submit verification data, set payout details, pause availability, discover briefs, submit proposals, message, accept/decline offers, deliver work, request revisions, review, manage payout details, and view payout slips.
+
+### Admin Support Tier 1
+
+Can process support and KYC intake, view workrooms, and communicate with users. Cannot verify payments, trigger payouts, suspend users, or alter financial records.
+
+### Finance Tier 2
+
+Can verify payments, prepare/trigger approved payouts, process refunds, export approved payout batches, and reconcile transactions. Cannot suspend users or make Risk decisions.
+
+### Risk Tier 3
+
+Can investigate risk flags, suspend accounts, review trust/safety cases, mediate disputes, and view audit logs. Cannot verify payments or trigger payouts.
+
+### Ops Manager
+
+Can monitor queues, reassign work, review SLA breaches, and receive escalations. Must not bypass financial maker-checker controls without explicit authorization.
+
+## CANONICAL MOCK DATA
+
+Use these records consistently across the prototype.
+
+### Buyer
+
+- Name: `Northstar Labs`
+- ID: `BUY-1042`
+- Role: `Buyer`
+- Industry: `B2B SaaS`
+- Location: `Kochi, India`
+- Verification: `Account ready`
+
+### Pro
+
+- Name: `Akhil Menon`
+- ID: `PRO-2088`
+- Headline: `Product Designer and UX Researcher`
+- Categories: `Product Design`, `UX Research`
+- Availability: `Available now`
+- Trust signals: `Identity reviewed`, `Portfolio reviewed`
+- Portfolio item: `Partner Portal Case Study`
+
+### Brief
+
+- ID: `BRF-0892`
+- Title: `Build a secure partner onboarding portal`
+- Category: `Web Development`
+- Professional fee: `₹80,000`
+- Buyer fee: `14% = ₹11,200`
+- Buyer total: `₹91,200 before applicable taxes`
+- Timeline: `8 weeks`
+- Visibility: `Open to verified Pros`
+- Exclusions: `No SEO optimization; no ongoing hosting support`
+
+### Proposal
+
+- ID: `PRP-4217`
+- Pro: `Akhil Menon`
+- Proposed fee: `₹85,000`
+- Buyer fee: `14% = ₹11,900`
+- Buyer total: `₹96,900 before applicable taxes`
+- Status: `Shortlisted`
+
+### Contract
+
+- ID: `QQ-0892`
+- Buyer: `Northstar Labs`
+- Pro: `Akhil Menon`
+- Total Pro fee: `₹80,000`
+- Milestones: 4 maximum
+- M1: `₹34,200`
+- M2: `₹20,000`
+- M3: `₹15,800`
+- M4: `₹10,000`
+
+### Payment
+
+- Payment ID: `PAY-0892`
+- Contract: `QQ-0892`
+- Milestone: `M1`
+- Amount due: `₹34,200`
+- UTR/reference: `UTR982341771`
+- Payment method: `NEFT`
+- Status: `Under Admin Verification`
+- Target review time: `24 hours`
+
+## GLOBAL COMPONENTS
+
+Build these reusable components first:
+
+- App shell and responsive sidebar.
+- Header with search, Help, notifications, avatar, and role label.
+- Breadcrumb.
+- Page header with title, description, status, and primary CTA.
+- Status badge with icon and accessible label.
+- Fee breakdown.
+- Progress bar.
+- Readiness checklist card.
+- Profile card.
+- Portfolio item card.
+- Gig card.
+- Brief card.
+- Proposal card.
+- Contract milestone stepper.
+- SLA timer.
+- Payment status tracker.
+- Evidence upload/dropzone.
+- Masked sensitive-data field.
+- Modal and confirmation modal.
+- Side drawer.
+- Toast notifications.
+- Empty state.
+- Loading skeleton.
+- Error state with retry.
+- Admin queue table.
+- Permission matrix.
+- Audit event row.
+- Support ticket panel.
+- Mobile bottom navigation.
+
+Every component needs default, hover, focus, disabled, loading, error, success, and mobile variants where relevant.
+
+## ROUTES AND FRAME MAP
+
+Create these routes or equivalent connected prototype frames:
+
+```text
+/                          Public role selection
+/auth                      Account creation/authentication
+/buyer/dashboard           Buyer dashboard
+/buyer/profile             Buyer profile editor and preview
+/buyer/talent               Talent discovery
+/buyer/briefs/new           Brief creation
+/buyer/briefs/:id           Brief detail and applicants
+/buyer/contracts/:id        Buyer contract/workroom
+/buyer/payments/:id         Buyer payment evidence
+/pro/dashboard             Pro dashboard
+/pro/profile               Pro profile editor and preview
+/pro/briefs                Brief discovery
+/pro/proposals             Pro proposal list
+/pro/contracts/:id         Pro contract/workroom
+/pro/payouts               Payout history and slip
+/admin/operations          Admin operations dashboard
+/admin/kyc                 KYC queue
+/admin/payments            Payment verification queue
+/admin/payouts             Payout batch queue
+/admin/refunds             Refund queue
+/admin/disputes            Dispute queue
+/admin/trust               Trust and Safety queue
+/admin/audit               Audit log
+/support                   Support ticket flow
+```
+
+## COMPLETE SCREEN REQUIREMENTS
+
+Implement every screen and sub-screen below. The number is the canonical screen/sub-screen ID. Use it in frame names, route metadata, and prototype QA.
+
+---
+
+## SCREEN 01 - ACCOUNT, ROLE, PROFILE AND VERIFICATION READINESS
+
+### 1.1 Role Selection
+
+Visitor sees: `What are you here to do?`
+
+Show two large intent cards:
+
+- `I want to hire` - `Find trusted professionals for your work.`
+- `I want to work` - `0% QuickQuid commission. Keep 100% of your agreed professional fee.`
+
+Show Continue with Google, Continue with LinkedIn, Continue with email. Selecting a role sets the account role and routes to account creation. Include Terms and Privacy links.
+
+States: default, OAuth loading, OAuth error, email validation, duplicate email, account created.
+
+### 1.2 Readiness Dashboard
+
+Show profile completion and role-specific tasks.
+
+Buyer tasks: account, profile, organization/billing details when needed, create brief, fund accepted milestone.
+
+Pro tasks: account, personal profile, identity review, category evidence, payout details, Admin approval, proposal access.
+
+Do not block Buyer browsing or brief drafting behind full KYC. Gate high-risk actions only.
+
+Show 0%, partial, submitted, approved, rejected, and action-required variants.
+
+### 1.3 KYC and Payout Upload Modal
+
+Build a three-step modal: Identity, Professional details, Payout details.
+
+Include drag/drop ID upload, JPG/PNG/PDF validation, 10MB maximum, masked PAN if required, account number, IFSC, beneficiary name, consent, submit for review, upload progress, invalid file, file too large, incomplete, and submitted states.
+
+Admin reveal of sensitive data must require a reason and create an audit event.
+
+### 1.4 Pending and Rejected States
+
+Pending copy: `Your verification is under Admin review. Typical review target: 24 hours.`
+
+Rejected copy: `We could not verify this submission. Reason: Image is too blurry. Upload a clearer document.`
+
+Actions: View reason, Resubmit, Contact Support.
+
+### 1.5 Pro Tax and Payout Interlock
+
+When a Pro submits a proposal without approved payout readiness, show:
+
+`Add payout details before applying`
+
+`QuickQuid needs approved payout details before you can submit a paid-work proposal.`
+
+Buttons: Add payout details, Cancel.
+
+### 1.6 Duplicate Device/IP Risk Flag
+
+Admin Risk view shows a risk signal, not an automatic guilt decision:
+
+`Risk signal: device or network pattern matches a previously suspended account.`
+
+Actions: Investigate, Request information, Reject, Approve with documented rationale. Show hashed signal, confidence, prior account status, and audit history. Do not show raw identifiers in ordinary UI.
+
+### 1.7 Pro Update Payout Details
+
+Pro edits payout data. Saving changes status to `Pending Admin Re-verification` and pauses new proposal submissions. Show approved, edit, pending, and rejected states.
+
+### 1.8 Buyer Organization Details Editor
+
+Fields: company name, billing address, GSTIN if applicable, billing contact. Show saved, invalid, incomplete, unsaved states. This private billing information must not automatically appear on the public profile.
+
+### 1.9 Terms and Privacy Consent
+
+Use two separate checkboxes:
+
+1. `I agree to the QuickQuid Terms of Service, including the 14% beta Buyer Fee and 0% QuickQuid platform commission for Pros.`
+2. `I have read the Privacy Notice and understand how information submitted for verification is used, stored, and accessed.`
+
+Store version and timestamp in mock audit data.
+
+### 1.10 Pro Work Relationship Acknowledgement
+
+Use this corrected copy:
+
+`I understand that QuickQuid is a marketplace platform and that I am responsible for the accuracy of my profile, work, taxes, insurance, and applicable statutory obligations. The final relationship and terms are governed by the applicable QuickQuid agreement and law.`
+
+Do not claim that a checkbox alone determines legal classification.
+
+### 1.11 Personal Profile Builder
+
+Build a profile editor for Buyer and Pro.
+
+Pro fields: avatar, public display name, headline, bio, primary/secondary categories, skills, portfolio items, case studies, availability, response time, preferred project size, preferred timeline, languages, time zone, and public visibility settings.
+
+Buyer fields: display name, logo/avatar, company description, industry, website if provided, hiring categories. Keep billing address and GSTIN private.
+
+Copy:
+
+- `Complete your profile so the right people can evaluate you quickly.`
+- `Only information marked Public appears in discovery.`
+- `Do not add phone numbers, personal email addresses, or direct payment links to your public profile.`
+
+Include empty profile, draft, saving, saved, incomplete, submitted for review, approved, restricted, rejected content, and mobile variants.
+
+### 1.12 Public Profile Preview and Customization
+
+Show exact public appearance with:
+
+- avatar, display name, headline
+- trust signals
+- About, Skills, Selected work, Reviews, Work history
+- featured portfolio selection
+- section ordering
+- visibility controls for optional fields
+- Buyer view / Pro view toggle
+- Save draft, Publish profile, Unpublish profile, Report profile
+
+Public trust labels must be dimensioned: `Identity reviewed`, `Portfolio reviewed`, `Available now`, `Completed projects`.
+
+Never show PAN, bank data, address, risk signals, internal notes, or raw KYC.
+
+### 1.13 Profile Completion and Approval Interlock
+
+Show separate Buyer and Pro readiness indicators. Pro indicators: account, identity submission, profile minimum, evidence, payout details, Admin review. Buyer indicators: account, brief-ready profile, billing details when needed, payment instructions acknowledged.
+
+Copy: `Your profile is visible, but proposal access may remain limited until the required review steps are complete.`
+
+---
+
+## SCREEN 02 - ROLE DASHBOARD AND ACTION CENTRE
+
+### 2.1 Sticky Action Required Banner
+
+Buyer: `Action required: submit payment evidence for QQ-0892.`
+
+Pro: `Payment verification pending. Do not begin work until QuickQuid confirms funding.`
+
+Include informational, action-required, SLA-warning, and critical variants.
+
+### 2.2 Active Engagements List
+
+Show title, counterparty, contract ID, status, milestone, Pro fee, Buyer total where relevant, last update, and contextual CTA.
+
+### 2.3 Buyer Empty State
+
+`No active projects yet`
+
+`Start with a clear brief or find a professional directly.`
+
+Buttons: Post a brief, Search talent.
+
+### 2.4 Global Notification Drawer
+
+Bell opens a right drawer. Show proposal received, payment submitted, payment confirmed, payout processed, dispute update, KYC result. Clicking a notification deep-links to the exact entity/state.
+
+---
+
+## SCREEN 03 - MARKETPLACE DISCOVERY AND FEEDS
+
+### 3.1 Mode-Switching Feed
+
+Segmented control: Talent | Briefs. Buyer defaults to Talent; Pro defaults to Briefs.
+
+Talent cards show avatar, name, headline, category, evidence, dimensioned trust labels, availability, Pro fee, Buyer fee helper, and CTA.
+
+Brief cards show title, category, scope, budget, timeline, exclusions, visibility, and Apply/Save actions.
+
+### 3.2 Filters and Empty States
+
+Filters: category, budget band, availability, evidence type, experience, delivery format.
+
+Budget bands: Under ₹20,000; ₹20,000-₹55,000; ₹55,001-₹1,00,000; Above ₹1,00,000.
+
+Empty copy: `No matches yet. Try a broader category or budget range.`
+
+---
+
+## SCREEN 04 - PROFESSIONAL, JOB AND GIG DETAIL
+
+### 4.1 Two-Pane Detail
+
+Desktop layout: narrative 66%, sticky commercial pane 33%.
+
+Narrative: profile/brief headline, overview, requirements, portfolio/evidence, timeline, exclusions, activity.
+
+Commercial pane:
+
+`Professional fee: ₹80,000`
+
+`QuickQuid platform commission deducted from Pro: ₹0`
+
+`Buyer fee: 14% = ₹11,200`
+
+`Total before any applicable taxes: ₹91,200`
+
+### 4.2 Invite to Brief Modal
+
+Buyer selects a private brief, sees scope preview, writes an optional message, and sends invitation. Include no private briefs, sent, unavailable, and duplicate invitation states.
+
+### 4.3 Pro Availability Pause
+
+Toggle: `Available for new work`.
+
+Off copy: `Paused. Your profile is hidden from Available Now results. Existing contracts are unaffected.`
+
+Buyer blocked copy: `This professional is currently unavailable for new work. Save the profile for later.`
+
+### 4.4 Pro Gig Creation - v0.2
+
+Clearly label this entire subsection `Coming in v0.2`.
+
+Create a wizard: Basics, Service Scope, Deliverables, Pricing, Timeline, Requirements, Preview.
+
+Fields: title, category, subcategory, tags, short description, detailed description, included items, exclusions, deliverable format, revisions, delivery timeline, Buyer requirements, evidence, cover image, package pricing, availability, maximum concurrent orders.
+
+Copy:
+
+`Describe the result a Buyer will receive.`
+
+`Be precise about what is included and excluded.`
+
+`Your gig price is the professional fee. QuickQuid does not deduct a platform commission from it.`
+
+`The Buyer sees the applicable QuickQuid fee before payment.`
+
+### 4.5 Gig Packages and Commercial Summary - v0.2
+
+Support a single package first, with Basic/Standard/Premium shown as a future option if needed. Each package has name, Pro fee, delivery time, deliverables, revisions, requirements, and exclusions.
+
+Example: Pro fee ₹25,000; QuickQuid commission deducted ₹0; Buyer fee 14% ₹3,500; Buyer total ₹28,500 before applicable taxes.
+
+Do not show the future Pro earned-rate ladder as active.
+
+### 4.6 Gig Preview and Publish - v0.2
+
+Preview cover image, title, Pro identity, trust signals, description, deliverables, exclusions, timeline, revisions, price, Buyer fee, total, requirements, and FAQ.
+
+Actions: Save draft, Submit for review, Back to edit.
+
+States: draft, submitted, under review, approved/live, changes requested, rejected, paused, archived.
+
+### 4.7 Gig Moderation and Approval - v0.2
+
+Admin sees gig preview, creator profile, category, pricing, deliverables, exclusions, evidence, content checks, and moderation history.
+
+Actions: Approve, Request changes, Reject, Pause gig, Escalate to Risk.
+
+Reasons: unclear scope, unsupported claim, missing deliverable, contact/payment information, duplicate service, pricing inconsistency, evidence problem.
+
+### 4.8 Buyer Gig Detail and Request - v0.2
+
+Buyer sees Pro fee, Buyer fee, applicable tax placeholder, total, delivery timeline, revision count, requirements, and Request this gig.
+
+After request, route to Screen 08. Do not bypass the v0.1 manual payment confirmation gate.
+
+### 4.9 Gig Management and Performance - v0.2
+
+Pro table: gig title, status, views, requests, conversion, active orders, rating summary, last updated, availability.
+
+Actions: edit, pause, duplicate draft, archive, view requests.
+
+Changing price, scope, timeline, or deliverables creates a new version and may require re-review. Existing contracts retain original terms.
+
+---
+
+## SCREEN 05 - BUYER BRIEF CREATION
+
+### 5.1 Accordion Form
+
+Sections: Basics, Scope, Budget, Timeline, Visibility.
+
+Fields: title, category, objective, deliverables, acceptance criteria, exclusions, budget, timeline, visibility, attachments.
+
+Required helper: `What is explicitly outside this project? Example: No SEO optimization.`
+
+### 5.2 Sticky Preview and Fee Calculator
+
+Show:
+
+`Professional fee ₹80,000`
+
+`Buyer fee (14% beta) ₹11,200`
+
+`Applicable taxes Calculated by Finance if applicable`
+
+`Buyer total before applicable tax ₹91,200`
+
+Update live as budget or proposal changes.
+
+### 5.3 Visibility Toggle
+
+Options: Open to verified Pros; Private - invite only. Explain that private briefs do not appear in the public feed.
+
+### 5.4 Autosave
+
+States: Saving..., Saved just now, Unable to save. Retry.
+
+### 5.5 Low-Budget Warning
+
+`This budget may be below typical expectations for this category. You may receive fewer proposals.`
+
+Do not display an unsupported “market average” number as fact.
+
+### 5.6 Brief Expiration
+
+Show active, approaching inactivity, archived, republished. Actions: Republish, Edit brief, Contact Support. Keep the period configurable.
+
+### 5.7 Fee Calculation and Rounding
+
+Show calculation transparently. Store unrounded calculation in mock Finance data. Copy: `Final tax and invoice treatment is confirmed by Finance where applicable.`
+
+---
+
+## SCREEN 06 - PROPOSALS, APPLICANTS, MATCHING AND SHORTLIST
+
+### 6.1 ATS-Lite Split Pane
+
+Left 40% applicant list. Right 60% selected applicant detail. Show avatar, name, proposed fee, status, cover letter, evidence, availability, fee breakdown, Shortlist, Decline, Message, Create offer.
+
+### 6.2 Counter Offer
+
+Pro can accept ₹80,000 or counter ₹85,000. Recalculate Buyer fee and total instantly before Buyer accepts.
+
+### 6.3 Pro Proposal Form
+
+Fields: proposed fee, cover letter minimum 100 characters, relevant evidence, delivery approach, availability. Validate missing evidence, invalid links, and payout readiness.
+
+### 6.4 Decline Modal
+
+Reasons: budget too high, skills mismatch, timeline mismatch, chose another Pro, brief changed, other. Optional private note.
+
+### 6.5 Proposal Expiry
+
+States: pending, shortlisted, expired, withdrawn, reactivation requested. Copy: `This proposal has expired because the quoted terms are no longer current.`
+
+### 6.6 Proposal Limit and Cooldown
+
+Prototype default: 10 active proposals. Copy: `You have reached your current active proposal limit. Withdraw an existing proposal or wait for a decision.`
+
+### 6.7 Buyer Shortlist SLA and Auto-Close
+
+States: active, approaching inactivity, closed - no action, republished. Notify Pros when a Buyer does not proceed.
+
+---
+
+## SCREEN 07 - MESSAGING AND SCOPE FINALISATION
+
+### 7.1 Contextual Workspace
+
+Chat 60%; immutable Brief and Scope Summary 40%. Show fee, timeline, deliverables, exclusions, criteria, revisions, status.
+
+Banner: `Admin Support may review this workspace if a dispute is filed.`
+
+### 7.2 Scope Update Modal
+
+Fields: requested change, fee delta, timeline delta, criteria impact, reason. Other party can Accept, Decline, or Request changes.
+
+### 7.3 Scope Locked
+
+Copy: `Scope locked by contract. Use a formal amendment to change commercial terms.`
+
+### 7.4 File Attachment Validation
+
+Maximum 25MB. Block executable files. Show upload progress, retry, remove, invalid type, and oversized states.
+
+### 7.5 Circumvention Blocker
+
+Detect direct phone numbers, emails, and payment links. Show:
+
+`Please keep payment and contract communication on QuickQuid until the contract is active.`
+
+Offer Edit message, report false positive, and accessible support path. Do not silently delete content.
+
+---
+
+## SCREEN 08 - OFFER, CONTRACT AND MILESTONES
+
+### 8.1 Immutable Offer Sheet
+
+Show Buyer, Pro, brief, scope, exclusions, timeline, fees, taxes placeholder, milestones, criteria, revisions, cancellation terms. Maximum four milestones.
+
+### 8.2 Funding Interlock
+
+Status: `Accepted (Pending Funding)`.
+
+Banner: `Work may not begin until QuickQuid confirms the required payment evidence for Milestone 1.`
+
+### 8.3 Milestone Cap Tooltip
+
+`v0.1 supports up to 4 milestones while payment verification and payout processing are handled manually.`
+
+### 8.4 Contract Decline
+
+Reasons: scope unclear, timeline too tight, budget too low, availability changed, other. Route back to messaging with a system event.
+
+---
+
+## SCREEN 09 - BUYER PAYMENT, ADMIN VERIFICATION AND PAYOUT STATUS
+
+### 9.1 Structured Payment Evidence
+
+Left: approved payment instructions, contract ID, milestone, amount, reference. Right: UTR/transaction reference, amount, date, method, optional screenshot.
+
+Copy: `Submit the UTR or transaction reference first. Supporting screenshots are optional and may contain sensitive information.`
+
+### 9.2 Pro Pending Warning
+
+Show:
+
+`Payment verification pending`
+
+`Expected Admin review target: 24 hours.`
+
+`Do not begin work until payment is confirmed.`
+
+### 9.3 Admin Bank Statement Matcher
+
+Split pane: Buyer-submitted UTR and expected amount versus Admin-entered/imported bank evidence. Actions: Confirm payment, Reject, Request more information, Escalate.
+
+### 9.4 Payment Rejected Recovery
+
+Reasons: amount mismatch, reference not found, date mismatch, duplicate reference, evidence unclear, suspected risk. Unlock resubmission and support.
+
+### 9.5 Maker-Checker
+
+Maker confirms match; Checker reviews and authorizes approved payout action. Show maker identity, checker identity, evidence, rationale, timestamps, and return-for-correction state. Threshold is configurable.
+
+### 9.6 Payout Failed
+
+Copy: `Payout could not be completed. Review your payout details and submit an update for Admin verification.`
+
+Do not hardcode one bank rail as the only failure path.
+
+### 9.7 Buyer Cancel and Refund
+
+Buyer requests cancellation. Show contract policy, work-start status, review requirement, manual refund status, and support link. Do not guarantee a refund unless policy permits it.
+
+### 9.8 Over/Under Payment Resolver
+
+Example received ₹35,000; expected ₹34,200; surplus ₹800. Actions: Hold for reconciliation, Apply to approved outstanding amount, Manual refund, Reject and request correction. No wallet.
+
+### 9.9 Chargeback and Unauthorized Transaction Queue
+
+States: reported, under review, provisional hold, recovery requested, resolved. Copy: `Payment reversal under review. Some account actions may be temporarily restricted while the transaction is reconciled.` Include appeal/support path.
+
+---
+
+## SCREEN 10 - WORKROOM, DELIVERY VAULT AND REVISIONS
+
+### 10.1 Milestone Timeline and Acceptance Checklist
+
+Stepper: Funding status, Work active, Submitted, Buyer review, Accepted, Payout queued. Pro cannot submit until required criteria are checked.
+
+### 10.2 Category-Specific Delivery Vault
+
+Development: staging/repository link or secure file/walkthrough. Design: Figma link or preview. Writing: document link or PDF. Third-party integrations are v0.2 options, not v0.1 requirements.
+
+### 10.3 Structured Revision Form
+
+Fields: revision number, reason, affected criterion, detailed feedback, attachments. Copy: `Describe what does not meet the agreed acceptance criteria.`
+
+### 10.4 Version History Drawer
+
+Rows: version, status, submitter, timestamp, link/file, change note. Example: v1 Rejected, v2 In Review, v3 Current.
+
+### 10.5 Accept Milestone
+
+Use button `Accept milestone`, not Release Payout.
+
+Copy: `Confirm that this milestone meets the agreed acceptance criteria. After acceptance, the payout will be queued for Admin processing.`
+
+### 10.6 Pro Inactivity Escalation
+
+States: approaching inactivity, Admin review, paused, resumed, disputed. Buyer copy: `This project appears inactive. QuickQuid has alerted Admin Support for review.`
+
+---
+
+## SCREEN 11 - ACCEPTANCE, DISPUTE, COMPLETION, REVIEW AND REHIRE
+
+### 11.1 Completion and Double-Blind Review
+
+Show accepted milestones, Pro fee, Buyer fee, tax status, payout status, and private review form. Reviews become visible after both submit or configured expiry.
+
+### 11.2 Structured Dispute Initiation
+
+Categories: scope, quality/bugs, timeline, communication, payment, delivery evidence, other. Fields: affected milestone, requested resolution, evidence, narrative, desired outcome. Freeze the relevant payout review state.
+
+### 11.3 Counterclaim and Admin Mediation
+
+Show Buyer claim, Pro response, immutable contract evidence, payment ledger, and Admin decision panel. Actions: release full amount, partial payout/refund, refund, request evidence, escalate.
+
+### 11.4 Deadlock Escalation
+
+Copy: `This dispute is under Admin mediation. Direct dispute chat is paused while evidence is reviewed.`
+
+### 11.5 Rehire Flow
+
+`Rehire Akhil` creates a new private brief with Pro preselected. Buyer must review scope, budget, timeline, and fees before creating a new offer.
+
+### 11.6 Mutual Cancellation
+
+Fields: completed work, proposed payout, proposed refund, reason, acknowledgement. Both parties accept; Admin manually executes approved payout/refund.
+
+### 11.7 Invoice and Tax Mapping
+
+Show Professional services ₹80,000; QuickQuid Buyer fee 14% ₹11,200; applicable tax Finance review; Buyer total before applicable tax ₹91,200. Keep tax treatment configurable.
+
+### 11.8 IP Ownership State
+
+Show contract-linked status: `IP ownership follows the signed agreement and applicable payment terms.` Do not use UI alone to transfer IP.
+
+### 11.9 Contract Amendment Placeholder
+
+Include a reserved future frame for formal amendments after scope lock.
+
+### 11.10 Post-Completion Defect Window
+
+States: active defect window, defect reported, closed by policy, Admin review. Copy: `Report only issues covered by the agreed critical-defect policy.`
+
+### 11.11 Review Appeal and Moderation
+
+Pro selects review, submits evidence and reason. Admin outcomes: uphold, remove for policy violation, request clarification, restore. Negative reviews are not automatically removed.
+
+### 11.12 Enterprise TDS Capture Overlay
+
+Clearly label as Enterprise/future overlay. Buyer enters withholding details and uploads certificate/challan; Finance reviews. Never hardcode TDS rate.
+
+### 11.13 Review Extortion Interlock
+
+During dispute: `Reviews are paused while this contract is under dispute review.` Unlock after resolution according to policy.
+
+---
+
+## SCREEN 12 - ADMIN OPERATIONS, TRUST, SUPPORT AND RECONCILIATION
+
+### 12.1 Operations Dashboard and Queue Grid
+
+Queue cards: KYC, Payment Verification, Payouts, Refunds, Disputes, Support, Trust & Safety, SLA breaches. Show count, oldest item, assigned team, SLA status, Open queue.
+
+### 12.2 SLA Queue Tables
+
+Columns: reference, user, contract, amount, status, owner, created time, time pending, risk flags, next action. Show normal, approaching, breached, and paused states.
+
+### 12.3 Maker-Checker Confirmation
+
+Roles Maker, Checker, Ops Manager. Actions Confirm match, Return for correction, Authorize payout, Reject, Add note.
+
+### 12.4 Audit Log and Masked Reveal
+
+Columns: event ID, Admin ID, role, action, entity, old status, new status, timestamp, reason. Reveal requires reason and creates event.
+
+### 12.5 Manual Payout Batch Export
+
+Flow: select payout queue -> review total -> maker approval -> secure export -> manual bank processing -> attach reference/proof -> mark processed -> reconciliation.
+
+Do not display raw bank details in general tables.
+
+### 12.6 Suspend User Interlock
+
+Modal checks reason, active contracts, pending payments, pending payouts, open disputes, and retention obligations. Provide restrict-selected-actions and request-review options.
+
+### 12.7 Manual Refund Queue
+
+Fields: refund reference, contract, amount, reason, approver, beneficiary token, transfer reference, status. Flow: approve, execute manually, attach proof, mark refunded, notify Buyer.
+
+### 12.8 Admin Permission Matrix
+
+Show Support Tier 1, Finance Tier 2, Risk Tier 3, Ops Manager with allowed and prohibited actions. Make permission denial explicit.
+
+### 12.9 Reconciliation Import Placeholder
+
+Reserved future frame for bank reconciliation imports or PSP integrations. Keep disconnected from v0.1 live prototype.
+
+### 12.10 Pro Payout Slip and Deductions
+
+Show agreed Pro fee, QuickQuid commission ₹0, statutory withholding if applicable, bank/provider charge if disclosed, net payout, payout reference. Never hardcode a TDS rate.
+
+### 12.11 Account Deletion and Data Retention
+
+Flow: request deletion, check obligations, deactivate, identify records to retain, purge eligible profile data, confirm. Use record-type-specific retention language.
+
+### 12.12 Personal Data Export
+
+User requests export. Risk reviews scope, redacts other-party data, generates JSON/CSV, sends time-limited secure link, records completion. Never export other users’ personal data or raw financial secrets.
+
+### 12.13 Offline Instrument Logger
+
+Fields: contract/reference, instrument type, bank, instrument number, amount, received date, expected settlement date, scan, owner, status. States: logged, pending settlement, cleared, dishonoured, escalated.
+
+### 12.14 Trust and Safety/IP Takedown Queue
+
+Fields: complainant, affected entity, allegation, evidence, urgency, owner, action history, resolution. Actions: request information, restrict visibility, suspend content, suspend account, restore, escalate to counsel.
+
+### 12.15 Cheque Bounce Escalation Queue
+
+Flow: mark dishonoured, restrict affected workflow according to policy, notify owner, assign legal review, track deadline, record payment/escalation. The system tracks workflow; it does not provide legal advice.
+
+### 12.16 Dispute Resolution SLA and Auto-Escalation
+
+Timer: 0-5 days normal, 5-7 approaching, 7+ breached, 14+ Ops Manager escalation. Actions: assign owner, request evidence, resolve per approved policy, escalate, notify parties.
+
+---
+
+## SCREEN 99 - TRANSACTIONAL COMMUNICATIONS AND SUPPORT
+
+### 99.1 Email and Push Matrix
+
+Implement triggered notification previews for:
+
+- KYC approved.
+- Contract accepted.
+- Payment evidence submitted.
+- Payment confirmed.
+- Payment rejected.
+- Deliverable submitted.
+- Payout queued.
+- Payout processed.
+- Dispute opened.
+
+Use actual recorded status. Do not say “sent to your bank” before transfer confirmation.
+
+### 99.2 Support Widget
+
+Floating Help button opens categories: Payment issue, Contract issue, Verification, Payout, Dispute, Bug, Other.
+
+Automatically attach contract ID, payment reference, current status, and latest relevant event. States: submitted, assigned, waiting for user, waiting for Admin, resolved, reopened.
+
+## PROTOTYPE JOURNEYS TO CONNECT
+
+### Journey A - Buyer hires a Pro
+
+`1.1 -> 1.2 -> 1.11/1.12 -> 3.1 Talent -> 4.1 Profile -> 4.2 Invite or 5.1 Brief -> 6.1 Applicants -> 7.1 Chat -> 8.1 Offer -> 8.2 Pending Funding -> 9.1 Evidence -> 9.3 Admin confirmation -> 10.1 Workroom -> 10.5 Accept Milestone -> 12.5 Payout Queue -> 11.1 Completion`
+
+### Journey B - Pro applies safely
+
+`1.1 -> 1.2 -> 1.11 Profile -> 1.3 Verification -> 1.4 Pending/Rejected -> 3.1 Briefs -> 6.3 Proposal -> 1.5 Interlock if needed -> 7.1 Chat -> 8.2 Pending Funding -> 9.2 Do Not Begin Work -> 10.2 Delivery -> 11.1 Review -> 12.10 Payout Slip`
+
+### Journey C - Pro publishes a v0.2 gig
+
+`Pro Dashboard -> 1.11 Profile -> 4.4 Gig Creation -> 4.5 Pricing -> 4.6 Preview -> 4.7 Admin Moderation -> 4.8 Buyer Gig Detail -> 8.1 Offer -> 9.1 Manual Payment Evidence`
+
+### Journey D - Admin verifies payment
+
+`12.1 Queue Grid -> 12.2 Payment Queue -> 9.3 Matcher -> 9.4 Reject or 9.5 Maker-Checker -> 99.1 Notification -> 02 Dashboard update`
+
+### Journey E - Dispute
+
+`10.1 Workroom -> 11.2 Dispute -> 11.3 Counterclaim -> 11.4 Deadlock -> 12.16 SLA -> 11.13 Review Lock -> Resolution -> Payout/Refund Queue`
+
+### Journey F - Profile customization
+
+`Dashboard -> 1.11 Edit Profile -> 1.12 Preview -> select featured work/reorder sections -> Save draft -> Publish -> public profile detail`
+
+## REQUIRED STATES FOR EVERY IMPORTANT SCREEN
+
+Create variants for:
+
+1. Default/first visit.
+2. Loading.
+3. Empty.
+4. Validation error.
+5. Permission denied.
+6. Pending Admin review.
+7. Success/confirmed.
+8. Rejected/recovery.
+9. SLA warning.
+10. Mobile responsive.
+
+High-risk screens additionally require payment mismatch, duplicate submission, chargeback/reversal, dispute freeze, permission separation, and audit-log confirmation states.
+
+## INTERACTION REQUIREMENTS
+
+- Every primary CTA must produce a visible state change and route to the next logical frame.
+- Every disabled action must explain why and provide a recovery path.
+- Use toasts only for low-risk confirmations; use modals for money movement, account suspension, deletion, and dispute decisions.
+- Preserve user-entered draft data when navigating back.
+- Use autosave indicators for briefs, profile edits, and gig drafts.
+- Every payment and payout action must show an immutable reference ID.
+- Every Admin money action must show role, timestamp, previous state, next state, and reason.
+- Use confirmation screens after KYC submission, payment evidence submission, profile publish, contract acceptance, milestone acceptance, refund execution, and payout processing.
+- Do not create fake bank transfer success merely from a button click; use a status such as `Processing` or `Awaiting confirmation` unless mock Admin confirmation is explicitly performed.
+
+## RESPONSIVE REQUIREMENTS
+
+### Desktop
+
+- Persistent sidebar.
+- Two-column detail layouts where specified.
+- Sticky commercial panels.
+- Split-pane applicant and Admin queue workflows.
+- Tables with visible status and next action.
+
+### Mobile
+
+- Sidebar becomes drawer or bottom navigation.
+- Two-column screens stack with commercial summary above the primary action.
+- Sticky CTA becomes bottom action bar without covering content.
+- Tables become cards with a `View details` expansion.
+- Payment warnings remain visible before the primary action.
+- Modals become full-screen sheets when content is long.
+- No horizontal overflow.
+
+## ACCESSIBILITY REQUIREMENTS
+
+- Keyboard navigable controls.
+- Visible focus state.
+- Semantic headings and labels.
+- Accessible modal focus trap.
+- Screen-reader labels for icons and status.
+- Error messages associated with inputs.
+- Do not rely on color alone.
+- Minimum readable contrast.
+- Touch targets at least 44px.
+
+## MOCK STATE AND DATA REQUIREMENTS
+
+Implement a local state store or equivalent mock API with:
+
+- users
+- roles
+- profile data
+- profile visibility
+- verification submissions
+- briefs
+- proposals
+- messages
+- scope changes
+- contracts
+- milestones
+- payment evidence
+- payment verification events
+- payouts
+- refunds
+- disputes
+- reviews
+- support tickets
+- notifications
+- audit events
+- gig drafts and gig moderation records for v0.2
+
+Create seeded states that allow the reviewer to switch between:
+
+- Buyer new user.
+- Buyer with active brief.
+- Buyer awaiting payment evidence.
+- Pro incomplete profile.
+- Pro pending verification.
+- Pro approved and available.
+- Pro payout failed.
+- Admin with payment queue.
+- Finance maker awaiting checker.
+- Risk Admin with duplicate-device flag.
+- Disputed contract.
+- v0.2 Pro gig draft.
+- v0.2 gig awaiting moderation.
+
+## SECURITY AND DATA PRESENTATION RULES
+
+- Mask PAN, bank account, IFSC, identity documents, and raw payment details by default.
+- Never show raw sensitive data on public profiles.
+- Sensitive reveal requires authorized role, reason, and audit event.
+- Do not expose other-party personal information in data exports.
+- Do not store contact information in public profile mock data.
+- Do not create a wallet or balance ledger in v0.1.
+- Use provisional recovery/reconciliation language for reversals until legal/accounting policy is approved.
+
+## FINAL DELIVERY REQUIREMENTS
+
+When finished, provide:
+
+1. A working responsive prototype.
+2. A route or frame map covering every screen ID.
+3. A visible role switcher for demo purposes, restricted to prototype mode.
+4. Seeded demo data matching this prompt.
+5. Connected Buyer, Pro, Admin, Finance, Risk, and Support journeys.
+6. Loading, empty, error, pending, rejected, success, mobile, and permission states.
+7. A short implementation report listing any unavailable interactions or assumptions.
+8. A final coverage checklist confirming every screen from 01 through 12 and Screen 99, plus 1.11-1.13 and v0.2 gig screens 4.4-4.9.
+
+Before declaring completion, test these acceptance criteria:
+
+- Pro never appears to pay QuickQuid a commission.
+- Buyer always sees the 14% fee before payment.
+- Pro cannot begin work before payment confirmation.
+- Admin manual verification is visible and understandable.
+- No v0.1 wallet or automated escrow language remains.
+- Profile creation, public preview, customization, and publishing work.
+- Buyer can create a brief and see the fee calculator.
+- Pro can submit a proposal and encounter the payout-readiness interlock.
+- Contract supports a maximum of four milestones.
+- Buyer can submit structured payment evidence.
+- Admin can confirm, reject, or escalate payment evidence.
+- Buyer can accept a milestone and see payout queued, not instant payout.
+- Admin can process payout/refund queues with permissions and audit events.
+- Dispute freezes the relevant review/payout flow.
+- v0.2 gig posting is visibly separated from v0.1.
+- Mobile screens do not hide warnings, pricing, or primary actions.
+
+Do not end with a static dashboard. The final result must be a complete, navigable, stateful QuickQuid marketplace prototype.
+
+---
+
+## OUTPUT FORMAT FOR YOUR RESPONSE
+
+After building the prototype, respond with:
+
+1. What was built.
+2. How to run or preview it.
+3. Demo login/role switching instructions.
+4. Screen coverage summary.
+5. Known limitations or assumptions.
+
+Do not claim a feature is implemented if it is only represented by a placeholder.
