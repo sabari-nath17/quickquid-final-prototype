@@ -41,21 +41,32 @@ export function EmptyState({
   title,
   description,
   icon: Icon = Inbox,
+  illustration,
   actions,
   className,
 }: {
   title: string;
   description?: string;
   icon?: React.ComponentType<{ className?: string }>;
+  illustration?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 px-6 py-12 text-center", className)}>
-      <div className="rounded-full bg-background border border-border p-3 shadow-sm">
-        <Icon className="size-6 text-muted-foreground" />
-      </div>
-      <h3 className="mt-4 text-base font-medium">{title}</h3>
+    <div className={cn("flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 px-6 py-14 text-center", className)}>
+      {illustration ?? (
+        <div className="relative">
+          <svg width="80" height="64" viewBox="0 0 80 64" fill="none" className="text-muted-foreground/30">
+            <rect x="8" y="14" width="64" height="44" rx="4" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 3" />
+            <circle cx="40" cy="34" r="8" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M36 34h8M40 30v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <div className="absolute -bottom-1 -right-1 rounded-full bg-background border border-border p-1.5 shadow-sm">
+            <Icon className="size-4 text-muted-foreground" />
+          </div>
+        </div>
+      )}
+      <h3 className="mt-4 text-base font-semibold">{title}</h3>
       {description && <p className="mt-1 text-sm text-muted-foreground max-w-sm">{description}</p>}
       {actions && <div className="mt-4 flex flex-wrap items-center justify-center gap-2">{actions}</div>}
     </div>

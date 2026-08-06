@@ -39,6 +39,7 @@ const NAV: Record<Role, NavItem[]> = {
   admin_support: [
     { label: "Operations", view: "admin_operations", icon: LayoutDashboard },
     { label: "KYC queue", view: "admin_kyc", icon: ClipboardCheck },
+    { label: "Gig moderation", view: "admin_gig_moderation", icon: Sparkles },
     { label: "Support", view: "support", icon: HelpCircle },
     { label: "Audit log", view: "admin_audit", icon: ScrollText },
     { label: "Admin notes", view: "admin_notes", icon: ClipboardList },
@@ -66,6 +67,7 @@ const NAV: Record<Role, NavItem[]> = {
     { label: "Refunds", view: "admin_refunds", icon: RefreshCcw },
     { label: "Disputes", view: "admin_disputes", icon: Scale },
     { label: "Trust & Safety", view: "admin_trust", icon: ShieldAlert },
+    { label: "Gig moderation", view: "admin_gig_moderation", icon: Sparkles },
     { label: "Audit log", view: "admin_audit", icon: ScrollText },
     { label: "Admin notes", view: "admin_notes", icon: ClipboardList },
   ],

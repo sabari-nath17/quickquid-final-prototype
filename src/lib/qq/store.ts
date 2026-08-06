@@ -250,7 +250,10 @@ export const useQQ = create<QQState>()(
       updateBuyerProfile: (userId, patch) => set((s) => ({ buyerProfiles: s.buyerProfiles.map((b) => (b.userId === userId ? { ...b, ...patch } : b)) })),
       resetData: () => {
         if (typeof window !== "undefined") {
-          try { localStorage.removeItem("quickquid-v0.1"); } catch { /* ignore */ }
+          try {
+            localStorage.removeItem("quickquid-v0.1");
+            localStorage.removeItem("quickquid-tour-completed-v1");
+          } catch { /* ignore */ }
         }
         set({ ...initialState, hydrated: true });
       },

@@ -265,3 +265,47 @@ The prototype was stable after Round 1 (lint clean, no runtime errors, all 33 sc
 - Clear the onboarding-tour-completed flag when "Reset demo data" is run, so reviewers can see the tour again after a reset.
 - Add a "submitted awaiting first review" gig seed + surface it in Admin → Gig moderation.
 - Consider adding lightweight SVG empty-state illustrations for polish.
+
+---
+
+## Cron Review Round 3 — Toast Fix, Role-Selection Polish, Gig Moderation, Empty-State Illustrations
+
+### Current project status assessment
+The prototype was stable after Round 2 (auto-normalize SLA, onboarding tour, milestone stepper, seeded completed contract + failed payout). This round focused on: (1) fixing the toast z-index bug (toasts rendered above modals), (2) polishing the role-selection/landing screen per VLM feedback, (3) adding a submitted gig seed + surfacing gig moderation in the admin sidebar, (4) improving the buyer talent discovery screen (tab switcher, ProfileCard badge grouping, empty-state illustrations), and (5) clearing the tour flag on reset so reviewers can see the tour again.
+
+### Completed modifications
+
+**Bug fixes:**
+1. **Toast z-index above modal** — Toast viewport was `z-[100]` while dialog overlay/content is `z-50`, so toasts rendered above modals (VLM-flagged in Round 2). Fixed by lowering toast viewport to `z-[40]`. Verified: toast z=40 < dialog z=50. (`src/components/ui/toast.tsx`)
+2. **Reset demo data now clears tour flag** — `resetData()` now also removes the `quickquid-tour-completed-v1` localStorage key, so reviewers can see the onboarding tour again after a reset. (`src/lib/qq/store.ts`)
+3. **Gig moderation missing from sidebar** — The `admin_gig_moderation` view existed but wasn't in the sidebar nav for any admin role. Added to `admin_support` and `ops_manager` nav. (`src/components/qq/shell/Shell.tsx`)
+
+**Styling polish (VLM-driven):**
+4. **Role-selection screen redesign** — Added a "Trust-first" pill badge above the headline, made intent cards larger with hover-lift + scale on icon, added parallel value-prop badges on both cards (Buyer: "14% flat Buyer fee · 0% Pro commission"; Pro: "0% QuickQuid commission · Manual payouts"), added a check-circle active indicator, redesigned TrustStat cards with icon + label + sub-label, restyled the "Browse the marketplace" button as a ghost button with dashed border, redesigned footer with 3 trust items separated by dots, added a "Controlled beta · v0.1" status pill in the header. VLM-confirmed: "significant improvement… trust anchors, value clarity, visual hierarchy." (`src/components/qq/screens/visitor/RoleAuthScreens.tsx`)
+5. **Talent/Gigs tab switcher** — Made the segmented control taller (`h-10 p-1`), larger icons (`size-4`), `font-medium` text, tighter badge. VLM-confirmed: "pill-style toggle with active state is a significant improvement." (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+6. **ProfileCard badge grouping** — Grouped verification badges ("Identity reviewed" + "Portfolio reviewed") into a single "Verified (N)" badge with tooltip, reserving card real estate for availability + price. Added border-top separator before price/projects row, bolder price (`font-bold`), hover-lift. VLM-confirmed: "grouping verification badges reduces visual noise." (`src/components/qq/shared/cards.tsx`)
+7. **EmptyState illustrations** — Added a lightweight SVG illustration (dashed rectangle with a plus icon) behind the status icon, with the icon in a floating badge. Makes empty states feel more polished and less stark. (`src/components/qq/shared/index.tsx`)
+
+**New seeded data:**
+8. **Submitted gig for moderation** — Added GIG-3004 "Logo + brand mark in 3 days" (Rahul Verma, ₹15,000, Brand & Identity, status `submitted`, 3-day delivery, unlimited revisions). Visible in Admin → Gig moderation queue, demonstrating the "submitted awaiting first review" state. (`src/lib/qq/seed.ts`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/` (only pre-existing skills/examples errors).
+- agent-browser end-to-end: fresh load → polished role-selection (VLM-confirmed improvements) → sign in as buyer → talent discovery (improved tab switcher + ProfileCard verified) → switch to Ops → gig moderation queue shows GIG-3004 (submitted) → toast z-index fix verified (toast z=40 < dialog z=50). All clean, no console/runtime errors.
+- VLM screenshot reviews confirmed: role-selection "significant improvement", talent tab switcher "clearer state & hierarchy", ProfileCard "better information density & trust signals", mobile role-selection "intent cards stacked properly, text readable".
+- Mobile responsive (390px): role-selection cards stack correctly, no horizontal overflow, text readable.
+
+### Unresolved issues / risks + next-phase priorities
+1. **Mobile trust badge density** — VLM flagged the 3 trust badges create a dense vertical stack on mobile. Could collapse to a horizontal scrollable row or accordion. **Priority: low** (cosmetic, mobile-only).
+2. **Filter sidebar "Reset filters" position** — VLM noted it's at the bottom of the sidebar with excessive whitespace. Could be sticky or moved higher. **Priority: low**.
+3. **Paused badge subtlety** — VLM noted the "Paused" badge on Rahul Verma's card uses neutral gray that may be too subtle vs the green "Available now". Could use muted amber. **Priority: low** (the StatusBadge "paused" tone already uses slate, which is intentional).
+4. **Inline alert banners** — Some buyer/admin screens still use inline `<div>` alert banners rather than the shared `AlertBanner` component. **Priority: medium** (consistency).
+5. **Tour on every role switch** — The tour only shows once per browser (localStorage flag). If a reviewer wants to see it again for a different role, they must reset data. **Priority: low** (reset now clears the flag).
+
+### Recommended next-phase focus
+- Collapse mobile trust badges into a horizontal scrollable row for better mobile density.
+- Migrate remaining inline alert banners to shared `AlertBanner` for dark-mode consistency.
+- Move "Reset filters" button higher in the filter sidebar or make it sticky.
+- Add more gig moderation seeds (e.g., a rejected gig, a paused gig) for richer admin demo paths.
+- Consider a "Replay tour" option in AdminNotes that clears the tour flag without a full reset.

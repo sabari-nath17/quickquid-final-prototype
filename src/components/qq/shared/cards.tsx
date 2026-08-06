@@ -21,10 +21,13 @@ function initials(name: string) {
 
 export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick?: () => void }) {
   const status = profile.availability === "available_now" ? { tone: "success" as const, label: "Available now" } : profile.availability === "paused" ? { tone: "paused" as const, label: "Paused" } : { tone: "info" as const, label: "Booked" };
+  const verificationBadges = profile.trustSignals.filter((t) => t.includes("reviewed") || t.includes("Identity") || t.includes("Portfolio"));
+  const otherSignals = profile.trustSignals.filter((t) => !verificationBadges.includes(t));
+  const verifiedCount = verificationBadges.length;
   return (
-    <Card className={cn("p-4 hover:shadow-md transition-shadow cursor-pointer text-left w-full", onClick && "hover:border-primary/40")} onClick={onClick}>
+    <Card className={cn("p-4 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer text-left w-full h-full", onClick && "hover:border-primary/40")} onClick={onClick}>
       <div className="flex items-start gap-3">
-        <Avatar className="size-12 rounded-md" style={{ backgroundColor: profile.userId === "PRO-2088" ? "#7C3AED" : profile.userId === "PRO-2099" ? "#0891B2" : profile.userId === "PRO-2101" ? "#DB2777" : "#CA8A04" }}>
+        <Avatar className="size-12 rounded-md shrink-0" style={{ backgroundColor: profile.userId === "PRO-2088" ? "#7C3AED" : profile.userId === "PRO-2099" ? "#0891B2" : profile.userId === "PRO-2101" ? "#DB2777" : "#CA8A04" }}>
           <AvatarFallback className="rounded-md text-white font-medium">{initials(profile.displayName)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
@@ -40,15 +43,20 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
           </div>
         </div>
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {profile.trustSignals.map((t) => (
-          <Badge key={t} variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900">
-            <ShieldCheck className="size-3" /> {t}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        {verifiedCount > 0 && (
+          <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900" title={verificationBadges.join(", ")}>
+            <ShieldCheck className="size-3" /> Verified ({verifiedCount})
+          </Badge>
+        )}
+        {otherSignals.map((t) => (
+          <Badge key={t} variant="outline" className="text-muted-foreground">
+            {t}
           </Badge>
         ))}
       </div>
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">From <span className="font-semibold text-foreground">{formatINR(profile.feeFrom ?? 0)}</span></span>
+      <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-sm">
+        <span className="text-muted-foreground">From <span className="font-bold text-foreground">{formatINR(profile.feeFrom ?? 0)}</span></span>
         <span className="text-muted-foreground">{profile.completedProjects} projects</span>
       </div>
     </Card>

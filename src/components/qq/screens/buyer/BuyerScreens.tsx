@@ -752,9 +752,9 @@ export function BuyerTalent() {
       />
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as "talent" | "gigs")}>
-        <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="talent"><Users className="size-3.5 mr-1.5" /> Talent</TabsTrigger>
-          <TabsTrigger value="gigs"><Sparkles className="size-3.5 mr-1.5" /> Gigs <Badge variant="secondary" className="ml-1 text-[10px]">v0.2</Badge></TabsTrigger>
+        <TabsList className="w-full sm:w-auto h-10 p-1">
+          <TabsTrigger value="talent" className="gap-1.5 text-sm font-medium"><Users className="size-4" /> Talent</TabsTrigger>
+          <TabsTrigger value="gigs" className="gap-1.5 text-sm font-medium"><Sparkles className="size-4" /> Gigs <Badge variant="secondary" className="ml-0.5 text-[10px] px-1 py-0">v0.2</Badge></TabsTrigger>
         </TabsList>
 
         <TabsContent value="talent" className="mt-4">

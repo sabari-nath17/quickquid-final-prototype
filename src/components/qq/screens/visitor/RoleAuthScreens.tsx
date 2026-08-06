@@ -39,21 +39,29 @@ export function RoleSelectionScreen() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/30">
-      <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-border">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/40">
+      <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-border bg-background/80 backdrop-blur">
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold">Q</div>
           <span className="font-semibold">QuickQuid</span>
-          <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">v0.1 · trust-first marketplace</span>
+          <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">trust-first marketplace</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => navigate("support")}>Help</Button>
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-emerald-500" /> Controlled beta · v0.1
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => navigate("support")}>Help</Button>
+        </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-4xl space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">What are you here to do?</h1>
-            <p className="text-muted-foreground">Choose how you want to use QuickQuid. You can switch roles anytime from the demo panel.</p>
+        <div className="w-full max-w-4xl space-y-8">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300">
+              <ShieldCheck className="size-3.5" /> Trust-first · Identity reviewed · Manual verification
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">What are you here to do?</h1>
+            <p className="text-muted-foreground max-w-xl mx-auto">Choose how you want to use QuickQuid. You can switch roles anytime from the demo panel.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -62,7 +70,8 @@ export function RoleSelectionScreen() {
               onClick={() => choose("buyer")}
               icon={<Briefcase className="size-5" />}
               title="I want to hire"
-              desc="Find trusted professionals for your work."
+              desc="Find vetted professionals for your work."
+              valueProp="14% flat Buyer fee · 0% Pro commission"
               tone="emerald"
             />
             <IntentCard
@@ -70,15 +79,16 @@ export function RoleSelectionScreen() {
               onClick={() => choose("pro")}
               icon={<User className="size-5" />}
               title="I want to work"
-              desc="0% QuickQuid commission. Keep 100% of your agreed professional fee."
+              desc="Keep 100% of your agreed professional fee."
+              valueProp="0% QuickQuid commission · Manual payouts"
               tone="violet"
             />
           </div>
 
           {intent && (
-            <Card className="p-6 space-y-4">
+            <Card className="p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold">Create your {intent === "buyer" ? "Buyer" : "Pro"} account</h2>
+                <h2 className="font-bold text-lg">Create your {intent === "buyer" ? "Buyer" : "Pro"} account</h2>
                 <Button variant="ghost" size="sm" onClick={() => setIntent(null)}><ArrowLeft className="size-3.5" /> Back</Button>
               </div>
               <p className="text-sm text-muted-foreground">Sign in to continue. Selecting a role sets your account role and routes to account creation.</p>
@@ -159,14 +169,14 @@ export function RoleSelectionScreen() {
 
           {!intent && (
             <>
-              <div className="grid sm:grid-cols-3 gap-3 text-center">
-                <TrustStat icon={<ShieldCheck className="size-4" />} label="Identity reviewed" />
-                <TrustStat icon={<CheckCircle2 className="size-4" />} label="Manual payment verification" />
-                <TrustStat icon={<User className="size-4" />} label="0% Pro commission" />
+              <div className="grid sm:grid-cols-3 gap-3">
+                <TrustStat icon={<ShieldCheck className="size-4" />} label="Identity reviewed" sub="Every Pro is verified" />
+                <TrustStat icon={<CheckCircle2 className="size-4" />} label="Manual payment verification" sub="No automated escrow" />
+                <TrustStat icon={<User className="size-4" />} label="0% Pro commission" sub="Keep your full fee" />
               </div>
-              <div className="flex items-center justify-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <span className="text-sm text-muted-foreground">Not ready to sign up?</span>
-                <Button variant="outline" size="sm" onClick={() => navigate("public_profile", { proId: "PRO-2088" })}>
+                <Button variant="ghost" size="sm" className="border border-dashed border-border" onClick={() => navigate("public_profile", { proId: "PRO-2088" })}>
                   <Eye className="size-4" /> Browse the marketplace
                 </Button>
               </div>
@@ -175,33 +185,54 @@ export function RoleSelectionScreen() {
         </div>
       </main>
 
-      <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-        QuickQuid v0.1 prototype · No wallet, no automated escrow · Payouts manually processed
+      <footer className="border-t border-border bg-card px-4 py-4 text-center text-xs text-muted-foreground">
+        <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-2">
+          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3 text-emerald-600" /> Secure manual payout verification</span>
+          <span className="hidden sm:inline text-border">·</span>
+          <span>No wallet · No automated escrow in v0.1</span>
+          <span className="hidden sm:inline text-border">·</span>
+          <span>QuickQuid controlled beta</span>
+        </div>
       </footer>
     </div>
   );
 }
 
-function IntentCard({ active, onClick, icon, title, desc, tone }: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; desc: string; tone: "emerald" | "violet" }) {
+function IntentCard({ active, onClick, icon, title, desc, valueProp, tone }: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; desc: string; valueProp?: string; tone: "emerald" | "violet" }) {
   return (
     <button
       onClick={onClick}
-      className={`text-left rounded-lg border-2 p-5 transition-all hover:shadow-md ${active ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/40"}`}
+      className={`group text-left rounded-lg border-2 p-5 transition-all hover:shadow-md hover:-translate-y-0.5 ${active ? "border-primary ring-2 ring-primary/20 shadow-sm" : "border-border hover:border-primary/40"}`}
     >
-      <div className={`inline-flex size-10 items-center justify-center rounded-md ${tone === "emerald" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300"}`}>
-        {icon}
+      <div className="flex items-start justify-between">
+        <div className={`inline-flex size-11 items-center justify-center rounded-lg transition-transform group-hover:scale-105 ${tone === "emerald" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300"}`}>
+          {icon}
+        </div>
+        {active && (
+          <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <CheckCircle2 className="size-3.5" />
+          </span>
+        )}
       </div>
-      <h3 className="mt-3 font-semibold text-lg">{title}</h3>
+      <h3 className="mt-3 font-bold text-lg">{title}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
-      {active && <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary font-medium">Selected <ArrowRight className="size-3.5" /></div>}
+      {valueProp && (
+        <div className={`mt-3 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${tone === "emerald" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300" : "bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"}`}>
+          {valueProp}
+        </div>
+      )}
     </button>
   );
 }
 
-function TrustStat({ icon, label }: { icon: React.ReactNode; label: string }) {
+function TrustStat({ icon, label, sub }: { icon: React.ReactNode; label: string; sub?: string }) {
   return (
-    <div className="inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-sm">
-      <span className="text-emerald-600">{icon}</span> {label}
+    <div className="flex items-start gap-2.5 rounded-lg border border-border bg-card px-3.5 py-3 text-left">
+      <span className="mt-0.5 text-emerald-600 shrink-0">{icon}</span>
+      <div>
+        <div className="text-sm font-medium text-foreground">{label}</div>
+        {sub && <div className="text-xs text-muted-foreground">{sub}</div>}
+      </div>
     </div>
   );
 }
