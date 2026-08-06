@@ -122,6 +122,12 @@ interface QQState {
   updateProProfile: (userId: string, patch: Partial<ProProfile>) => void;
   updateBuyerProfile: (userId: string, patch: Partial<BuyerProfile>) => void;
   resetData: () => void;
+  normalizeSlaTimestamps: () => void;
+  theme: "light" | "dark";
+  setTheme: (t: "light" | "dark") => void;
+  toggleTheme: () => void;
+  commandOpen: boolean;
+  setCommandOpen: (open: boolean) => void;
 }
 
 const initialState = {
@@ -158,6 +164,8 @@ const initialState = {
   supportWidgetOpen: false,
   mobileSidebarOpen: false,
   kycModalOpen: false,
+  theme: "light" as "light" | "dark",
+  commandOpen: false,
 };
 
 export const useQQ = create<QQState>()(
@@ -240,7 +248,45 @@ export const useQQ = create<QQState>()(
       updateScopeChange: (id, patch) => set((s) => ({ scopeChanges: s.scopeChanges.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
       updateProProfile: (userId, patch) => set((s) => ({ proProfiles: s.proProfiles.map((p) => (p.userId === userId ? { ...p, ...patch } : p)) })),
       updateBuyerProfile: (userId, patch) => set((s) => ({ buyerProfiles: s.buyerProfiles.map((b) => (b.userId === userId ? { ...b, ...patch } : b)) })),
-      resetData: () => set({ ...initialState, hydrated: true }),
+      resetData: () => {
+        if (typeof window !== "undefined") {
+          try { localStorage.removeItem("quickquid-v0.1"); } catch { /* ignore */ }
+        }
+        set({ ...initialState, hydrated: true });
+      },
+      normalizeSlaTimestamps: () => set((s) => {
+        // Shift all timestamps forward so SLA timers show realistic normal/approaching/breached states relative to now.
+        const now = Date.now();
+        const shift = (iso: string, hoursAgo: number) => new Date(now - hoursAgo * 3600000).toISOString();
+        return {
+          kyc: s.kyc.map((k) => ({
+            ...k,
+            submittedAt: shift(k.submittedAt, k.status === "under_review" ? 3 : 48),
+            resolvedAt: k.resolvedAt ? shift(k.resolvedAt, 2) : undefined,
+          })),
+          payments: s.payments.map((p) => ({
+            ...p,
+            submittedAt: shift(p.submittedAt, p.status === "under_admin_verification" ? 3 : 30),
+            date: shift(p.date, p.status === "under_admin_verification" ? 3 : 30),
+            resolvedAt: p.resolvedAt ? shift(p.resolvedAt, 20) : undefined,
+          })),
+          payouts: s.payouts.map((p) => ({
+            ...p,
+            queuedAt: shift(p.queuedAt, p.status === "queued" ? 6 : p.status === "processed" ? 72 : 40),
+            processedAt: p.processedAt ? shift(p.processedAt, 60) : undefined,
+          })),
+          refunds: s.refunds.map((r) => ({ ...r, createdAt: shift(r.createdAt, r.status === "requested" ? 8 : 50), executedAt: r.executedAt ? shift(r.executedAt, 40) : undefined })),
+          disputes: s.disputes.map((d) => ({ ...d, createdAt: shift(d.createdAt, d.status === "opened" ? 2 : 80), slaOpenedAt: shift(d.slaOpenedAt, d.status === "opened" ? 2 : 80) })),
+          trustCases: s.trustCases.map((t) => ({ ...t, createdAt: shift(t.createdAt, 5) })),
+          tickets: s.tickets.map((t) => ({ ...t, createdAt: shift(t.createdAt, 4) })),
+          notifications: s.notifications.map((n) => ({ ...n, createdAt: shift(n.createdAt, 1) })),
+        };
+      }),
+      theme: "light",
+      setTheme: (t) => set({ theme: t }),
+      toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
+      commandOpen: false,
+      setCommandOpen: (open) => set({ commandOpen: open }),
     }),
     {
       name: "quickquid-v0.1",
@@ -269,6 +315,7 @@ export const useQQ = create<QQState>()(
         messages: s.messages,
         scopeChanges: s.scopeChanges,
         consent: s.consent,
+        theme: s.theme,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();

@@ -4,7 +4,7 @@ import * as React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Inbox, RefreshCw, Loader2, Eye, EyeOff, Clock } from "lucide-react";
+import { AlertTriangle, Inbox, RefreshCw, Loader2, Eye, EyeOff, Clock, Info, CheckCircle2, ShieldAlert } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 
 export function PageHeader({
@@ -26,7 +26,7 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
             {status}
           </div>
           {description && <p className="text-sm text-muted-foreground max-w-2xl">{description}</p>}
@@ -234,14 +234,52 @@ export function SectionCard({
       {(title || actions) && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            {title && <h2 className="text-base font-semibold">{title}</h2>}
-            {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+            {title && <h2 className="text-base font-bold tracking-tight">{title}</h2>}
+            {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
           </div>
           {actions}
         </div>
       )}
       {children}
     </Card>
+  );
+}
+
+type BannerTone = "info" | "action" | "warning" | "critical";
+const bannerStyles: Record<BannerTone, { wrap: string; icon: string; title: string }> = {
+  info: { wrap: "border-sky-300 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800", icon: "text-sky-600 dark:text-sky-400", title: "text-sky-900 dark:text-sky-100" },
+  action: { wrap: "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800", icon: "text-emerald-600 dark:text-emerald-400", title: "text-emerald-900 dark:text-emerald-100" },
+  warning: { wrap: "border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800", icon: "text-amber-600 dark:text-amber-400", title: "text-amber-900 dark:text-amber-100" },
+  critical: { wrap: "border-red-300 bg-red-50 dark:bg-red-950/40 dark:border-red-800", icon: "text-red-600 dark:text-red-400", title: "text-red-900 dark:text-red-100" },
+};
+
+export function AlertBanner({
+  tone = "info",
+  icon: Icon,
+  title,
+  children,
+  actions,
+  className,
+}: {
+  tone?: BannerTone;
+  icon?: React.ComponentType<{ className?: string }>;
+  title?: string;
+  children?: React.ReactNode;
+  actions?: React.ReactNode;
+  className?: string;
+}) {
+  const s = bannerStyles[tone];
+  const DefaultIcon = tone === "critical" ? ShieldAlert : tone === "warning" ? AlertTriangle : tone === "action" ? CheckCircle2 : Info;
+  const I = Icon ?? DefaultIcon;
+  return (
+    <div className={cn("flex items-start gap-3 rounded-lg border px-4 py-3.5", s.wrap, className)}>
+      <I className={cn("size-5 shrink-0 mt-0.5", s.icon)} />
+      <div className="flex-1 min-w-0">
+        {title && <div className={cn("text-sm font-semibold", s.title)}>{title}</div>}
+        {children && <div className={cn("text-sm mt-0.5", "text-foreground/80")}>{children}</div>}
+      </div>
+      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+    </div>
   );
 }
 

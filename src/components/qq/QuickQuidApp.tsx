@@ -5,6 +5,7 @@ import { useQQ } from "@/lib/qq/store";
 import { Sidebar, MobileSidebar, Header, MobileBottomNav } from "./shell/Shell";
 import { NotificationDrawer } from "./shell/NotificationDrawer";
 import { SupportWidget } from "./shell/SupportWidget";
+import { CommandPalette, ThemeProvider } from "./shell/CommandPalette";
 import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor/RoleAuthScreens";
 import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
@@ -50,7 +51,7 @@ const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
   notifications: NotificationsScreen,
 };
 
-// Views that render full-screen (no app shell) — visitor pre-auth
+// Views that render full-screen (no app shell) — visitor pre-auth + public browse
 const FULLSCREEN: ViewName[] = ["role_selection", "auth"];
 
 function ViewRouter() {
@@ -149,37 +150,43 @@ export function QuickQuidApp() {
 
   if (fullscreen) {
     return (
-      <>
-        <ViewRouter />
-        <SupportWidget />
-      </>
+      <ThemeProvider>
+        <>
+          <ViewRouter />
+          <SupportWidget />
+          <CommandPalette />
+        </>
+      </ThemeProvider>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <div className="flex flex-1">
-        <Sidebar />
-        <MobileSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header />
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 pb-24 md:pb-8">
-            <div className="mx-auto w-full max-w-[1200px] space-y-6">
-              <Breadcrumb />
-              <ViewRouter />
-            </div>
-          </main>
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col bg-background">
+        <div className="flex flex-1">
+          <Sidebar />
+          <MobileSidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <Header />
+            <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 pb-24 md:pb-8">
+              <div className="mx-auto w-full max-w-[1200px] space-y-6">
+                <Breadcrumb />
+                <ViewRouter />
+              </div>
+            </main>
+          </div>
         </div>
+        <footer className="mt-auto border-t border-border bg-card px-4 py-4 pb-20 md:pb-4 text-center text-xs text-muted-foreground">
+          <div className="mx-auto max-w-[1200px] flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>QuickQuid v0.1 prototype · 0% Pro commission · 14% beta Buyer fee · Manual payment verification</span>
+            <span className="hidden sm:inline">No wallet · No automated escrow · Payouts manually processed</span>
+          </div>
+        </footer>
+        <MobileBottomNav />
+        <NotificationDrawer />
+        <SupportWidget />
+        <CommandPalette />
       </div>
-      <footer className="mt-auto border-t border-border bg-card px-4 py-4 text-center text-xs text-muted-foreground">
-        <div className="mx-auto max-w-[1200px] flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>QuickQuid v0.1 prototype · 0% Pro commission · 14% beta Buyer fee · Manual payment verification</span>
-          <span className="hidden sm:inline">No wallet · No automated escrow · Payouts manually processed</span>
-        </div>
-      </footer>
-      <MobileBottomNav />
-      <NotificationDrawer />
-      <SupportWidget />
-    </div>
+    </ThemeProvider>
   );
 }

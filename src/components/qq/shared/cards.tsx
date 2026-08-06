@@ -58,7 +58,7 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
 export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true }: { brief: Brief; onOpen?: () => void; onApply?: () => void; onSave?: () => void; showApply?: boolean }) {
   const m = statusMeta(brief.status);
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow flex flex-col gap-3 text-left">
+    <Card className="p-4 hover:shadow-md transition-all flex flex-col gap-3 text-left h-full">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <button className="text-left" onClick={onOpen}>
@@ -93,7 +93,7 @@ export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true }: 
 export function ProposalCard({ proposal, onOpen, onShortlist, onDecline, onMessage }: { proposal: Proposal; onOpen?: () => void; onShortlist?: () => void; onDecline?: () => void; onMessage?: () => void }) {
   const m = statusMeta(proposal.status);
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow flex flex-col gap-2 text-left">
+    <Card className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-2 text-left">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <Avatar className="size-9 rounded-md"><AvatarFallback className="rounded-md bg-primary/10 text-primary text-xs">{initials(proposal.proName)}</AvatarFallback></Avatar>
@@ -159,7 +159,7 @@ export function GigCard({ gig, onOpen }: { gig: GigDraft; onOpen?: () => void })
 
 export function PortfolioItemCard({ item, featured }: { item: { title: string; category: string; description: string; url?: string }; featured?: boolean }) {
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow flex flex-col gap-2 text-left">
+    <Card className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-2 text-left">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h4 className="font-medium text-sm">{item.title}</h4>

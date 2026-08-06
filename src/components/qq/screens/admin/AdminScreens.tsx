@@ -39,6 +39,7 @@ import {
   Landmark, Receipt, Wallet, FileWarning, FileCheck2,
   DownloadCloud, AlertOctagon, Gavel, Hourglass, BadgeCheck, Info, UserCog,
   ChevronRight, MessageSquareOff, Fingerprint, ScrollText, ListChecks,
+  RefreshCcw, Palette,
 } from "lucide-react";
 
 // ===================== Helpers =====================
@@ -2428,7 +2429,8 @@ export function AdminGigModeration() {
 // ===================== 10. AdminNotes =====================
 
 export function AdminNotes() {
-  const { adminNotes, currentRole } = useQQ();
+  const { adminNotes, currentRole, resetData, normalizeSlaTimestamps, toggleTheme, theme, navigate, addAudit, currentUserId } = useQQ();
+  const [confirmReset, setConfirmReset] = React.useState(false);
   return (
     <div className="space-y-6">
       <PageHeader
@@ -2436,6 +2438,36 @@ export function AdminNotes() {
         description="v0.1 implementation assumptions + the permission matrix that governs every admin action."
         status={<Badge variant="outline"><RolePill role={currentRole} /></Badge>}
       />
+
+      <SectionCard title="Demo data controls" description="Prototype-only tools for reviewers. Reset clears localStorage; Normalize shifts SLA timestamps to 'now' so queue states look realistic.">
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Card className="p-4">
+            <div className="font-medium flex items-center gap-2"><RefreshCcw className="size-4 text-primary" />Normalize SLA timestamps</div>
+            <p className="text-xs text-muted-foreground mt-1.5">Shifts all queue item timestamps forward so SLA timers show normal / approaching / breached states relative to today (instead of Jan 2025 seed dates).</p>
+            <Button size="sm" className="mt-3 w-full" onClick={() => { normalizeSlaTimestamps(); addAudit({ adminId: currentUserId ?? "", adminRole: currentRole, action: "Normalized SLA timestamps", entity: "Demo", entityId: "all", reason: "Reviewer demo reset" }); }}>Normalize now</Button>
+          </Card>
+          <Card className="p-4">
+            <div className="font-medium flex items-center gap-2"><Palette className="size-4 text-primary" />Theme: {theme}</div>
+            <p className="text-xs text-muted-foreground mt-1.5">Toggle light/dark mode. Also available from the header sun/moon icon. Persists across reloads.</p>
+            <Button size="sm" variant="outline" className="mt-3 w-full" onClick={toggleTheme}>Switch to {theme === "light" ? "dark" : "light"}</Button>
+          </Card>
+          <Card className="p-4 border-destructive/30">
+            <div className="font-medium flex items-center gap-2 text-destructive"><AlertOctagon className="size-4" />Reset all demo data</div>
+            <p className="text-xs text-muted-foreground mt-1.5">Clears localStorage and restores canonical seed data (Northstar Labs, Akhil Menon, BRF-0892, QQ-0892, etc.). All session changes are lost.</p>
+            {confirmReset ? (
+              <div className="mt-3 flex gap-2">
+                <Button size="sm" variant="destructive" className="flex-1" onClick={() => { resetData(); }}>Confirm reset</Button>
+                <Button size="sm" variant="ghost" onClick={() => setConfirmReset(false)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="outline" className="mt-3 w-full hover:border-destructive hover:text-destructive" onClick={() => setConfirmReset(true)}>Reset demo data</Button>
+            )}
+          </Card>
+        </div>
+        <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+          <strong className="text-foreground">Tip:</strong> Press <kbd className="rounded border border-border bg-background px-1 mx-0.5">⌘K</kbd> / <kbd className="rounded border border-border bg-background px-1 mx-0.5">Ctrl+K</kbd> anywhere to open the command palette — search screens, briefs, contracts, switch roles, or run these actions without navigating here.
+        </div>
+      </SectionCard>
 
       <SectionCard title="Implementation assumptions (v0.1)" description="Hard constraints for this prototype. Do not display contradicting features.">
         <ul className="space-y-2 text-sm">

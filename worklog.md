@@ -163,3 +163,61 @@ Unresolved / next-phase priorities:
 - Add more seeded end-to-end journey states (e.g. a Pro with payout failed, a gig awaiting moderation) for richer demo paths — partial coverage already exists.
 - Consider exposing a "Reset demo data" button in AdminNotes (store has resetData action) for reviewers.
 - Polish: add empty-state illustrations, refine mobile drawer animations.
+
+---
+
+## Cron Review Round 1 — QA, Bug Fixes, Styling Polish, New Features
+
+### Current project status assessment
+The QuickQuid prototype (v0.1) was functionally complete from the initial build — all 33 screens across Screens 01-12, Screen 99, and v0.2 gig screens were implemented and connected. This review round focused on: (1) QA bug-hunting via agent-browser + VLM screenshot analysis, (2) fixing runtime/TypeScript errors, (3) a global styling polish pass, and (4) adding new power-user features.
+
+### Completed modifications
+
+**Bug fixes (3):**
+1. **Nested `<button>` DOM warning** — Pro dashboard engagement list items wrapped a `<button>` around an inner `<Button>` ("Open workroom"), causing React's "button cannot contain a nested button" warning. Fixed by converting the outer `<button>` to a `<div role="button" tabIndex={0}>` with keyboard handler (Enter/Space) for accessibility. (`src/components/qq/screens/pro/ProScreens.tsx`)
+2. **TypeScript error `KycSubmission.bankName`** — `ReadinessScreen.tsx` read `existing.bankName` which doesn't exist on the type. Fixed by deriving bank name from `proProfile.payoutDetails.bankName` instead. (`src/components/qq/screens/visitor/ReadinessScreen.tsx`)
+3. **TypeScript error `export { Tone }` with isolatedModules** — `StatusBadge.tsx` re-exported the `Tone` type without `export type`. Fixed to `export type { Tone }`. (`src/components/qq/shared/StatusBadge.tsx`)
+4. **Mobile footer overlap** — fixed bottom nav obscured the footer on mobile. Added `pb-20 md:pb-4` to the footer. (`src/components/qq/QuickQuidApp.tsx`)
+5. **resetData** now properly clears localStorage before resetting state (was leaving stale persisted data).
+
+**Styling polish (global):**
+- `globals.css`: Added custom slim scrollbars (`.scroll-area-thin`), stronger keyboard focus rings (`ring-2 ring-ring ring-offset-2`), zebra-striped data tables (`.qq-table`), card hover-lift utility (`.qq-card-hover`), reduced-motion media query, antialiased text rendering. (`src/app/globals.css`)
+- `StatusBadge`: Increased contrast — success/pending/warning/info now use `-100`/`-800`/`-300` shades (was `-50`/`-700`/`-200`). Critical tone is now **solid red-600 background with white text** (was light red) so breached/critical states grab attention. (`src/components/qq/shared/StatusBadge.tsx`)
+- `SectionCard` / `PageHeader`: Section titles now `font-bold tracking-tight` (was `font-semibold`); page H1 now `font-bold`. Stronger hierarchy.
+- `QueueTable`: Bolder uppercase table headers, zebra striping via `.qq-table`, more row padding (`py-3.5`), right/center alignment support via `align` prop, improved empty state with icon. (`src/components/qq/shared/QueueTable.tsx`)
+- `Sidebar`: Filled the void between nav and role switcher with a **role-aware trust panel** (Pro: "0% commission", Buyer: "14% beta Buyer fee", Admin: "Maker-checker"). Added "MENU" section label, active nav item now has `shadow-sm`, inactive items use `text-foreground/80`. Custom scrollbar on nav. (`src/components/qq/shell/Shell.tsx`)
+- `Header`: Replaced the plain search input with a **command-palette trigger button** showing "⌘K" hint. Added a **dark mode toggle** (sun/moon icon). Mobile gets a search icon button. (`src/components/qq/shell/Shell.tsx`)
+- `BriefCard` / `ProfileCard` / `ProposalCard`: Added `h-full` + hover-lift for equal-height grids. Card grids now use `items-stretch`. (`src/components/qq/shared/cards.tsx`, `BuyerScreens.tsx`)
+- New shared `AlertBanner` component with 4 tones (info/action/warning/critical), proper icon + title + body + actions layout, better padding (`px-4 py-3.5`). (`src/components/qq/shared/index.tsx`)
+- VLM-confirmed improvements: card height consistency, sidebar void filled, badge contrast, section header weight, financial alignment, alert padding all improved.
+
+**New features:**
+1. **Command palette (⌘K / Ctrl+K)** — Global keyboard shortcut opens a searchable dialog with grouped results: Navigate (role-aware screens), Briefs (jump to any brief), Contracts (jump to any contract), Switch role (demo — one-click sign-in as any of 6 demo users), Actions (toggle theme, normalize SLA, reset demo data, open support, back to role selection). Full keyboard nav (↑↓ to move, Enter to select, Esc to close). (`src/components/qq/shell/CommandPalette.tsx`)
+2. **Dark mode** — Theme toggle in header (sun/moon) + in AdminNotes. Persists to localStorage. `ThemeProvider` applies `.dark` class to `<html>`. All components already had `dark:` variants from shadcn, so the toggle activates them. (`src/lib/qq/store.ts`, `src/components/qq/shell/CommandPalette.tsx`, `Shell.tsx`)
+3. **Reset demo data** — Two-step confirm button in AdminNotes that clears localStorage and restores canonical seed data. (`src/lib/qq/store.ts`, `AdminScreens.tsx`)
+4. **Normalize SLA timestamps** — Shifts all queue item timestamps forward relative to "now" so SLA timers show realistic normal/approaching/breached states (was all "Breached" because seed dates were Jan 2025). Verified: after normalize, ops dashboard shows 2 normal, 2 approaching, 1 breached. Creates an audit event. (`src/lib/qq/store.ts`, `AdminScreens.tsx`)
+5. **Visitor marketplace browse** — "Browse the marketplace" button on the role-selection screen lets visitors explore a public Pro profile (Akhil Menon) without signing up. Renders fullscreen with Invite/Message/Save CTAs (sign-in prompted on action). (`RoleAuthScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/` (only pre-existing errors in skills/examples folders).
+- agent-browser end-to-end: role selection → buyer sign-in → dashboard → payment evidence → brief creation (fee calc ₹80,000 → ₹0 → ₹11,200 → ₹91,200 ✓) → pro switch → proposal submission (success, no nested-button warning) → finance payment verification → confirm payment (status → "payment confirmed", milestone funded) → ops dashboard. All clean, no console/runtime errors.
+- Command palette: ⌘K opens, shows grouped nav/briefs/contracts/roles/actions, search filters, keyboard nav works.
+- Dark mode: toggle applies `.dark` class, VLM-confirmed consistent application across sidebar/cards/footer.
+- Normalize SLA: verified SLA queue shifts from all-breached to realistic mix.
+- Visitor browse: navigates to public profile, renders correctly with back button.
+- VLM screenshot reviews confirmed styling improvements (card consistency, sidebar void filled, badge contrast, header weight, financial alignment, alert padding all improved).
+
+### Unresolved issues / risks + next-phase priorities
+1. **Dark mode active nav state** — In dark mode, the active sidebar item uses `bg-primary` which becomes near-white (shadcn dark theme default). This is intentional high-contrast but a reviewer flagged it as "breaking dark theme consistency". Could be refined to a subtler `bg-primary/20 text-primary` in dark mode if desired. **Priority: low** (cosmetic).
+2. **Warning banner text contrast in dark mode** — amber banner body text on amber-50 may be marginal in some dark-mode contexts. The `AlertBanner` uses `text-foreground/80` for body which is fine, but legacy inline banners in screen files (not yet migrated to `AlertBanner`) may vary. **Priority: medium** — migrate remaining inline alert banners to the shared `AlertBanner` component.
+3. **More seeded journey states** — still limited coverage for: Pro with payout failed, completed contract with double-blind review, v0.2 gig awaiting moderation. Partial coverage exists. **Priority: medium**.
+4. **Empty-state illustrations** — currently icon-only empty states. Could add lightweight SVG illustrations for polish. **Priority: low**.
+5. **Toast positioning on mobile** — toasts may overlap the bottom nav. **Priority: low**.
+6. **Seed date freshness** — normalizeSlaTimestamps must be run manually (or via command palette) to fix the "all breached" appearance. Consider auto-running on first hydration if dates are >60 days old. **Priority: medium**.
+
+### Recommended next-phase focus
+- Migrate remaining inline alert banners across buyer/pro/admin screens to the shared `AlertBanner` component for consistent dark-mode contrast.
+- Auto-normalize SLA timestamps on hydration if seed dates are stale.
+- Add 2-3 more seeded journey states (payout failed, completed+review, gig moderation) for richer demo paths.
+- Consider a "guided tour" overlay for first-time reviewers explaining the role switcher + command palette.

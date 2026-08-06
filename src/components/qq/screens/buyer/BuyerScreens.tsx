@@ -296,7 +296,7 @@ export function BuyerDashboard() {
             actions={<Button onClick={() => navigate("buyer_brief_new")}><Plus className="size-4" /> Post a brief</Button>}
           />
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
             {myBriefs.slice(0, 6).map((b) => (
               <BriefCard
                 key={b.id}

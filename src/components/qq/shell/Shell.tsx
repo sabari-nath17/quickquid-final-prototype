@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Briefcase, Users, FileText, Wallet, MessageSquare,
   ShieldCheck, Banknote, RefreshCcw, Scale, ScrollText, FileSearch,
   Bell, Search, HelpCircle, Menu, X, Home, ChevronDown, UserCog,
-  Sparkles, ClipboardList, ShieldAlert, ClipboardCheck,
+  Sparkles, ClipboardList, ShieldAlert, ClipboardCheck, Sun, Moon,
 } from "lucide-react";
 import type { Role, ViewName } from "@/lib/qq/types";
 import { useToast } from "@/hooks/use-toast";
@@ -103,7 +103,8 @@ export function Sidebar() {
           <Logo />
         </button>
       </div>
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto scroll-area-thin p-3 space-y-0.5">
+        <div className="px-3 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Menu</div>
         {items.map((item) => {
           const active = view === item.view;
           return (
@@ -112,7 +113,7 @@ export function Sidebar() {
               onClick={() => navigate(item.view)}
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted",
+                active ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground/80 hover:bg-muted hover:text-foreground",
               )}
             >
               <item.icon className="size-4" />
@@ -120,9 +121,26 @@ export function Sidebar() {
             </button>
           );
         })}
+        <SidebarTrustPanel role={currentRole} />
       </nav>
       <RoleSwitcher />
     </aside>
+  );
+}
+
+function SidebarTrustPanel({ role }: { role: Role }) {
+  const facts = role === "pro"
+    ? { title: "0% commission", body: "Keep 100% of your agreed fee." }
+    : role === "buyer"
+    ? { title: "14% beta Buyer fee", body: "Shown before payment. Manual verification." }
+    : { title: "Maker-checker", body: "All money actions are audited." };
+  return (
+    <div className="mt-4 mx-1 rounded-lg border border-border bg-muted/40 p-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+        <ShieldCheck className="size-3.5 text-emerald-600" /> {facts.title}
+      </div>
+      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{facts.body}</p>
+    </div>
   );
 }
 
@@ -222,25 +240,30 @@ function RoleSwitcher() {
 }
 
 export function Header() {
-  const { setNotificationDrawer, notifications, currentUserId, currentRole, navigate, setMobileSidebar, setSupportWidget } = useQQ();
+  const { setNotificationDrawer, notifications, currentUserId, currentRole, navigate, setMobileSidebar, setSupportWidget, toggleTheme, theme, setCommandOpen } = useQQ();
   const unread = notifications.filter((n) => !n.read && n.userId === currentUserId).length;
   const showSearch = currentRole !== "visitor";
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-4">
       <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileSidebar(true)}><Menu className="size-5" /></Button>
       {showSearch && (
-        <div className="relative hidden sm:flex flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <input
-            type="search"
-            placeholder="Search briefs, pros, contracts…"
-            className="w-full rounded-md border border-border bg-muted/30 pl-9 pr-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            onKeyDown={(e) => { if (e.key === "Enter") navigate(currentRole === "buyer" ? "buyer_talent" : "pro_briefs"); }}
-          />
-        </div>
+        <button
+          onClick={() => setCommandOpen(true)}
+          className="relative hidden sm:flex flex-1 max-w-md items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:border-primary/30 transition-colors"
+        >
+          <Search className="size-4" />
+          <span className="flex-1 text-left">Search or jump to…</span>
+          <kbd className="inline-flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">⌘K</kbd>
+        </button>
       )}
       <div className="flex-1 sm:hidden" />
       <div className="flex items-center gap-1">
+        {showSearch && (
+          <Button variant="ghost" size="icon" aria-label="Search" className="sm:hidden" onClick={() => setCommandOpen(true)}><Search className="size-5" /></Button>
+        )}
+        <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={toggleTheme} title="Toggle dark mode">
+          {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+        </Button>
         <Button variant="ghost" size="icon" aria-label="Help" onClick={() => setSupportWidget(true)}><HelpCircle className="size-5" /></Button>
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative" onClick={() => setNotificationDrawer(true)}>
           <Bell className="size-5" />

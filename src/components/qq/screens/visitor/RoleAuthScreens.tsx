@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, User, Mail, Linkedin, Chrome, ArrowRight, ArrowLeft, Loader2, ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
+import { Briefcase, User, Mail, Linkedin, Chrome, ArrowRight, ArrowLeft, Loader2, ShieldCheck, CheckCircle2, AlertCircle, Eye } from "lucide-react";
 import { useState } from "react";
 import type { Role } from "@/lib/qq/types";
 
@@ -158,11 +158,19 @@ export function RoleSelectionScreen() {
           )}
 
           {!intent && (
-            <div className="grid sm:grid-cols-3 gap-3 text-center">
-              <TrustStat icon={<ShieldCheck className="size-4" />} label="Identity reviewed" />
-              <TrustStat icon={<CheckCircle2 className="size-4" />} label="Manual payment verification" />
-              <TrustStat icon={<User className="size-4" />} label="0% Pro commission" />
-            </div>
+            <>
+              <div className="grid sm:grid-cols-3 gap-3 text-center">
+                <TrustStat icon={<ShieldCheck className="size-4" />} label="Identity reviewed" />
+                <TrustStat icon={<CheckCircle2 className="size-4" />} label="Manual payment verification" />
+                <TrustStat icon={<User className="size-4" />} label="0% Pro commission" />
+              </div>
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <span className="text-sm text-muted-foreground">Not ready to sign up?</span>
+                <Button variant="outline" size="sm" onClick={() => navigate("public_profile", { proId: "PRO-2088" })}>
+                  <Eye className="size-4" /> Browse the marketplace
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </main>

@@ -195,6 +195,7 @@ export function KycModal() {
 
   const user = users.find((u) => u.id === currentUserId);
   const existing = kyc.find((k) => k.userId === currentUserId);
+  const proProfile = proProfiles.find((p) => p.userId === currentUserId);
   const steps = ["Identity", "Professional details", "Payout details"];
 
   React.useEffect(() => {
@@ -202,7 +203,9 @@ export function KycModal() {
       setStep(0);
       if (existing) {
         setBeneficiary(existing.beneficiaryName);
-        setBankName(existing.bankName || "");
+      }
+      if (proProfile?.payoutDetails?.bankName) {
+        setBankName(proProfile.payoutDetails.bankName);
       }
     }
   }, [kycModalOpen]);

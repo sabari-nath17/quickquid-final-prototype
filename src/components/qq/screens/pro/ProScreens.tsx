@@ -227,10 +227,13 @@ export function ProDashboard() {
                   const m = statusMeta(c.status);
                   const fundingPending = c.milestones.some((ms) => ms.status === "funding_pending");
                   return (
-                    <button
+                    <div
                       key={c.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate("pro_contract", { contractId: c.id })}
-                      className="w-full text-left rounded-lg border border-border p-3 hover:shadow-md hover:border-primary/30 transition-all"
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("pro_contract", { contractId: c.id }); } }}
+                      className="w-full text-left rounded-lg border border-border bg-card p-3 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -253,9 +256,9 @@ export function ProDashboard() {
                         </div>
                       </div>
                       <div className="mt-2 flex items-center justify-end">
-                        <Button size="sm" variant="ghost">Open workroom <ArrowRight className="size-3.5" /></Button>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">Open workroom <ArrowRight className="size-3.5" /></span>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
