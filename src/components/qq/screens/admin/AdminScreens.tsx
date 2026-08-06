@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  PageHeader, SectionCard, EmptyState, MaskedField, SLATimer, AuditRow,
+  PageHeader, SectionCard, EmptyState, MaskedField, SLATimer, AuditRow, AlertBanner,
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { PermissionMatrix } from "@/components/qq/shared/EvidenceDropzone";
@@ -70,15 +70,13 @@ function canManageDeletionExport(r: Role) { return r === "risk" || r === "ops_ma
 
 function PermissionDenied({ action, allowedRoles }: { action: string; allowedRoles: Role[] }) {
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-3 flex items-start gap-2">
-      <Lock className="size-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
-      <div className="text-sm">
-        <div className="font-medium text-amber-800 dark:text-amber-300">Permission denied</div>
-        <p className="text-amber-700 dark:text-amber-400 mt-0.5">
-          {action} requires: {allowedRoles.map((r) => ROLE_LABELS[r]).join(" or ")}. Your current role cannot perform this action.
-        </p>
-      </div>
-    </div>
+    <AlertBanner
+      tone="warning"
+      icon={Lock}
+      title="Permission denied"
+    >
+      {action} requires: {allowedRoles.map((r) => ROLE_LABELS[r]).join(" or ")}. Your current role cannot perform this action.
+    </AlertBanner>
   );
 }
 

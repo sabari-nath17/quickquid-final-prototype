@@ -511,3 +511,43 @@ The prototype was stable after Round 7 (Pro activity timeline, fuller gigs feed,
 - Add a 6th live gig or adjust the gigs grid layout.
 - Consider adding real base64 image upload for portfolio items.
 - Add more seeded contract lifecycle states (e.g., a contract with an active dispute, a contract in the revision cycle).
+
+---
+
+## Cron Review Round 9 — Select Audit, Seeded Lifecycle States, 6th Gig, Admin AlertBanner
+
+### Current project status assessment
+The prototype was stable after Round 8 (ProProfile crash fix, AlertBanner migration, 5th gig). This round focused on: (1) auditing all Select components for empty string values (the Radix crash risk that broke ProProfile), (2) adding richer seeded contract lifecycle states (active work in review + revision cycle), (3) adding a 6th live gig to complete the 3-column grid, and (4) migrating the admin PermissionDenied component to AlertBanner.
+
+### Completed modifications
+
+**QA audit:**
+1. **Select component empty-value audit** — Searched all `SelectItem value=""` and `Select value=…?? ""` patterns across `src/components/qq/`. Found 0 remaining empty-string SelectItem values (the ProProfile secondary category was the only one, already fixed in Round 8). All Select components are now safe from the Radix empty-value crash. (`src/components/qq/` — full audit)
+
+**New seeded data:**
+2. **Active contract with milestone in review (QQ-0710)** — Verdant Retail ↔ Rahul Verma, "Brand identity for new retail sub-brand", ₹45,000, 3 milestones. M1 accepted, M2 "Color + type system" is `in_review` (Pro submitted v1, Buyer reviewing), M3 not started. Contract status `active`. Demonstrates the "ongoing work, awaiting buyer review" lifecycle state. (`src/lib/qq/seed.ts`)
+3. **Active contract with revision cycle (QQ-0725)** — Northstar Labs ↔ Priya Nair, "Dashboard redesign", ₹70,000, 3 milestones. M1 accepted, M2 "Hi-fi designs" is `rejected` with 2 versions (v1 rejected "missing filter states", v2 "in_review" with "added filter states + empty states"). Demonstrates the revision cycle — Pro submitted, Buyer rejected with feedback, Pro resubmitted v2. (`src/lib/qq/seed.ts`)
+4. **6th live gig (GIG-3011)** — Sara Khan, "User research interviews (10 participants)", ₹40,000, UX Research, 127 views, 5 requests, 4.6★, violet cover. The buyer gigs feed now shows 6 live gigs (2 full rows of 3). VLM-confirmed: "6 cards in 3-column grid, 2 full rows, distinct colors, no empty space." (`src/lib/qq/seed.ts`)
+
+**Styling polish:**
+5. **Admin PermissionDenied → AlertBanner** — Migrated the inline `<div className="border-amber-200 bg-amber-50…">` PermissionDenied component to the shared `AlertBanner` (tone="warning", icon=Lock, title="Permission denied"). Consistent dark-mode styling across all admin permission-denied states. (`src/components/qq/screens/admin/AdminScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Buyer → Talent → Gigs tab shows 6 live gigs (VLM-confirmed: "6 cards, 2 full rows, distinct colors, no empty space"). Buyer dashboard shows QQ-0725 "Dashboard redesign" (the new revision-cycle contract). Ops dashboard loads without errors. All 3 roles (buyer, pro, ops) load without crashes or console errors.
+- VLM screenshot review confirmed the 6-gig grid: "exactly 6 gig cards in 3-column grid with 2 full rows, distinct cover colors, no empty space."
+
+### Unresolved issues / risks + next-phase priorities
+1. **Remaining admin inline banners** — A few admin screens still have inline amber/red banners (KYC risk flag, chargeback, cheque bounce). Could migrate them to AlertBanner for full consistency. **Priority: low**.
+2. **Real image upload** — Review images and portfolio items still use color gradients. **Priority: low** (prototype limitation).
+3. **Help FAB still slightly overlaps** — VLM noted the Help button "slightly overlaps the edge" of the 3rd gig card. Could add right padding to the gigs grid or move the FAB further down. **Priority: low**.
+4. **More seeded reviews** — The new contracts (QQ-0710, QQ-0725) don't have reviews yet (they're active). Could add reviews for the completed QQ-0680 contract (already has 2). **Priority: low**.
+5. **Pro dashboard for Priya/Rahul** — The role switcher only includes Akhil (PRO-2088) as the demo Pro. Priya and Rahul have contracts but aren't in the switcher. Could add them. **Priority: low**.
+
+### Recommended next-phase focus
+- Migrate remaining admin inline amber/red banners to AlertBanner.
+- Add right padding to gigs grid or adjust Help FAB position to avoid overlap.
+- Add Priya Nair and Rahul Verma to the demo role switcher for richer Pro testing.
+- Add more reviews to the completed QQ-0680 contract (e.g., a 4-star review with images).
+- Consider adding a contract with an active dispute (currently DSP-7001 is on QQ-0650 which isn't in the buyer/pro contract lists).
