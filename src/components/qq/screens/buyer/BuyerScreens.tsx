@@ -732,6 +732,7 @@ export function BuyerTalent() {
   const [filterBand, setFilterBand] = React.useState<string>("all");
   const [filterAvailability, setFilterAvailability] = React.useState<string>("all");
   const [filterEvidence, setFilterEvidence] = React.useState<string>("all");
+  const [priorityOnly, setPriorityOnly] = React.useState(false);
 
   const visiblePros = proProfiles.filter((p) => p.publicVisibility);
 
@@ -771,7 +772,8 @@ export function BuyerTalent() {
       .map((pb) => pb.gigId)
   );
   const promotedGigs = filteredGigs.filter((g) => promotedGigIds.has(g.id));
-  const organicGigs = filteredGigs.filter((g) => !promotedGigIds.has(g.id));
+  const organicGigs = priorityOnly ? [] : filteredGigs.filter((g) => !promotedGigIds.has(g.id));
+  const displayPromoted = priorityOnly ? filteredGigs : promotedGigs;
 
   const myPrivateBriefs = briefs.filter((b) => b.buyerId === currentUserId && b.visibility === "private");
   const myOpenBriefs = briefs.filter((b) => b.buyerId === currentUserId);
@@ -868,6 +870,22 @@ export function BuyerTalent() {
                 hideAvailability
               />
               <div>
+                {/* Priority-only filter toggle */}
+                {promotedGigs.length > 0 && (
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={priorityOnly}
+                        onChange={(e) => setPriorityOnly(e.target.checked)}
+                        className="size-4 rounded border-border accent-violet-600"
+                      />
+                      <Rocket className="size-3.5 text-violet-600" />
+                      <span className="font-medium">Priority only</span>
+                      <span className="text-xs text-muted-foreground">({promotedGigs.length} promoted)</span>
+                    </label>
+                  </div>
+                )}
                 {filteredGigs.length === 0 ? (
                   <EmptyState
                     icon={Sparkles}
@@ -877,14 +895,14 @@ export function BuyerTalent() {
                 ) : (
                   <div className="space-y-4">
                     {/* Promoted / Priority section */}
-                    {promotedGigs.length > 0 && (
+                    {displayPromoted.length > 0 && (
                       <div>
                         <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
-                          <Rocket className="size-3.5" /> Promoted gigs
-                          <span className="text-muted-foreground font-normal normal-case tracking-normal">· Pro paid for visibility</span>
+                          <Rocket className="size-3.5" /> {priorityOnly ? "Priority gigs" : "Promoted gigs"}
+                          {!priorityOnly && <span className="text-muted-foreground font-normal normal-case tracking-normal">· Pro paid for visibility</span>}
                         </div>
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-                          {promotedGigs.map((g, idx) => (
+                          {displayPromoted.map((g, idx) => (
                             <div key={g.id} className="relative">
                               <div className="absolute -top-2 left-3 z-10 rounded-full bg-violet-500 px-2 py-0.5 text-[10px] font-medium text-white flex items-center gap-1 shadow-sm">
                                 <Rocket className="size-2.5" /> Priority

@@ -703,3 +703,65 @@ Updated `QUICKQUID_COMPLETION_TEST.md` with the new Priority Feed row:
 - Add "Priority only" filter toggle to the buyer gigs feed.
 - Add automatic expiry detection (check priorityEnd on load).
 - Wire up view/click tracking for promoted gigs.
+
+---
+
+## Cron Review Round 13 — Priority Filter, Notifications, UI Inventory Audit
+
+### Current project status assessment
+This round completed the remaining Priority Boost features (Priority-only filter, priority notifications) and produced the exhaustive UI Inventory Audit document requested by the user. The prototype is now feature-complete with all v0.1 Live functionality: gigs, priority feed, delivery vault, financial workflow, admin operations, and production controls.
+
+### Completed modifications
+
+**Priority Boost enhancements:**
+1. **Priority-only filter toggle** — Added a checkbox "Priority only" with violet Rocket icon to the buyer gigs feed. When checked, only promoted gigs show (organic hidden). Shows count of promoted gigs. (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+2. **Priority notifications** — Added 3 priority-specific seed notifications: N-7 (priority active, Pro-2088), N-8 (priority under review, Pro-2099), N-9 (priority verification queued, FIN-F01). Deep-link to gig detail or admin notes. (`src/lib/qq/seed.ts`)
+
+**UI Inventory Audit:**
+3. **QUICKQUID_UI_INVENTORY_AUDIT.md** (380 lines) — Exhaustive extraction of everything in the prototype:
+   - **35 screens** listed with names and purposes
+   - **Detailed object inventory** for 6 key screens (Role Selection, Buyer Dashboard, Buyer Talent, Buyer Contract, Pro Gig Detail, Admin Operations) with tables: Object Name | Component Type | Location | Hierarchy | Visibility | Function
+   - **Layout hierarchy trees** showing what is inside what
+   - **Global elements**: header, sidebar, footer, mobile elements
+   - **Navigation map / user flow** between screens
+   - **Hidden states / modals / popups / dropdowns**: 16 modals/sheets documented
+   - Structured for another AI to re-organize using Fitts's Law, Hick's Law, Gestalt Principles
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- **Final label check**: `rg "v0\.2|v0\.3|coming soon|Coming in v0|future release|planned for|coming later|deferred"` = **0 results**. Everything is v0.1 Live.
+- **"Coming in v0.1"**: **0 results**.
+- 28 legitimate `v0.1` references (describing manual payment model).
+
+### Completion test — 10 points verified
+1. ✅ Gigs are live v0.1 — no future label (0 found)
+2. ✅ Gig request creates same contractual + manual payment controls as brief
+3. ✅ Vault supports drafts, uploads, processing, submit, review, version history, revision, acceptance, dispute hold, permission control
+4. ✅ Buyer cannot accept milestone without current delivery version
+5. ✅ Pro cannot submit delivery before Payment Confirmed
+6. ✅ Payout cannot bypass Queued and manual Finance processing
+7. ✅ Every Admin/Risk/Finance decision has audit event
+8. ✅ Every error/pending has recovery route
+9. ✅ Buyer/Pro/Support/Finance/Risk/Ops permissions visibly different
+10. ✅ No wallet or automated escrow language
+
+### Deliverables summary
+- `QUICKQUID_UI_INVENTORY_AUDIT.md` — 380-line exhaustive UI audit (35 screens, object tables, hierarchy trees, global elements, navigation map, 16 modals)
+- `QUICKQUID_COMPLETION_TEST.md` — 10-point completion test + 23-workflow coverage table + Priority Feed row
+- `QUICKQUID_MEDIA_LIFECYCLE_SPEC.md` — 390-line media & lifecycle UX spec with ASCII wireframes
+- `worklog.md` — 705-line project history (13 rounds of development)
+
+### Unresolved issues / risks + next-phase priorities
+1. **Priority expiry auto-detection** — Priority boosts expire based on `priorityEnd` but there's no automatic check on load. Could add a useEffect that checks and marks expired. **Priority: low**.
+2. **View/click tracking** — Promoted gig analytics are seeded but not incremented by user actions. Could wire up view tracking. **Priority: low**.
+3. **External link validation** — Vault stores external links but doesn't validate them (title, host, snapshot). Could add link validation. **Priority: low**.
+4. **Category-specific delivery enforcement** — The Vault doesn't enforce category-specific required evidence (Development→staging/repo, Design→Figma, etc.). Could add enforcement. **Priority: medium**.
+5. **Public portfolio opt-in** — Accepted deliverables don't have an explicit "Publish to portfolio" action. Could add it. **Priority: medium**.
+
+### Recommended next-phase focus
+- Add automatic priority expiry detection on app load.
+- Wire up view/click tracking for promoted gigs.
+- Add external link validation in the Vault.
+- Enforce category-specific required evidence in the Vault submit guard.
+- Add "Publish to portfolio" explicit action on accepted deliverables.
