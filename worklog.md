@@ -870,3 +870,48 @@ The user reported: (1) "No active contracts" / "Messaging is locked" error on th
 - Add real preview images to Vault deliverable file rows.
 - Add more proposals/contracts for Priya and Rahul.
 - Consider a dedicated Pro messages conversation picker screen.
+
+---
+
+## Cron Review Round 16 — 4 Demo Workflows with Rich Messages, Pro Contract Picker
+
+### Current project status assessment
+The user wanted 4 distinct demo workflow stages in the messaging panel, each hitting a different work status: (1) early conversation, (2) mid-milestone, (3) completed + review, (4) dispute (2 different issues). These needed to work from both the buyer and Pro sides. The Pro "Messages" nav item also showed "Contract not found" when no contractId was passed.
+
+### Completed modifications
+
+**New contracts (2):**
+1. **QQ-0730 — Mid-milestone (active work)** — Northstar Labs ↔ Akhil Menon, "UX research for partner portal - 12 interviews", ₹60,000, 3 milestones. M1 accepted (script + recruitment), M2 `in_review` (journey map v1 submitted, Buyer asking about insights), M3 not started. Status `active`. Demonstrates the "Pro submitted deliverable, Buyer reviewing and asking questions" workflow.
+2. **QQ-0735 — Dispute 2 (communication + timeline)** — Northstar Labs ↔ Akhil Menon, "Private: Design ops audit (invite only)", ₹35,000, 1 milestone (accepted but disputed). Pro delivered 5 days late, missing governance section, unresponsive for 3 days. Status `disputed`. Demonstrates the "communication breakdown + timeline breach" dispute type. (`src/lib/qq/seed.ts`)
+
+**New dispute:**
+3. **DSP-7003 — Communication + timeline dispute** on QQ-0735. Buyer raised: "audit delivered 5 days late, missing governance section, Pro unresponsive for 3 days." Pro counterclaim: "delay due to Buyer not providing access until day 4, governance section was verbal not written." Category `communication`. (`src/lib/qq/seed.ts`)
+
+**New payment evidence (2):**
+4. **PAY-0730** — M1 payment confirmed for QQ-0730 (₹20,000, UTR, confirmed).
+5. **PAY-0735** — M1 payment confirmed for QQ-0735 (₹35,000, UTR, confirmed). (`src/lib/qq/seed.ts`)
+
+**Rich messages (35 total across 5 contracts):**
+6. **4 distinct workflow conversations:**
+   - **QQ-0892 (Early conversation, 6 messages):** Buyer submitting payment, asking about kickoff format, Pro requesting staging access and research. Status: funding pending, Pro can't start yet.
+   - **QQ-0730 (Mid-milestone, 7 messages):** Pro confirmed 12 participants, Buyer requesting enterprise/SMB mix, Pro uploaded journey map v1 to Vault, Buyer asking about specific insights, Pro annotating. Status: active work, M2 in review.
+   - **QQ-0680 (Completed + review, 5 messages):** System announces completion + payout, Buyer praises work, Pro thanks, Buyer proposes rehire, Pro accepts. Status: completed, reviews exchanged.
+   - **QQ-0725 (Dispute 1 - scope, 9 messages):** Active work → Pro delivers v1 → Buyer notices missing filter states → Pro says it's extra → Buyer raises dispute. Status: disputed, chat paused.
+   - **QQ-0735 (Dispute 2 - communication, 8 messages):** Pro requests access → Buyer shares + mentions governance → Pro goes quiet → Buyer chases → Buyer raises dispute. Status: disputed, chat paused. (`src/lib/qq/store.ts`)
+
+**Bug fix:**
+7. **Pro "Messages" → Contract not found** — The Pro sidebar "Messages" nav item navigated to `pro_contract` without a contractId, showing "Contract not found." Fixed by adding a contract picker: when no contractId is provided, the ProContract screen shows a list of the Pro's contracts with status badges, current milestone, and fee. Click a contract → opens the workroom. Verified: shows "Your contracts" with QQ-0892, QQ-0680, QQ-0730, QQ-0735. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser: Buyer → Messages → dropdown shows 5 contracts. Selecting QQ-0730 shows mid-milestone conversation (interviews, journey map, insights). Selecting QQ-0735 shows dispute conversation (5 days late, governance, unresponsive). Pro → Messages → shows "Your contracts" picker (no "Contract not found"). Clicking QQ-0730 opens workroom with messages. No console/runtime errors.
+
+### Demo workflow summary
+| # | Contract | Workflow Stage | Messages | Buyer sees | Pro sees |
+|---|---|---|---|---|---|
+| 1 | QQ-0892 | Early conversation (funding pending) | 6 | "Submit payment" banner, convo about kickoff | "Do not begin work" warning, same convo |
+| 2 | QQ-0730 | Mid-milestone (active, M2 in review) | 7 | Vault v1 submitted, asking about insights | Deliverable uploaded, awaiting feedback |
+| 3 | QQ-0680 | Completed + review | 5 | Completion summary, review, rehire offer | Payout processed, review, rehire accepted |
+| 4a | QQ-0725 | Dispute 1 (scope) | 9 | Missing filter states → dispute | Scope disagreement → dispute |
+| 4b | QQ-0735 | Dispute 2 (communication) | 8 | Late delivery + unresponsive → dispute | Access delay + verbal vs written → counterclaim |

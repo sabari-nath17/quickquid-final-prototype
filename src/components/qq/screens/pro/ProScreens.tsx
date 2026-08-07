@@ -1534,6 +1534,61 @@ export function ProContract() {
   const contract = contracts.find((c) => c.id === viewParams.contractId);
   const [tab, setTab] = React.useState("overview");
 
+  // If no contractId, show a contract picker (Pro Messages entry point)
+  if (!viewParams.contractId) {
+    const myContracts = contracts.filter((c) => c.proId === currentUserId);
+    if (myContracts.length === 0) {
+      return (
+        <EmptyState
+          icon={FileWarning}
+          title="No contracts yet"
+          description="You'll see contracts here once a Buyer accepts your proposal."
+          actions={<Button onClick={() => navigate("pro_briefs")}>Browse briefs</Button>}
+        />
+      );
+    }
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Your contracts" description="Select a contract to open its workroom and messages." />
+        <div className="space-y-2">
+          {myContracts.map((c) => {
+            const meta = statusMeta(c.status);
+            const cm = c.milestones.find((m) => m.id === c.currentMilestoneId) ?? c.milestones[0];
+            return (
+              <div
+                key={c.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate("pro_contract", { contractId: c.id })}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("pro_contract", { contractId: c.id }); } }}
+                className="w-full text-left rounded-lg border border-border bg-card p-3 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-medium truncate">{c.briefTitle}</h3>
+                      <StatusBadge tone={meta.tone} icon={false}>{meta.label}</StatusBadge>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Buyer · {c.buyerName} · Contract <span className="font-mono">{c.id}</span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Current milestone · <span className="font-medium text-foreground">{cm?.label ?? "—"}</span> ({cm ? formatINR(cm.proFee) : "—"})
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-xs text-muted-foreground">Pro fee</div>
+                    <div className="font-semibold tabular-nums">{formatINR(c.totalProFee)}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   if (!contract) {
     return (
       <EmptyState
