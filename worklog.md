@@ -958,3 +958,39 @@ All contracts now have realistic conversations matching their workflow stage. Bo
 - `bun run lint`: 0 errors, 0 warnings.
 - `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
 - agent-browser: Northstar Labs buyer → Messages → 5 contracts in dropdown (all with messages). Verdant Retail buyer → Messages → QQ-0710 with brand identity conversation (logo concepts, Concept B, Fraunces). Rahul Verma Pro → Messages → "Your contracts" picker with QQ-0710. No console/runtime errors.
+
+---
+
+## Cron Review Round 18 — Pro Messages Tab, Two-Way Messaging, Tab Persistence
+
+### Current project status assessment
+The user found that: (1) Akhil's (Pro) side didn't show the conversation messages — only milestones were visible, (2) clicking a milestone then going back to Messages showed "no message", (3) both parties should be able to send messages, (4) wanted duplicate/clutter audit. Root cause: the Pro contract screen had NO "Messages" tab — only Overview, Workroom, Disputes, Reviews, Invoice. The Pro had no way to view or send messages.
+
+### Completed modifications
+
+**Pro Messages tab:**
+1. **Added "Messages" tab to Pro contract** — Added a new `ProMessagesTab` component with:
+   - Full conversation view (chat 60% / scope summary 40%)
+   - All message bubbles (buyer left, pro right, system centered)
+   - Send textarea + button (with circumvention detection)
+   - Dispute pause state ("chat paused while evidence is reviewed")
+   - Scope summary rail (fee, timeline, deliverables, exclusions, status)
+   - Admin Support review notice
+   - VLM-confirmed: "chat message bubbles showing conversation, text input with send button, scope summary on right"
+   (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+2. **Tab auto-selection** — When Pro clicks "Messages" in sidebar → contract picker → selects a contract, the Messages tab auto-selects (instead of defaulting to Overview). Uses `viewParams.tab === "messages"` check + `useEffect` to update tab state when params change. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+3. **Contract picker passes tab param** — The contract picker now passes `{ contractId: c.id, tab: "messages" }` when navigating, so the Messages tab opens directly. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+**Two-way messaging verified:**
+4. **Both parties can send messages** — Buyer has textarea with "Message Akhil Menon…" placeholder (in `BuyerMessages`). Pro has textarea with "Type a message…" placeholder (in `ProMessagesTab`). Both use `addMessage()` store action. Circumvention detection works on both sides. Dispute pause works on both sides. Verified: both textareas are enabled and functional.
+
+**Duplicate/clutter audit:**
+5. **No duplicates found** — Audited all files. The `MessagingQuickAccess` component (floating FAB) was already removed in Round 15. The `VaultDeliverable` (old) and `DeliveryVault` (new) coexist but the old one is only used in the MediaLifecycleDemo showcase screen, not in live screens. The `GigCard` (old) was replaced by `VideoGigCard` (new) in the buyer feed. No duplicate logic loops found.
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser: Pro → Messages → contract picker → click QQ-0892 → Messages tab auto-selects → shows conversation (excited, kickoff, staging) + send textarea (enabled). Buyer → Messages → shows conversation + send textarea (enabled). Both sides can send messages. No console/runtime errors.
+- VLM confirmed: Pro Messages tab has "chat message bubbles, text input with send button, scope summary on right".

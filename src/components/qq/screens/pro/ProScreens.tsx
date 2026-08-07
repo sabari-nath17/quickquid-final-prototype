@@ -1532,7 +1532,12 @@ export function ProContract() {
   const { viewParams, contracts, navigate, updateContract, addMessage, addAudit, currentUserId, disputes, openDispute, reviews, addReview, updateReview, updateMilestone } = useQQ();
   const { toast } = useToast();
   const contract = contracts.find((c) => c.id === viewParams.contractId);
-  const [tab, setTab] = React.useState("overview");
+  const [tab, setTab] = React.useState(viewParams.tab === "messages" ? "messages" : "overview");
+
+  // Update tab when viewParams change (e.g., from contract picker)
+  React.useEffect(() => {
+    if (viewParams.tab === "messages") setTab("messages");
+  }, [viewParams.tab]);
 
   // If no contractId, show a contract picker (Pro Messages entry point)
   if (!viewParams.contractId) {
@@ -1559,8 +1564,8 @@ export function ProContract() {
                 key={c.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => navigate("pro_contract", { contractId: c.id })}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("pro_contract", { contractId: c.id }); } }}
+                onClick={() => navigate("pro_contract", { contractId: c.id, tab: "messages" })}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("pro_contract", { contractId: c.id, tab: "messages" }); } }}
                 className="w-full text-left rounded-lg border border-border bg-card p-3 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -1658,6 +1663,7 @@ export function ProContract() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="workroom">Workroom</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="disputes">Disputes {contractDisputes.length > 0 && `(${contractDisputes.length})`}</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="invoice">Invoice & tax</TabsTrigger>
@@ -1725,6 +1731,10 @@ export function ProContract() {
 
         <TabsContent value="workroom" className="space-y-4">
           <WorkroomTab contract={contract} currentMilestone={currentMilestone} />
+        </TabsContent>
+
+        <TabsContent value="messages" className="space-y-4">
+          <ProMessagesTab contract={contract} />
         </TabsContent>
 
         <TabsContent value="disputes" className="space-y-4">
@@ -2175,6 +2185,152 @@ function VersionDrawer({ milestone, onOpenChange }: { milestone: Milestone | nul
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// ===== Pro Messages Tab — full conversation with send capability =====
+function ProMessagesTab({ contract }: { contract: Contract }) {
+  const { messages, addMessage, currentUserId, users, navigate } = useQQ();
+  const { toast } = useToast();
+  const [draft, setDraft] = React.useState("");
+  const [circumventionWarning, setCircumventionWarning] = React.useState<string[] | null>(null);
+  const contractMsgs = messages.filter((m) => m.contractId === contract.id).sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  const buyer = users.find((u) => u.id === contract.buyerId);
+  const disputeActive = contract.status === "disputed";
+
+  function send() {
+    if (!draft.trim()) return;
+    const flags = detectCircumvention(draft);
+    if (flags.length > 0) {
+      setCircumventionWarning(flags);
+      return;
+    }
+    addMessage({
+      id: genId("MSG"),
+      contractId: contract.id,
+      from: "pro",
+      fromName: contract.proName,
+      text: draft.trim(),
+      at: new Date().toISOString(),
+    });
+    setDraft("");
+    toast({ title: "Message sent" });
+  }
+
+  return (
+    <div className="grid lg:grid-cols-[60%_40%] gap-4">
+      {/* Chat */}
+      <Card className="flex flex-col h-[600px]">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div>
+            <div className="text-sm font-medium">{contract.briefTitle}</div>
+            <div className="text-xs text-muted-foreground">with {contract.buyerName} · {contract.id}</div>
+          </div>
+          <StatusBadge tone={disputeActive ? "critical" : "success"} icon={false}>{disputeActive ? "Dispute — chat paused" : "Active"}</StatusBadge>
+        </div>
+
+        <div className="flex-1 overflow-y-auto scroll-area-thin p-4 space-y-3">
+          {contractMsgs.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-8">No messages yet. Start the conversation below.</div>
+          ) : (
+            contractMsgs.map((m) => {
+              const isPro = m.from === "pro";
+              const isSystem = m.from === "system";
+              if (isSystem) {
+                return (
+                  <div key={m.id} className="flex justify-center">
+                    <div className="rounded-md bg-muted px-3 py-1.5 text-xs text-muted-foreground text-center max-w-md">
+                      {m.text}
+                      <div className="text-[10px] mt-0.5 opacity-70">{new Date(m.at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div key={m.id} className={cn("flex", isPro ? "justify-end" : "justify-start")}>
+                  <div className={cn("max-w-[75%] rounded-lg px-3 py-2 text-sm", isPro ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                    <div className="text-[10px] font-medium mb-0.5 opacity-80">{m.fromName}</div>
+                    <p>{m.text}</p>
+                    <div className={cn("text-[10px] mt-1 opacity-60")}>{new Date(m.at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Send area */}
+        <div className="border-t border-border p-3">
+          {disputeActive ? (
+            <div className="rounded-md border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 p-3 text-xs text-red-800 dark:text-red-300 flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>This contract is under dispute. Direct chat is paused while evidence is reviewed.</span>
+            </div>
+          ) : (
+            <>
+              {circumventionWarning && (
+                <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-300">
+                  <AlertTriangle className="size-3.5 inline mr-1" />
+                  Detected: {circumventionWarning.join(", ")}. Please keep payment and contract communication on QuickQuid until the contract is active.
+                  <div className="mt-2 flex gap-2">
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setDraft(""); setCircumventionWarning(null); }}>Edit message</Button>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate("support")}>Report false positive</Button>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <textarea
+                  className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary resize-none"
+                  rows={2}
+                  placeholder="Type a message…"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } }}
+                />
+                <Button onClick={send} disabled={!draft.trim()}><Send className="size-4" /></Button>
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">Max 25MB · executables blocked · phone, email, and payment links are blocked until the contract is active.</p>
+            </>
+          )}
+        </div>
+      </Card>
+
+      {/* Scope summary */}
+      <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+        <SectionCard title="Brief & scope summary" description="Immutable reference. Locked for the contract.">
+          <div className="space-y-3 text-sm">
+            <div>
+              <div className="text-xs text-muted-foreground">Fee</div>
+              <div className="font-medium">{formatINR(contract.totalProFee)} · 0% commission</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Timeline</div>
+              <div className="font-medium">{contract.timeline}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Deliverables</div>
+              <div className="font-medium">{contract.scope}</div>
+            </div>
+            {contract.exclusions.length > 0 && (
+              <div>
+                <div className="text-xs text-muted-foreground">Exclusions</div>
+                <ul className="mt-0.5 space-y-0.5">
+                  {contract.exclusions.map((e) => <li key={e} className="flex items-start gap-1.5"><XCircle className="size-3.5 mt-0.5 text-muted-foreground" /> {e}</li>)}
+                </ul>
+              </div>
+            )}
+            <div>
+              <div className="text-xs text-muted-foreground">Status</div>
+              <StatusBadge tone={statusMeta(contract.status).tone}>{statusMeta(contract.status).label}</StatusBadge>
+            </div>
+          </div>
+        </SectionCard>
+        <div className="rounded-md border border-sky-200 bg-sky-50 dark:bg-sky-950/30 dark:border-sky-800 p-3 text-xs text-sky-800 dark:text-sky-300 flex items-start gap-2">
+          <Info className="size-3.5 mt-0.5 shrink-0" />
+          <span>Admin Support may review this workspace if a dispute is filed.</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
