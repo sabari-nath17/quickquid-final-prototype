@@ -39,6 +39,8 @@ import {
   PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline,
 } from "@/components/qq/shared";
 import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
+import { DeliveryVault } from "@/components/qq/shared/DeliveryVault";
+import type { VaultItem as VaultItemType, VaultState as VaultStateType } from "@/lib/qq/types";
 import { PortfolioGallery } from "@/components/qq/shared/PortfolioGallery";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
@@ -1734,7 +1736,7 @@ function AcceptDeclineCard({ onAccept, onDecline, onCounter, totalProFee }: {
 }
 
 function WorkroomTab({ contract, currentMilestone }: { contract: Contract; currentMilestone?: Milestone }) {
-  const { updateMilestone, addMessage, currentUserId, addAudit } = useQQ();
+  const { updateMilestone, addMessage, currentUserId, addAudit, navigate } = useQQ();
   const { toast } = useToast();
   const [activeMilestoneId, setActiveMilestoneId] = React.useState(currentMilestone?.id ?? contract.milestones[0]?.id);
   const [submitOpen, setSubmitOpen] = React.useState(false);
@@ -1902,27 +1904,58 @@ function WorkroomTab({ contract, currentMilestone }: { contract: Contract; curre
               </div>
             )}
 
-            {/* Rich Vault deliverable view — shows watermarked/locked → unlocked transition */}
-            {ms.versions.length > 0 && (() => {
-              const vaultState: VaultState = ms.status === "funding_pending" || ms.status === "not_started" ? "locked"
-                : ms.status === "accepted" || ms.status === "payout_queued" || ms.status === "payout_processed" ? "unlocked"
-                : "reviewable";
-              const vaultFiles: VaultFile[] = ms.versions.map((v) => ({
-                id: v.id,
-                name: v.link.includes(".") ? v.link.split("/").pop() || v.link : `${ms.label}_v${v.version}`,
-                type: v.link.includes("figma") ? "figma" as const : v.link.includes("github") ? "link" as const : v.link.endsWith(".pdf") ? "pdf" as const : v.link.endsWith(".zip") ? "zip" as const : "image" as const,
-                size: "—",
-                url: v.link,
-                thumbColor: "#7C3AED",
+            {/* Production Delivery Vault — authoritative record of work submitted */}
+            {(() => {
+              const paymentConfirmed = ms.status !== "funding_pending" && ms.status !== "not_started";
+              const disputeActive = contract.status === "disputed";
+              const vaultState: VaultStateType = disputeActive ? "disputed"
+                : ms.versions.length === 0 ? "empty"
+                : ms.status === "accepted" || ms.status === "payout_queued" || ms.status === "payout_processed" ? "accepted"
+                : ms.versions.some(v => v.status === "rejected") && ms.versions[ms.versions.length - 1]?.status === "in_review" ? "resubmitted"
+                : ms.versions[ms.versions.length - 1]?.status === "in_review" ? "submitted_for_review"
+                : ms.versions[ms.versions.length - 1]?.status === "rejected" ? "revision_requested"
+                : "draft_upload";
+
+              const vaultItems: VaultItemType[] = ms.versions.map((v, idx) => ({
+                vault_item_id: v.id,
+                contract_id: contract.id,
+                milestone_id: ms.id,
+                submitted_by: "pro",
+                submitted_at: v.timestamp,
+                version_number: v.version,
+                asset_type: v.link.includes("figma") ? "design_link" : v.link.includes("github") ? "repository" : v.link.includes("notion") ? "document_link" : "file",
+                file_name_or_link_title: v.link.split("/").pop() || v.link,
+                content_type: v.link.includes("figma") ? "Figma design" : v.link.includes("github") ? "Git repository" : v.link.includes("notion") ? "Notion doc" : "File",
+                source_type: v.link.includes("figma") ? "design_link" : v.link.includes("github") ? "repository" : v.link.includes("notion") ? "document_link" : "file",
+                preview_status: "ready",
+                scan_status: "clean",
+                access_policy: "contract_parties",
+                submission_note: v.changeNote,
+                review_status: v.status === "accepted" ? "accepted" : v.status === "rejected" ? "rejected" : v.status === "in_review" ? "in_review" : "submitted",
+                revision_reason: v.status === "rejected" ? "Revision requested — see change note" : undefined,
+                replaces_vault_item_id: idx > 0 ? ms.versions[idx - 1].id : undefined,
+                retention_hold_status: disputeActive ? "active" : "none",
+                activity_log: [{ action: `v${v.version} submitted`, by: "pro", at: v.timestamp, note: v.changeNote }],
               }));
+
+              const currentVersion = vaultItems[vaultItems.length - 1];
+
               return (
                 <div className="mt-3">
-                  <VaultDeliverable
+                  <DeliveryVault
+                    contractId={contract.id}
+                    milestoneId={ms.id}
                     milestoneLabel={ms.label}
                     milestoneDescription={ms.description}
-                    state={vaultState}
-                    files={vaultFiles}
                     proFee={ms.proFee}
+                    state={vaultState}
+                    items={vaultItems}
+                    currentVersion={currentVersion}
+                    acceptanceCriteria={ms.acceptanceCriteria}
+                    userRole="pro"
+                    paymentConfirmed={paymentConfirmed}
+                    disputeActive={disputeActive}
+                    onContactSupport={() => navigate("support")}
                   />
                 </div>
               );
@@ -2645,12 +2678,9 @@ export function ProGigs() {
       <PageHeader
         title="Gigs"
         description="Gigs are fixed-scope services Buyers can order directly. 0% QuickQuid commission from your fee."
-        status={<StatusBadge tone="info" icon>Coming in v0.2</StatusBadge>}
       >
         <Button onClick={() => navigate("pro_gig_new")}><Plus className="size-4" /> Create gig</Button>
       </PageHeader>
-
-      <InterlockCard tone="info" icon={Sparkles} title="Coming in v0.2" body="Gigs are part of the v0.2 release. This screen is fully built for preview but Buyers cannot order gigs in v0.1." />
 
       {myGigs.length === 0 ? (
         <EmptyState
@@ -2873,10 +2903,7 @@ export function ProGigNew() {
       <PageHeader
         title={editing ? "Edit gig" : "Create a gig"}
         description="Describe the result a Buyer will receive. 0% QuickQuid commission from your fee. The Buyer sees the applicable QuickQuid fee before payment."
-        status={<StatusBadge tone="info" icon>Coming in v0.2</StatusBadge>}
       />
-
-      <InterlockCard tone="info" icon={Sparkles} title="Coming in v0.2" body="Gigs are part of the v0.2 release. This wizard is fully built for preview but Buyers cannot order gigs in v0.1." />
 
       {/* Stepper */}
       <Card className="p-3">
@@ -3019,7 +3046,6 @@ export function ProGigNew() {
                 <div className="text-xs text-muted-foreground">
                   Commercial summary: Pro fee {formatINR(proFee)} · commission {formatINR(0)} · Buyer fee 14% {formatINR(fee)} · Buyer total {formatINR(total)}.
                 </div>
-                <InterlockCard tone="info" icon={Info} title="Future: tiered packages & earned-rate ladder" body="Basic/Standard/Premium tiered packages and the Pro earned-rate ladder are future. Do not show them as active in v0.2." />
               </div>
             </SectionCard>
           )}
@@ -3205,8 +3231,6 @@ export function ProGigDetail() {
         {gig.status === "paused" && <Button variant="outline" onClick={pause}><CheckCircle2 className="size-4" /> Resume</Button>}
         <Button variant="ghost" onClick={() => setConfirmArchive(true)}><Archive className="size-4" /> Archive</Button>
       </PageHeader>
-
-      <InterlockCard tone="info" icon={Sparkles} title="Coming in v0.2" body="Gigs are part of the v0.2 release. This preview is fully built; Buyers cannot order in v0.1." />
 
       {(gig.status === "changes_requested" || gig.status === "rejected") && gig.moderationReason && (
         <InterlockCard

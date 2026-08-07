@@ -29,7 +29,7 @@ const NAV_BY_ROLE: { role: Role; items: { label: string; view: ViewName }[] }[] 
     { label: "Pro dashboard", view: "pro_dashboard" },
     { label: "Browse briefs", view: "pro_briefs" },
     { label: "My proposals", view: "pro_proposals" },
-    { label: "Gigs (v0.2)", view: "pro_gigs" },
+    { label: "Gigs", view: "pro_gigs" },
     { label: "Payouts", view: "pro_payouts" },
     { label: "Pro profile", view: "pro_profile" },
   ]},

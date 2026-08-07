@@ -553,3 +553,48 @@ export type ViewName =
 export interface ViewParams {
   [key: string]: string | undefined;
 }
+
+// ===== Delivery Vault (production system) =====
+
+export type VaultAssetType = "file" | "external_link" | "repository" | "staging_link" | "design_link" | "document_link";
+export type VaultPreviewStatus = "pending" | "ready" | "failed" | "unsupported";
+export type VaultScanStatus = "pending" | "scanning" | "clean" | "flagged";
+export type VaultReviewStatus = "not_submitted" | "submitted" | "in_review" | "revision_requested" | "accepted" | "rejected";
+export type VaultRetentionHold = "none" | "active" | "released";
+
+export interface VaultItem {
+  vault_item_id: string;
+  contract_id: string;
+  milestone_id: string;
+  submitted_by: string;
+  submitted_at: string;
+  version_number: number;
+  asset_type: VaultAssetType;
+  file_name_or_link_title: string;
+  content_type: string;
+  file_size?: string;
+  source_type: VaultAssetType;
+  preview_status: VaultPreviewStatus;
+  scan_status: VaultScanStatus;
+  access_policy: "contract_parties" | "mediator_only" | "restricted";
+  submission_note: string;
+  review_status: VaultReviewStatus;
+  revision_reason?: string;
+  replaces_vault_item_id?: string;
+  retention_hold_status: VaultRetentionHold;
+  activity_log: { action: string; by: string; at: string; note?: string }[];
+}
+
+export type VaultState =
+  | "empty"
+  | "draft_upload"
+  | "uploading"
+  | "processing"
+  | "ready_to_submit"
+  | "submitted_for_review"
+  | "revision_requested"
+  | "resubmitted"
+  | "accepted"
+  | "disputed"
+  | "access_restricted"
+  | "unsupported_failed";

@@ -43,6 +43,8 @@ import {
   MilestoneStepper, PaymentTracker, ContractMilestoneList,
 } from "@/components/qq/shared/cards";
 import { VideoGigCard } from "@/components/qq/shared/VideoGigCard";
+import { DeliveryVault } from "@/components/qq/shared/DeliveryVault";
+import type { VaultItem as VaultItemType, VaultState as VaultStateType } from "@/lib/qq/types";
 import { EvidenceDropzone } from "@/components/qq/shared/EvidenceDropzone";
 import {
   formatINR, buyerFee, buyerTotal, budgetBand, BUDGET_BANDS, CATEGORIES,
@@ -801,7 +803,7 @@ export function BuyerTalent() {
       <Tabs value={mode} onValueChange={(v) => setMode(v as "talent" | "gigs")}>
         <TabsList className="w-full sm:w-auto h-10 p-1">
           <TabsTrigger value="talent" className="gap-1.5 text-sm font-medium"><Users className="size-4" /> Talent</TabsTrigger>
-          <TabsTrigger value="gigs" className="gap-1.5 text-sm font-medium"><Sparkles className="size-4" /> Gigs <Badge variant="secondary" className="ml-0.5 text-[10px] px-1 py-0">v0.2</Badge></TabsTrigger>
+          <TabsTrigger value="gigs" className="gap-1.5 text-sm font-medium"><Sparkles className="size-4" /> Gigs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="talent" className="mt-4">
@@ -2091,26 +2093,74 @@ export function BuyerContract() {
                       </div>
                     )}
 
-                    {/* Delivery vault */}
-                    {(m.status === "submitted" || m.status === "in_review" || m.status === "accepted") && (
-                      <div className="mt-3 rounded-md border border-border p-3 bg-muted/30">
-                        <div className="text-xs font-medium mb-2 flex items-center gap-1">
-                          <FileText className="size-3.5" /> Category-specific delivery vault
+                    {/* Production Delivery Vault — buyer review view */}
+                    {(() => {
+                      const paymentConfirmed = m.status !== "funding_pending" && m.status !== "not_started";
+                      const disputeActive = contract.status === "disputed";
+                      const vaultState: VaultStateType = disputeActive ? "disputed"
+                        : m.versions.length === 0 ? "empty"
+                        : m.status === "accepted" || m.status === "payout_queued" || m.status === "payout_processed" ? "accepted"
+                        : m.versions.some(v => v.status === "rejected") && m.versions[m.versions.length - 1]?.status === "in_review" ? "resubmitted"
+                        : m.versions[m.versions.length - 1]?.status === "in_review" ? "submitted_for_review"
+                        : m.versions[m.versions.length - 1]?.status === "rejected" ? "revision_requested"
+                        : "submitted_for_review";
+
+                      const vaultItems: VaultItemType[] = m.versions.map((v, idx) => ({
+                        vault_item_id: v.id,
+                        contract_id: contract.id,
+                        milestone_id: m.id,
+                        submitted_by: "pro",
+                        submitted_at: v.timestamp,
+                        version_number: v.version,
+                        asset_type: v.link.includes("figma") ? "design_link" : v.link.includes("github") ? "repository" : v.link.includes("notion") ? "document_link" : "file",
+                        file_name_or_link_title: v.link.split("/").pop() || v.link,
+                        content_type: v.link.includes("figma") ? "Figma design" : v.link.includes("github") ? "Git repository" : v.link.includes("notion") ? "Notion doc" : "File",
+                        source_type: v.link.includes("figma") ? "design_link" : v.link.includes("github") ? "repository" : v.link.includes("notion") ? "document_link" : "file",
+                        preview_status: "ready",
+                        scan_status: "clean",
+                        access_policy: "contract_parties",
+                        submission_note: v.changeNote,
+                        review_status: v.status === "accepted" ? "accepted" : v.status === "rejected" ? "rejected" : v.status === "in_review" ? "in_review" : "submitted",
+                        revision_reason: v.status === "rejected" ? "Revision requested — see change note" : undefined,
+                        replaces_vault_item_id: idx > 0 ? m.versions[idx - 1].id : undefined,
+                        retention_hold_status: disputeActive ? "active" : "none",
+                        activity_log: [{ action: `v${v.version} submitted`, by: "pro", at: v.timestamp, note: v.changeNote }],
+                      }));
+
+                      return (
+                        <div className="mt-3">
+                          <DeliveryVault
+                            contractId={contract.id}
+                            milestoneId={m.id}
+                            milestoneLabel={m.label}
+                            milestoneDescription={m.description}
+                            proFee={m.proFee}
+                            state={vaultState}
+                            items={vaultItems}
+                            currentVersion={vaultItems[vaultItems.length - 1]}
+                            acceptanceCriteria={m.acceptanceCriteria}
+                            userRole="buyer"
+                            paymentConfirmed={paymentConfirmed}
+                            disputeActive={disputeActive}
+                            onBuyerAccept={(versionId) => {
+                              updateMilestone(contract.id, m.id, { status: "accepted", acceptedAt: new Date().toISOString() });
+                              queuePayout({
+                                id: genId("PO"), contractId: contract.id, proId: contract.proId, proName: contract.proName,
+                                milestoneLabel: m.label, proFee: m.proFee, commission: 0, netPayout: m.proFee,
+                                status: "queued", beneficiaryToken: `BNF-${contract.proId}`, queuedAt: new Date().toISOString(),
+                                slipAvailable: false,
+                              });
+                              addAudit({ adminId: currentUserId ?? "", adminRole: "buyer", action: "Milestone accepted → Payout queued", entity: "Milestone", entityId: m.id, oldStatus: m.status, newStatus: "accepted" });
+                              toast({ title: "Milestone accepted", description: "Payout queued for Admin processing." });
+                            }}
+                            onBuyerRequestRevision={(versionId, reason, criterion) => {
+                              toast({ title: "Revision requested", description: `Pro notified to revise v${m.versions[m.versions.length - 1]?.version}. Reason: ${reason.slice(0, 60)}…` });
+                            }}
+                            onContactSupport={() => navigate("support")}
+                          />
                         </div>
-                        <div className="grid sm:grid-cols-3 gap-2 text-xs">
-                          <a href="#" className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1.5 hover:bg-muted/50">
-                            <ImageIcon className="size-3.5" /> Figma link
-                          </a>
-                          <a href="#" className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1.5 hover:bg-muted/50">
-                            <FileText className="size-3.5" /> Staging repo
-                          </a>
-                          <a href="#" className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1.5 hover:bg-muted/50">
-                            <FileText className="size-3.5" /> Delivery PDF
-                          </a>
-                        </div>
-                        {m.deliveryNote && <p className="mt-2 text-xs text-muted-foreground">Note: {m.deliveryNote}</p>}
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Version history */}
                     {m.versions.length > 0 && (

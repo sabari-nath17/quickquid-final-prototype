@@ -2325,8 +2325,8 @@ export function AdminGigModeration() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Gig moderation (v0.2)"
-        description="Review gig submissions: creator profile, category, pricing, deliverables, exclusions, evidence, content checks. Coming in v0.2 — fully built for demo."
+        title="Gig moderation"
+        description="Review gig submissions: creator profile, category, pricing, deliverables, exclusions, evidence, content checks."
         status={<Badge variant="outline"><RolePill role={currentRole} /></Badge>}
       />
 

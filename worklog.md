@@ -588,3 +588,60 @@ The prototype was stable after Round 9 (Select audit, seeded lifecycle states, 6
 - Add images to more reviews (e.g., a 4-star review with constructive feedback + photos).
 - Consider adding a contract completion celebration screen (confetti or success animation) for the "Aha!" moment.
 - Add a "Rehire" flow demo on the completed contract.
+
+---
+
+## Cron Review Round 11 — Production Vault System, v0.2 Labels Removed, Completion Test
+
+### Current project status assessment
+This round responded to the "QuickQuid Production Workflow and Delivery Vault Addendum" which: (1) declared gigs as live v0.1 (not v0.2/future), (2) mandated a production-grade Delivery Vault system with 12 states, version history, permission control, and immutable evidence, and (3) required state transition guards, audit events, and a completion test. I removed all v0.2 labels, built the production DeliveryVault component, wired it into both buyer and pro workrooms, and produced the completion test report.
+
+### Completed modifications
+
+**Scope override — gigs are live v0.1:**
+1. **Removed all v0.2/future labels** — Removed "Coming in v0.2" badges, "v0.2" suffixes, "future" interlocks, and "Buyers cannot order gigs in v0.1" copy from: sidebar nav (`Shell.tsx`), command palette (`CommandPalette.tsx`), breadcrumbs (`QuickQuidApp.tsx`), buyer Gigs tab (`BuyerScreens.tsx`), ProGigs/ProGigNew/ProGigDetail (`ProScreens.tsx`), and admin gig moderation (`AdminScreens.tsx`). Gigs are now presented as live v0.1 functionality with no future/prototype labels.
+
+**Production Delivery Vault system:**
+2. **New Vault types** — Added `VaultItem` interface (16 fields: vault_item_id, contract_id, milestone_id, submitted_by, submitted_at, version_number, asset_type, file_name_or_link_title, content_type, file_size, source_type, preview_status, scan_status, access_policy, submission_note, review_status, revision_reason, replaces_vault_item_id, retention_hold_status, activity_log) and `VaultState` type (12 states: empty, draft_upload, uploading, processing, ready_to_submit, submitted_for_review, revision_requested, resubmitted, accepted, disputed, access_restricted, unsupported_failed) to `types.ts`. (`src/lib/qq/types.ts`)
+3. **DeliveryVault component** (`src/components/qq/shared/DeliveryVault.tsx`) — The authoritative delivery record system with:
+   - **12 Vault states** with tone-coded headers (neutral/info/warning/success/critical), state descriptions, and state-appropriate icons.
+   - **Version history** with immutable submitted versions (never overwritten — revisions create new versions). Each version row shows: version number, Current/Accepted/Rejected/Immutable badges, submitter, timestamp, replaces reference, asset type icon, file name, content type, scan status (clean/scanning/flagged/pending), submission note, revision reason.
+   - **Permission control** — Role-based access: Pro (upload/submit/replace), Buyer (preview/download/accept/revision), Support (read-only with ticket), Risk/Mediator (read-only with dispute), Finance (denied — sees only metadata). Finance gets an explicit "does not have access to delivery contents" message.
+   - **State transition guards** — Pro cannot submit before payment confirmed (shows blocked reason + recovery CTA). Buyer cannot accept without a submitted version (shows blocked reason). Disputed milestones freeze acceptance. Accepted milestones block further submission.
+   - **Scope & review rail** (35%) — Acceptance criteria checklist, commercial record (Pro fee, commission ₹0, payment status, dispute hold), payout queued confirmation, mediator access notice.
+   - **Pro submit bar** — Add evidence, submission note, "Submit for review" creates immutable version.
+   - **Buyer revision form** — Criterion selector + reason text, tied to specific version.
+   - **Asset type icons** — Figma/GitHub/external link/staging/document/file with proper icons.
+   - **Scan badges** — Clean (green shield), Scanning (blue spinner), Flagged (red shield), Pending (clock).
+
+**Integration:**
+4. **DeliveryVault in Pro workroom** — Replaced the old `VaultDeliverable` in the Pro contract workroom with the production `DeliveryVault`. Derives vault state from milestone status + dispute status. Maps delivery versions to VaultItem records with asset type detection (figma→design_link, github→repository, notion→document_link). Pro sees upload/submit controls with payment-confirmed guard. (`src/components/qq/screens/pro/ProScreens.tsx`)
+5. **DeliveryVault in Buyer workroom** — Replaced the minimal delivery vault links in the buyer contract workroom with the production `DeliveryVault`. Buyer sees version history, preview/download (where permitted), accept milestone (→ queues payout), request revision (with criterion + reason). Accept action creates payout queued + audit event. (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+
+**Bug fix:**
+6. **Missing `navigate` in WorkroomTab** — The DeliveryVault's `onContactSupport` callback referenced `navigate` which wasn't destructured from `useQQ` in the `WorkroomTab` component. Fixed by adding `navigate` to the destructuring. (`src/components/qq/screens/pro/ProScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Buyer → completed contract QQ-0680 → Workroom tab → DeliveryVault shows "Delivery versions" with Accepted/Current badges, acceptance criteria rail, commercial record (Pro fee, commission ₹0, payment confirmed, dispute hold none) — VLM-confirmed. Buyer → disputed contract QQ-0725 → Workroom → DeliveryVault shows "Disputed — evidence locked" state. Gigs tab no longer has "v0.2" badge. All clean, no console/runtime errors.
+- VLM screenshot review confirmed: "Delivery versions section with version rows, Accepted/Current badges, acceptance criteria rail, commercial record with Pro fee, commission ₹0, payment status, dispute hold."
+
+### Completion test
+Produced `QUICKQUID_COMPLETION_TEST.md` with:
+- **10-item completion test**: All 10 items PASS (gigs live v0.1, gig request → contract, Vault 12 states, buyer can't accept without version, pro can't submit before payment, payout can't bypass queue, audit events, error recovery, permission separation, no wallet/escrow language).
+- **23-workflow coverage table**: Each workflow lists route/frame, owner, valid start state, success state, failure states, audit event, notification, and remaining gap.
+
+### Unresolved issues / risks + next-phase priorities
+1. **Vault upload UI** — The Pro "Add evidence" button creates a draft item but doesn't have a full file-upload modal yet (uses `EvidenceDropzone` elsewhere). Could add a dedicated upload modal. **Priority: medium**.
+2. **External link validation** — The Vault stores external links but doesn't validate them (title, host, snapshot). Could add link validation + warning if unverified. **Priority: low**.
+3. **Category-specific delivery requirements** — The addendum specifies required evidence per category (Development→staging/repo, Design→Figma, Writing→PDF). Could enforce these in the submit guard. **Priority: medium**.
+4. **Retention hold** — The `retention_hold_status` field exists but isn't surfaced in the UI beyond the dispute hold. Could add a retention notice. **Priority: low**.
+5. **Public portfolio opt-in** — The addendum states "Public portfolio publishing is a separate explicit action." Could add an explicit "Publish to portfolio" action on accepted deliverables. **Priority: medium**.
+
+### Recommended next-phase focus
+- Build a dedicated Vault upload modal with category-specific required evidence enforcement.
+- Add external link validation (title, host, snapshot, warning if unverified).
+- Add "Publish to portfolio" explicit action on accepted deliverables.
+- Surface retention hold status in the Vault UI.
+- Add notification deep-links for all Vault state changes.
