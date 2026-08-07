@@ -182,6 +182,7 @@ export interface PortfolioItem {
   description: string;
   type: "case_study" | "link" | "image";
   url?: string;
+  imageUrl?: string;
   featured?: boolean;
 }
 
@@ -466,6 +467,7 @@ export interface GigDraft {
   buyerRequirements: string[];
   evidence: string[];
   coverImageColor: string;
+  coverImageUrl?: string;
   packageName: string;
   proFee: number;
   availability: boolean;

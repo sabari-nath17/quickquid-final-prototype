@@ -223,7 +223,6 @@ export function QuickQuidApp() {
         <SupportWidget />
         <CommandPalette />
         <OnboardingTour />
-        <MessagingQuickAccess />
       </div>
     </ThemeProvider>
   );

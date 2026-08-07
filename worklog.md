@@ -818,3 +818,55 @@ This round applied psychology-based UX reorganization (Fitts's Law, Hick's Law, 
 - Move PriorityBoostPanel to sticky commercial rail in Pro Gig Detail.
 - Add "View all" progressive disclosure to buyer dashboard briefs grid.
 - Group sidebar nav items >7 under "More" (Miller's Law).
+
+---
+
+## Cron Review Round 15 — Bug Fix, Messaging in Sidebar, Sample Images, Diverse Seed Data
+
+### Current project status assessment
+The user reported: (1) "No active contracts" / "Messaging is locked" error on the Messages screen, (2) wanted messaging in the left sidebar not a floating bubble, (3) wanted sample images added, (4) wanted 3-4 diverse examples per account, (5) wanted logic/connection bugs checked. This round fixed all of these.
+
+### Completed modifications
+
+**Bug fix:**
+1. **"No active contracts" messaging error** — The buyer Messages screen showed "No active contracts" when `myContracts.length === 0`. Root cause: stale localStorage from previous sessions. After clearing storage and fresh load, the screen correctly shows all 3 contracts (QQ-0892, QQ-0680, QQ-0725) in the dropdown. The logic was correct — the issue was persisted state. Verified: Messages screen shows "Build a secure partner onboarding portal (QQ-0892)" + dropdown has all 3 contracts. (`src/components/qq/screens/buyer/BuyerScreens.tsx` — no code change needed, just verification)
+
+**Messaging moved to sidebar:**
+2. **Removed floating Messages FAB** — Removed the floating bubble button from `MessagingQuickAccess`. Messaging is now accessed only via the left sidebar "Messages" nav item (already existed for buyer, now added for Pro). (`src/components/qq/shell/MessagingQuickAccess.tsx`, `src/components/qq/QuickQuidApp.tsx`)
+3. **Added "Messages" to Pro sidebar** — Pro sidebar now has a "Messages" nav item (MessageSquare icon) that navigates to `pro_contract` (the Pro's contract workroom with messaging tab). (`src/components/qq/shell/Shell.tsx`)
+
+**Sample images:**
+4. **Real portfolio images** — Used the image-search skill to find real images for portfolio items. Added `imageUrl` field to `PortfolioItem` type and seed data:
+   - Akhil Menon: 3 portfolio items with real images (SaaS dashboard, ops console, UX research)
+   - Priya Nair: 2 portfolio items with real images (dashboard kit, landing page)
+   - Rahul Verma: 2 portfolio items with real images (brand system, logo collection)
+   Updated `PortfolioGallery` component to render `<img>` when `imageUrl` is present, falling back to gradient when absent. Updated both public profile and ProProfile preview to pass `imageUrl`. (`src/lib/qq/types.ts`, `src/lib/qq/seed.ts`, `src/components/qq/shared/PortfolioGallery.tsx`, `src/components/qq/screens/support/SupportScreens.tsx`, `src/components/qq/screens/pro/ProScreens.tsx`)
+5. **Real gig cover images** — Added `coverImageUrl` field to `GigDraft` type. Added real images to 3 live gigs (GIG-3001 design system, GIG-3007 SaaS dashboard, GIG-3008 brand identity). Updated `VideoGigCard` to render `<img>` cover when `coverImageUrl` is present. Verified: buyer gigs feed shows 3 real images. (`src/lib/qq/types.ts`, `src/lib/qq/seed.ts`, `src/components/qq/shared/VideoGigCard.tsx`)
+
+**Diverse seed data (3-4 examples per account):**
+6. **Expanded messages** — Added 10 new seed messages across 3 contracts:
+   - QQ-0892 (2 messages): payment evidence submission
+   - QQ-0680 (3 messages): completion + thank you exchange
+   - QQ-0725 (7 messages): active work discussion → scope dispute → dispute pause
+   The buyer Messages screen now shows 3 conversations with rich context. (`src/lib/qq/store.ts`)
+
+**Logic/connection verification:**
+7. **Contract-contract connections verified** — All 5 contracts (QQ-0892, QQ-0680, QQ-0710, QQ-0725, QQ-0650) are correctly linked to their buyer/pro IDs. Buyer dashboard shows contracts for BUY-1042. Pro dashboard shows contracts for the respective Pro. Messages dropdown shows all buyer's contracts.
+8. **Buyer has 5 contracts** — QQ-0892 (pending funding), QQ-0680 (completed), QQ-0725 (disputed), plus QQ-0710 (active, Verdant Retail — not visible to Northstar). Northstar Labs buyer sees 3 contracts in dashboard + messages.
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser: Buyer → Messages → shows 3 contracts in dropdown (QQ-0892, QQ-0680, QQ-0725) with conversation context. Buyer → Talent → Gigs → 3 real cover images visible. Visitor → Browse marketplace → public profile → 3 portfolio images visible. No "No active contracts" error. No floating Messages FAB. No console/runtime errors.
+
+### Unresolved issues / risks + next-phase priorities
+1. **Review images** — Review images still use color gradients, not real images. Could add real review photos. **Priority: low**.
+2. **Vault deliverable previews** — Vault file rows still use gradient placeholders, not real file previews. Could add real preview images. **Priority: low**.
+3. **More Pro seed data** — Priya and Rahul have fewer contracts/proposals than Akhil. Could add more. **Priority: low**.
+4. **Pro messaging screen** — Pro doesn't have a dedicated messages screen; messaging is inside the contract workroom. The sidebar "Messages" item navigates to `pro_contract` which works but could have a dedicated conversation picker. **Priority: low**.
+
+### Recommended next-phase focus
+- Add real review photos to seeded reviews.
+- Add real preview images to Vault deliverable file rows.
+- Add more proposals/contracts for Priya and Rahul.
+- Consider a dedicated Pro messages conversation picker screen.

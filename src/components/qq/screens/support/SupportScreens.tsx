@@ -929,6 +929,7 @@ export function PublicProfileScreen() {
                   title: item.title,
                   description: item.description,
                   url: item.url,
+                  imageUrl: item.imageUrl,
                   color: item.id === profile.portfolioItems[0]?.id ? "#7C3AED" : ["#0891B2", "#CA8A04", "#DB2777", "#0EA5E9"][parseInt(item.id.replace(/\D/g, "") || "0") % 4],
                   featured: item.featured,
                 }))}

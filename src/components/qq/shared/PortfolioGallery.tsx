@@ -11,6 +11,7 @@ export interface GalleryItem {
   title: string;
   description?: string;
   url?: string;
+  imageUrl?: string;
   color: string;
   featured?: boolean;
 }
@@ -54,9 +55,12 @@ export function PortfolioGallery({ items }: { items: GalleryItem[] }) {
             className="group relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-lg border border-border text-left transition-all hover:shadow-md hover:-translate-y-0.5"
           >
             <div
-              className="relative aspect-video w-full"
-              style={{ background: `linear-gradient(135deg, ${item.color}, ${item.color}aa)` }}
+              className="relative aspect-video w-full overflow-hidden"
+              style={item.imageUrl ? undefined : { background: `linear-gradient(135deg, ${item.color}, ${item.color}aa)` }}
             >
+              {item.imageUrl && (
+                <img src={item.imageUrl} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+              )}
               {/* Play icon for videos */}
               {item.type === "video" && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -65,7 +69,7 @@ export function PortfolioGallery({ items }: { items: GalleryItem[] }) {
                   </div>
                 </div>
               )}
-              {item.type === "link" && (
+              {item.type === "link" && !item.imageUrl && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <ExternalLink className="size-8 text-white/80" />
                 </div>
@@ -120,11 +124,11 @@ export function PortfolioGallery({ items }: { items: GalleryItem[] }) {
               <div className="flex-1 flex items-center justify-center overflow-hidden px-4 pb-4 relative">
                 <div
                   className={cn(
-                    "rounded-lg transition-all duration-300",
+                    "rounded-lg transition-all duration-300 overflow-hidden relative",
                     zoomed ? "cursor-zoom-out max-w-none" : "cursor-zoom-in max-w-full max-h-full",
                   )}
                   style={{
-                    background: `linear-gradient(135deg, ${current.color}, ${current.color}aa)`,
+                    background: current.imageUrl ? undefined : `linear-gradient(135deg, ${current.color}, ${current.color}aa)`,
                     width: zoomed ? "auto" : "100%",
                     height: zoomed ? "auto" : "100%",
                     maxWidth: zoomed ? "none" : "min(90vw, 1200px)",
@@ -132,7 +136,10 @@ export function PortfolioGallery({ items }: { items: GalleryItem[] }) {
                     aspectRatio: "16 / 9",
                   }}
                 >
-                  <div className="flex items-center justify-center h-full">
+                  {current.imageUrl && (
+                    <img src={current.imageUrl} alt={current.title} className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                  <div className="flex items-center justify-center h-full relative z-10">
                     {current.type === "video" && (
                       <div className="rounded-full bg-black/40 p-5 backdrop-blur-sm">
                         <Play className="size-10 text-white" fill="white" />

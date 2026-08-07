@@ -31,6 +31,7 @@ const NAV: Record<Role, NavItem[]> = {
     { label: "Dashboard", view: "pro_dashboard", icon: LayoutDashboard },
     { label: "Briefs", view: "pro_briefs", icon: Briefcase },
     { label: "Proposals", view: "pro_proposals", icon: FileText },
+    { label: "Messages", view: "pro_contract", icon: MessageSquare },
     { label: "Gigs", view: "pro_gigs", icon: Sparkles },
     { label: "Payouts", view: "pro_payouts", icon: Wallet },
     { label: "Profile", view: "pro_profile", icon: UserCog },

@@ -944,6 +944,7 @@ export function ProProfile() {
                         title: p.title,
                         description: p.description,
                         url: p.url,
+                        imageUrl: p.imageUrl,
                         color: p.id === featured?.id ? "#7C3AED" : ["#0891B2", "#CA8A04", "#DB2777", "#0EA5E9"][parseInt(p.id.replace(/\D/g, "") || "0") % 4],
                         featured: p.featured,
                       }))}

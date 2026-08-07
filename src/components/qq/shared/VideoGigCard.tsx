@@ -49,9 +49,13 @@ export function VideoGigCard({ gig, hasVideo = false, views, requests, rating, o
       onMouseLeave={() => setHovered(false)}
     >
       {/* Cover with video preview */}
-      <div className="relative aspect-video w-full overflow-hidden" style={{ backgroundColor: gig.coverImageColor }}>
-        {/* Gradient backdrop as "video frame" */}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gig.coverImageColor}, ${gig.coverImageColor}99)` }} />
+      <div className="relative aspect-video w-full overflow-hidden" style={gig.coverImageUrl ? undefined : { backgroundColor: gig.coverImageColor }}>
+        {gig.coverImageUrl && (
+          <img src={gig.coverImageUrl} alt={gig.title} className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        {!gig.coverImageUrl && (
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gig.coverImageColor}, ${gig.coverImageColor}99)` }} />
+        )}
 
         {/* Simulated content silhouette */}
         <div className="absolute inset-0 flex items-center justify-center opacity-30">
