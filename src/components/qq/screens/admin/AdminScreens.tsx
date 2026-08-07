@@ -35,7 +35,7 @@ import type {
 import {
   ShieldCheck, ShieldAlert, Clock, AlertTriangle, CheckCircle2, XCircle,
   Eye, EyeOff, FileText, Banknote, ArrowRight, ArrowLeft, Lock, PauseCircle,
-  PlayCircle, UserX, Scale, FileSearch, Send, Ban,
+  PlayCircle, UserX, Scale, FileSearch, Send, Ban, Briefcase,
   Landmark, Receipt, Wallet, FileWarning, FileCheck2,
   DownloadCloud, AlertOctagon, Gavel, Hourglass, BadgeCheck, Info, UserCog,
   ChevronRight, MessageSquareOff, Fingerprint, ScrollText, ListChecks,
@@ -325,31 +325,52 @@ export function AdminOperations() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {cards.map((c) => {
-          const tone = c.count === 0 ? "success" : c.tone;
-          const isEmphasised = emphasised.includes(c.title);
-          const oldestLabel = c.oldest ? slaLabel(c.oldest, c.target || 24) : "—";
-          return (
-            <Card key={c.title} className={cn("p-4 flex flex-col gap-2", isEmphasised && "ring-1 ring-primary/40")}>
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-xs text-muted-foreground">{c.title}</div>
-                  <div className="text-2xl font-semibold tabular-nums">{c.count}</div>
+      {/* Miller's Law: chunk 9 cards into 3 groups (Money / Trust / Work) */}
+      {(() => {
+        const groups = [
+          { label: "Money", icon: Banknote, color: "text-emerald-600", items: cards.filter((c) => ["Payment verification", "Payouts", "Refunds", "Priority boost verification"].includes(c.title)) },
+          { label: "Trust & Safety", icon: ShieldAlert, color: "text-red-600", items: cards.filter((c) => ["KYC review", "Disputes", "Trust & Safety"].includes(c.title)) },
+          { label: "Work & Operations", icon: Briefcase, color: "text-sky-600", items: cards.filter((c) => ["Gig moderation", "Support", "SLA breaches"].includes(c.title)) },
+        ];
+        return (
+          <div className="space-y-4">
+            {groups.map((group) => (
+              <div key={group.label}>
+                <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <group.icon className={cn("size-3.5", group.color)} />
+                  {group.label}
+                  <span className="text-muted-foreground/60 font-normal normal-case">({group.items.length})</span>
                 </div>
-                <StatusBadge tone={tone} icon={false}>{c.count === 0 ? "Clear" : c.count > 5 ? "Heavy" : "Open"}</StatusBadge>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {group.items.map((c) => {
+                    const tone = c.count === 0 ? "success" : c.tone;
+                    const isEmphasised = emphasised.includes(c.title);
+                    const oldestLabel = c.oldest ? slaLabel(c.oldest, c.target || 24) : "—";
+                    return (
+                      <Card key={c.title} className={cn("p-4 flex flex-col gap-2", isEmphasised && "ring-1 ring-primary/40")}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-xs text-muted-foreground">{c.title}</div>
+                            <div className="text-2xl font-semibold tabular-nums">{c.count}</div>
+                          </div>
+                          <StatusBadge tone={tone} icon={false}>{c.count === 0 ? "Clear" : c.count > 5 ? "Heavy" : "Open"}</StatusBadge>
+                        </div>
+                        <div className="text-xs text-muted-foreground space-y-0.5">
+                          <div>Oldest: <span className="text-foreground font-medium">{oldestLabel}</span></div>
+                          <div>Team: <span className="text-foreground">{c.team}</span></div>
+                        </div>
+                        <Button size="sm" variant="outline" className="mt-auto w-full min-h-[44px]" onClick={() => navigate(c.view as never)}>
+                          Open queue <ArrowRight className="size-3.5" />
+                        </Button>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground space-y-0.5">
-                <div>Oldest: <span className="text-foreground font-medium">{oldestLabel}</span></div>
-                <div>Team: <span className="text-foreground">{c.team}</span></div>
-              </div>
-              <Button size="sm" variant="outline" className="mt-auto w-full min-h-[44px]" onClick={() => navigate(c.view as never)}>
-                Open queue <ArrowRight className="size-3.5" />
-              </Button>
-            </Card>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        );
+      })()}
 
       <SectionCard
         title="Unified SLA queue"
@@ -2440,7 +2461,7 @@ export function AdminNotes() {
         status={<Badge variant="outline"><RolePill role={currentRole} /></Badge>}
       />
 
-      <SectionCard title="Demo data controls" description="Prototype-only tools for reviewers. Reset clears localStorage; Normalize shifts SLA timestamps to 'now' so queue states look realistic.">
+      <SectionCard title="Demo data controls" description="Reviewer tools. Reset clears localStorage; Normalize shifts SLA timestamps to 'now' so queue states look realistic.">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="p-4">
             <div className="font-medium flex items-center gap-2"><RefreshCcw className="size-4 text-primary" />Normalize SLA timestamps</div>

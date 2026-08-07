@@ -7,6 +7,7 @@ import { NotificationDrawer } from "./shell/NotificationDrawer";
 import { SupportWidget } from "./shell/SupportWidget";
 import { CommandPalette, ThemeProvider } from "./shell/CommandPalette";
 import { OnboardingTour } from "./shell/OnboardingTour";
+import { MessagingQuickAccess } from "./shell/MessagingQuickAccess";
 import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor/RoleAuthScreens";
 import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
@@ -126,10 +127,25 @@ function Breadcrumb() {
 }
 
 export function QuickQuidApp() {
-  const { view, currentRole, hydrated, navigate, payments, normalizeSlaTimestamps } = useQQ();
+  const { view, currentRole, hydrated, navigate, payments, normalizeSlaTimestamps, priorityBoosts, updatePriorityBoost, addAudit } = useQQ();
   const [mounted, setMounted] = React.useState(false);
   const [autoNormalized, setAutoNormalized] = React.useState(false);
+  const [expiryChecked, setExpiryChecked] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+
+  // Priority boost expiry auto-detection: on load, check active boosts where endAt < now → mark expired
+  React.useEffect(() => {
+    if (mounted && hydrated && !expiryChecked && priorityBoosts.length > 0) {
+      const now = new Date();
+      priorityBoosts.forEach((pb) => {
+        if (pb.paymentStatus === "active" && pb.priorityEnd && new Date(pb.priorityEnd) < now) {
+          updatePriorityBoost(pb.id, { paymentStatus: "expired" });
+          addAudit({ adminId: "system", adminRole: "ops_manager", action: "Priority boost expired", entity: "PriorityBoost", entityId: pb.id, oldStatus: "active", newStatus: "expired", reason: `Priority ended at ${pb.priorityEnd}` });
+        }
+      });
+      setExpiryChecked(true);
+    }
+  }, [mounted, hydrated, expiryChecked, priorityBoosts, updatePriorityBoost, addAudit]);
 
   // On hydration, restore the signed-in user to their role home instead of role_selection
   React.useEffect(() => {
@@ -207,6 +223,7 @@ export function QuickQuidApp() {
         <SupportWidget />
         <CommandPalette />
         <OnboardingTour />
+        <MessagingQuickAccess />
       </div>
     </ThemeProvider>
   );

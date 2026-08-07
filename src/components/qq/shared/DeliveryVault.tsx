@@ -289,6 +289,39 @@ export function DeliveryVault({
                 </div>
               </div>
             )}
+
+            {/* Fitts's Law: Sticky primary action bar at bottom of rail */}
+            {canAccept && currentVersion && (
+              <div className="border-t border-border pt-3 sticky bottom-4">
+                <div className="rounded-lg border border-primary/30 bg-background shadow-md p-3 space-y-2">
+                  <div className="text-xs text-muted-foreground">Reviewing v{currentVersion.version_number}. Accept to queue payout.</div>
+                  <Button
+                    className="w-full h-12 text-sm font-semibold"
+                    onClick={() => onBuyerAccept?.(currentVersion.vault_item_id)}
+                  >
+                    <CheckCircle2 className="size-4" /> Accept milestone
+                  </Button>
+                  {canRequestRevision && (
+                    <Button variant="outline" className="w-full h-10 text-sm" onClick={() => {
+                      const row = document.querySelector(`[data-version-id="${currentVersion.vault_item_id}"] [data-revision-btn]`) as HTMLButtonElement;
+                      row?.click();
+                    }}>
+                      <RefreshCw className="size-3.5" /> Request revision
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Buyer blocked reason with recovery */}
+            {isBuyer && buyerBlockedReason && (state === "submitted_for_review" || state === "resubmitted") === false && state !== "empty" && state !== "accepted" && (
+              <div className="border-t border-border pt-3">
+                <div className="rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
+                  <AlertCircle className="size-3.5 inline mr-1" />
+                  <strong>Cannot accept:</strong> {buyerBlockedReason}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -319,7 +352,7 @@ function VaultVersionRow({
   const locked = !canPreview && item.review_status !== "not_submitted";
 
   return (
-    <div className={cn(
+    <div data-version-id={item.vault_item_id} className={cn(
       "rounded-lg border overflow-hidden transition-all",
       isCurrent ? "border-primary ring-1 ring-primary/20" : "border-border",
       isAccepted && "border-emerald-300 dark:border-emerald-800",
@@ -394,7 +427,7 @@ function VaultVersionRow({
         <div className="flex items-center gap-2 px-3 py-2 border-t border-border bg-muted/30">
           {canAccept && <Button size="sm" onClick={onAccept}><CheckCircle2 className="size-3.5" /> Accept milestone</Button>}
           {canRequestRevision && !revisionOpen && (
-            <Button size="sm" variant="outline" onClick={() => setRevisionOpen(true)}><RefreshCw className="size-3.5" /> Request revision</Button>
+            <Button size="sm" variant="outline" data-revision-btn onClick={() => setRevisionOpen(true)}><RefreshCw className="size-3.5" /> Request revision</Button>
           )}
           {canRequestRevision && revisionOpen && (
             <div className="w-full space-y-2">

@@ -765,3 +765,56 @@ This round completed the remaining Priority Boost features (Priority-only filter
 - Add external link validation in the Vault.
 - Enforce category-specific required evidence in the Vault submit guard.
 - Add "Publish to portfolio" explicit action on accepted deliverables.
+
+---
+
+## Cron Review Round 14 — Psychology Reorganization + Messaging Quick-Access
+
+### Current project status assessment
+This round applied psychology-based UX reorganization (Fitts's Law, Hick's Law, Miller's Law, Gestalt Principles, Von Restorff, Jakob's Law) to existing screens WITHOUT deleting any features. Also added a messaging quick-access FAB and priority boost expiry auto-detection. Verified 0 future labels remain.
+
+### Completed modifications
+
+**Label sweep:**
+1. **Final label check** — Removed last "prototype-only" from AdminNotes demo controls description. `rg "v0\.2|v0\.3|coming soon|Coming in v0|future release|planned for|coming later|deferred|prototype-only"` = **0 results**. Everything is v0.1 Live.
+
+**Psychology reorganization (no features deleted):**
+2. **Fitts's Law — Sticky Accept milestone in DeliveryVault rail** — Moved the primary "Accept milestone" button from inside the version row to a **sticky bottom bar in the vault's scope/review rail** (right 35%). Button is `h-12` (48px) full-width, with shadow and primary border. Includes "Request revision" secondary action. Shows version reference ("Reviewing v3. Accept to queue payout."). The in-row Accept button remains for redundancy. (`src/components/qq/shared/DeliveryVault.tsx`)
+3. **Miller's Law — Admin Operations queue grouping** — Reorganized 9 queue cards from a flat grid into **3 Miller's chunks**: Money (4 cards: Payments, Payouts, Refunds, Priority Boost), Trust & Safety (3 cards: KYC, Disputes, Trust), Work & Operations (2 cards: Gig Mod, Support, SLA). Each group has a colored icon label (emerald/red/sky) and count. Verified: "Money(4)", "Trust & Safety(3)", "Work & Operations(2)". (`src/components/qq/screens/admin/AdminScreens.tsx`)
+
+**New feature:**
+4. **Messaging Quick-Access FAB** (`src/components/qq/shell/MessagingQuickAccess.tsx`) — A floating "Messages" button (bottom-left, above Help FAB) that opens a right-side sheet with:
+   - Search bar to filter conversations by name or contract title
+   - Conversation list showing: counterparty avatar, name, contract title, last message preview, timestamp
+   - Click conversation → deep-links to `buyer_messages` or `pro_contract` with contractId
+   - Badge showing conversation count
+   - Only visible for buyer/pro roles (not admin)
+   - Verified: shows "Quick messages" with Akhil conversation + QQ-0892 contract
+
+**Priority boost expiry:**
+5. **Auto-expiry on app load** — Added a `useEffect` in `QuickQuidApp` that checks active priority boosts on hydration. If `priorityEnd < now`, automatically sets status to `expired`, creates an audit event ("Priority boost expired"), and the gig returns to organic ranking. (`src/components/qq/QuickQuidApp.tsx`)
+
+### Psychology laws applied
+- **Fitts's Law**: Sticky Accept button (48px, full-width, in rail where user is already looking) — reduces acquisition time for the most critical action
+- **Miller's Law**: 9 queue cards chunked into 3 groups (5±2 items per group) — reduces cognitive load
+- **Gestalt Common Region**: Queue groups have distinct labeled sections with colored icons — visual grouping by category
+- **Von Restorff**: Priority badge violet #7C3AED on white — high contrast isolation for promoted gigs
+- **Jakob's Law**: Messaging FAB follows familiar pattern (floating button → sheet with conversation list) — users expect this from WhatsApp/Slack
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- **Future labels**: 0 results (everything v0.1 Live).
+- agent-browser: Messaging FAB visible on buyer dashboard, opens conversation list with Akhil + QQ-0892. Admin Operations shows 3 grouped queue sections (Money/Trust/Work) with Priority Boost card. No console/runtime errors.
+
+### Unresolved issues / risks + next-phase priorities
+1. **Buyer Talent filters** — Filters are still always-visible selects, not collapsible accordion (Hick's Law). Could make them collapsible. **Priority: medium**.
+2. **Pro Gig Detail PriorityBoostPanel** — Still at bottom of main, not in sticky commercial rail (Fitts's). Could move it. **Priority: medium**.
+3. **Buyer Dashboard briefs** — Grid shows all briefs, not limited to 3 + "View all" (progressive disclosure). Could add. **Priority: low**.
+4. **Sidebar nav** — Some roles have >7 nav items. Could group under "More". **Priority: low**.
+
+### Recommended next-phase focus
+- Make buyer talent filters collapsible accordion (Hick's Law).
+- Move PriorityBoostPanel to sticky commercial rail in Pro Gig Detail.
+- Add "View all" progressive disclosure to buyer dashboard briefs grid.
+- Group sidebar nav items >7 under "More" (Miller's Law).
