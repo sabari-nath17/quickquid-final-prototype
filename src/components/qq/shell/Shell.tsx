@@ -192,6 +192,7 @@ function RoleSwitcher() {
   const { toast } = useToast();
   const demoUsers = [
     { role: "buyer" as Role, userId: "BUY-1042" },
+    { role: "buyer" as Role, userId: "BUY-1050" },
     { role: "pro" as Role, userId: "PRO-2088" },
     { role: "pro" as Role, userId: "PRO-2099" },
     { role: "pro" as Role, userId: "PRO-2101" },

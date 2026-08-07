@@ -204,6 +204,15 @@ const initialState = {
     { id: "MSG-33", contractId: "QQ-0735", from: "buyer", fromName: "Northstar Labs", text: "Hi Akhil — the audit was due yesterday. Can you share an update? I haven't heard from you in 3 days.", at: "2025-01-15T09:00:00Z" },
     { id: "MSG-34", contractId: "QQ-0735", from: "buyer", fromName: "Northstar Labs", text: "I'm raising a dispute. The audit was delivered 5 days late and it's missing the design system governance section we discussed. I've been trying to reach you for 3 days.", at: "2025-01-15T09:05:00Z" },
     { id: "MSG-35", contractId: "QQ-0735", from: "system", fromName: "QuickQuid", text: "⚠️ Dispute DSP-7003 opened by Northstar Labs (category: communication). Direct dispute chat is paused. Risk team has been notified. SLA: 5 days to acknowledge.", at: "2025-01-15T09:10:00Z" },
+
+    // === Workflow 5: QQ-0710 — Brand identity (active work, different buyer: Verdant Retail) ===
+    { id: "MSG-36", contractId: "QQ-0710", from: "system", fromName: "QuickQuid", text: "Contract QQ-0710 active. M1 (Logo concepts) accepted. Work may begin on M2.", at: "2025-01-10T10:00:00Z" },
+    { id: "MSG-37", contractId: "QQ-0710", from: "pro", fromName: "Rahul Verma", text: "Hi Verdant team! I've shared 3 logo concepts in the Vault. Concept A is modern/minimal, B is bold/expressive, C is classic/timeless. Which direction resonates?", at: "2025-01-12T14:00:00Z" },
+    { id: "MSG-38", contractId: "QQ-0710", from: "buyer", fromName: "Verdant Retail", text: "We love Concept B — the bold/expressive direction. Can you refine it with our brand green (#15803D) and try a version with the tagline?", at: "2025-01-12T16:00:00Z" },
+    { id: "MSG-39", contractId: "QQ-0710", from: "pro", fromName: "Rahul Verma", text: "Great choice! I'll refine Concept B with the green and tagline. Should have v2 in the Vault by Thursday.", at: "2025-01-13T09:00:00Z" },
+    { id: "MSG-40", contractId: "QQ-0710", from: "pro", fromName: "Rahul Verma", text: "Update: Color + type system v1 is uploaded. I've paired the logo with Inter (headings) and DM Sans (body). Let me know if the type pairing works.", at: "2025-01-18T10:00:00Z" },
+    { id: "MSG-41", contractId: "QQ-0710", from: "buyer", fromName: "Verdant Retail", text: "The color palette looks great. The type pairing is clean — but can we try a serif for headings? Something with more personality. Maybe Fraunces or Recoleta?", at: "2025-01-18T14:00:00Z" },
+    { id: "MSG-42", contractId: "QQ-0710", from: "pro", fromName: "Rahul Verma", text: "Sure — I'll mock up both Fraunces and Recoleta options and share them tomorrow. Good call on adding more personality.", at: "2025-01-18T15:00:00Z" },
   ] as Message[],
   scopeChanges: [] as ScopeChange[],
   adminNotes: ADMIN_NOTES,

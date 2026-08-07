@@ -915,3 +915,46 @@ The user wanted 4 distinct demo workflow stages in the messaging panel, each hit
 | 3 | QQ-0680 | Completed + review | 5 | Completion summary, review, rehire offer | Payout processed, review, rehire accepted |
 | 4a | QQ-0725 | Dispute 1 (scope) | 9 | Missing filter states → dispute | Scope disagreement → dispute |
 | 4b | QQ-0735 | Dispute 2 (communication) | 8 | Late delivery + unresponsive → dispute | Access delay + verbal vs written → counterclaim |
+
+---
+
+## Cron Review Round 17 — All Message Situations Covered
+
+### Current project status assessment
+The user reported that not all message situations were showing. Investigation found QQ-0710 (Verdant Retail ↔ Rahul Verma, "Brand identity for new retail sub-brand") had **zero messages** — it was the only contract without a conversation. Also, Verdant Retail (BUY-1050) wasn't in the demo role switcher, so users couldn't test that buyer's perspective.
+
+### Completed modifications
+
+**Added missing messages:**
+1. **QQ-0710 — Brand identity (active work, 7 messages)** — Added conversation for Verdant Retail ↔ Rahul Verma:
+   - System: contract active, M1 accepted
+   - Pro: shares 3 logo concepts (modern/minimal, bold/expressive, classic/timeless)
+   - Buyer: selects Concept B, requests brand green + tagline
+   - Pro: confirms, will refine
+   - Pro: uploads color + type system v1 (Inter + DM Sans pairing)
+   - Buyer: likes colors, requests serif headings (Fraunces or Recoleta)
+   - Pro: agrees, will mock up both options
+   (`src/lib/qq/store.ts`)
+
+**Added Verdant Retail to role switcher:**
+2. **Verdant Retail (BUY-1050)** — Added to the demo role switcher as a second buyer account. Users can now sign in as Verdant Retail to see their contracts and messages (QQ-0710). (`src/components/qq/shell/Shell.tsx`)
+
+### Complete message coverage
+
+| # | Contract | Buyer | Pro | Messages | Workflow Stage |
+|---|---|---|---|---|---|
+| 1 | QQ-0892 | Northstar Labs | Akhil Menon | 6 | Early conversation (funding pending) |
+| 2 | QQ-0730 | Northstar Labs | Akhil Menon | 7 | Mid-milestone (M2 in review) |
+| 3 | QQ-0680 | Northstar Labs | Akhil Menon | 5 | Completed + review |
+| 4a | QQ-0725 | Northstar Labs | Priya Nair | 9 | Dispute 1 (scope) |
+| 4b | QQ-0735 | Northstar Labs | Akhil Menon | 8 | Dispute 2 (communication) |
+| 5 | QQ-0710 | Verdant Retail | Rahul Verma | 7 | Active work (logo + type feedback) |
+
+**Total: 6 contracts, 42 messages, 5 distinct workflow stages.**
+
+All contracts now have realistic conversations matching their workflow stage. Both buyer and Pro sides can see all their contracts with messages.
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser: Northstar Labs buyer → Messages → 5 contracts in dropdown (all with messages). Verdant Retail buyer → Messages → QQ-0710 with brand identity conversation (logo concepts, Concept B, Fraunces). Rahul Verma Pro → Messages → "Your contracts" picker with QQ-0710. No console/runtime errors.
