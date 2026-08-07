@@ -63,7 +63,7 @@ import {
   ShieldAlert, ShieldCheck, Sparkles, Star, Upload, UserCog, Users,
   Wallet, X, XCircle, Eye, EyeOff, Ban, RotateCcw, Hand, FileCheck, Camera,
   FileSearch, IndianRupee, Scale, ChevronLeft, Image as ImageIcon,
-  Paperclip, Search, SlidersHorizontal, Tag, Clock4, Hash,
+  Paperclip, Search, SlidersHorizontal, Tag, Clock4, Hash, Rocket,
 } from "lucide-react";
 
 // ---------- helpers ----------
@@ -715,7 +715,7 @@ function BillingStatusBadge({ state }: { state: "saved" | "invalid" | "incomplet
 // =================================================================
 export function BuyerTalent() {
   const {
-    proProfiles, gigs, currentUserId, briefs, navigate, addAudit,
+    proProfiles, gigs, currentUserId, briefs, navigate, addAudit, priorityBoosts,
   } = useQQ();
   const { toast } = useToast();
   const [mode, setMode] = React.useState<"talent" | "gigs">("talent");
@@ -763,6 +763,15 @@ export function BuyerTalent() {
     }
     return true;
   });
+
+  // Priority boost: split promoted + organic
+  const promotedGigIds = new Set(
+    priorityBoosts
+      .filter((pb) => pb.paymentStatus === "active" && filteredGigs.some((g) => g.id === pb.gigId))
+      .map((pb) => pb.gigId)
+  );
+  const promotedGigs = filteredGigs.filter((g) => promotedGigIds.has(g.id));
+  const organicGigs = filteredGigs.filter((g) => !promotedGigIds.has(g.id));
 
   const myPrivateBriefs = briefs.filter((b) => b.buyerId === currentUserId && b.visibility === "private");
   const myOpenBriefs = briefs.filter((b) => b.buyerId === currentUserId);
@@ -866,18 +875,54 @@ export function BuyerTalent() {
                     description="Try a broader category or budget range. Gigs are reviewed before going live."
                   />
                 ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-                    {filteredGigs.map((g, idx) => (
-                      <VideoGigCard
-                        key={g.id}
-                        gig={g}
-                        hasVideo={g.status === "approved_live" && idx % 2 === 0}
-                        views={g.views}
-                        requests={g.requests}
-                        rating={g.rating}
-                        onOpen={() => setSelectedGigId(g.id)}
-                      />
-                    ))}
+                  <div className="space-y-4">
+                    {/* Promoted / Priority section */}
+                    {promotedGigs.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                          <Rocket className="size-3.5" /> Promoted gigs
+                          <span className="text-muted-foreground font-normal normal-case tracking-normal">· Pro paid for visibility</span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+                          {promotedGigs.map((g, idx) => (
+                            <div key={g.id} className="relative">
+                              <div className="absolute -top-2 left-3 z-10 rounded-full bg-violet-500 px-2 py-0.5 text-[10px] font-medium text-white flex items-center gap-1 shadow-sm">
+                                <Rocket className="size-2.5" /> Priority
+                              </div>
+                              <VideoGigCard
+                                gig={g}
+                                hasVideo={idx % 2 === 0}
+                                views={g.views}
+                                requests={g.requests}
+                                rating={g.rating}
+                                onOpen={() => setSelectedGigId(g.id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Organic section */}
+                    <div>
+                      {promotedGigs.length > 0 && (
+                        <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          All gigs
+                        </div>
+                      )}
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+                        {organicGigs.map((g, idx) => (
+                          <VideoGigCard
+                            key={g.id}
+                            gig={g}
+                            hasVideo={idx % 2 === 0}
+                            views={g.views}
+                            requests={g.requests}
+                            rating={g.rating}
+                            onOpen={() => setSelectedGigId(g.id)}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

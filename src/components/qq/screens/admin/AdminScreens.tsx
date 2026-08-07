@@ -39,7 +39,7 @@ import {
   Landmark, Receipt, Wallet, FileWarning, FileCheck2,
   DownloadCloud, AlertOctagon, Gavel, Hourglass, BadgeCheck, Info, UserCog,
   ChevronRight, MessageSquareOff, Fingerprint, ScrollText, ListChecks,
-  RefreshCcw, Palette, GraduationCap, Sparkles,
+  RefreshCcw, Palette, GraduationCap, Sparkles, Rocket,
 } from "lucide-react";
 
 // ===================== Helpers =====================
@@ -217,7 +217,7 @@ type UnifiedRow = {
 };
 
 export function AdminOperations() {
-  const { kyc, payments, payouts, refunds, disputes, trustCases, tickets, currentRole, navigate } = useQQ();
+  const { kyc, payments, payouts, refunds, disputes, trustCases, tickets, currentRole, navigate, priorityBoosts } = useQQ();
 
   const openKyc = kyc.filter((k) => k.status === "under_review" || k.status === "submitted");
   const openPayments = payments.filter((p) => p.status === "under_admin_verification" || p.status === "payment_evidence_submitted" || p.status === "more_info_requested");
@@ -226,6 +226,7 @@ export function AdminOperations() {
   const openDisputes = disputes.filter((d) => d.status !== "resolved");
   const openTickets = tickets.filter((t) => t.status !== "resolved");
   const openTrust = trustCases.filter((t) => t.status !== "restored");
+  const openPriorityBoosts = priorityBoosts.filter((pb) => pb.paymentStatus === "payment_evidence_submitted" || pb.paymentStatus === "under_admin_verification");
   const slaBreaches = [
     ...openKyc.filter((k) => hoursSince(k.submittedAt) > 24),
     ...openPayments.filter((p) => hoursSince(p.submittedAt) > p.targetReviewHours),
@@ -240,6 +241,7 @@ export function AdminOperations() {
     { title: "Disputes", count: openDisputes.length, oldest: openDisputes[0]?.slaOpenedAt, team: "Risk / Ops", target: 120, view: "admin_disputes", role: "risk" as Role, tone: "warning" as const },
     { title: "Support", count: openTickets.length, oldest: openTickets[0]?.createdAt, team: "Support T1", target: 24, view: "support", role: "admin_support" as Role, tone: "info" as const },
     { title: "Trust & Safety", count: openTrust.length, oldest: openTrust[0]?.createdAt, team: "Risk T3", target: 48, view: "admin_trust", role: "risk" as Role, tone: "critical" as const },
+    { title: "Priority boost verification", count: openPriorityBoosts.length, oldest: openPriorityBoosts[0]?.createdAt, team: "Finance T2", target: 24, view: "admin_notes", role: "finance" as Role, tone: "info" as const },
     { title: "SLA breaches", count: slaBreaches.length, oldest: undefined, team: "Ops Manager", target: 0, view: "admin_audit", role: "ops_manager" as Role, tone: "critical" as const },
   ];
 
@@ -2427,8 +2429,9 @@ export function AdminGigModeration() {
 // ===================== 10. AdminNotes =====================
 
 export function AdminNotes() {
-  const { adminNotes, currentRole, resetData, normalizeSlaTimestamps, toggleTheme, theme, navigate, addAudit, currentUserId } = useQQ();
+  const { adminNotes, currentRole, resetData, normalizeSlaTimestamps, toggleTheme, theme, navigate, addAudit, currentUserId, priorityBoosts, updatePriorityBoost } = useQQ();
   const [confirmReset, setConfirmReset] = React.useState(false);
+  const openPriorityBoosts = priorityBoosts.filter((pb) => pb.paymentStatus === "payment_evidence_submitted" || pb.paymentStatus === "under_admin_verification");
   return (
     <div className="space-y-6">
       <PageHeader
@@ -2475,6 +2478,40 @@ export function AdminNotes() {
             <Sparkles className="size-3.5" /> Media & Lifecycle showcase
           </Button>
         </div>
+      </SectionCard>
+
+      <SectionCard title="Priority boost verification queue" description="Pro pays a separate marketing fee to boost gig visibility. Verify payment → activate priority. Priority fee is NOT commission (0% commission unchanged).">
+        {openPriorityBoosts.length === 0 ? (
+          <EmptyState title="No pending priority boosts" description="All priority boost payments are verified." icon={Rocket} />
+        ) : (
+          <QueueTable
+            columns={[
+              { key: "id", header: "Ref", render: (pb) => <span className="font-mono text-xs">{pb.id}</span> },
+              { key: "pro", header: "Pro", render: (pb) => <span className="font-medium">{pb.proName}</span> },
+              { key: "gig", header: "Gig", render: (pb) => <span className="text-xs">{pb.gigId}</span> },
+              { key: "fee", header: "Priority fee", align: "right", render: (pb) => <span className="font-semibold tabular-nums">{formatINR(pb.priorityFee)}</span> },
+              { key: "duration", header: "Duration", render: (pb) => <span>{pb.duration} days</span> },
+              { key: "utr", header: "UTR", render: (pb) => <span className="font-mono text-xs">{pb.paymentReference ?? "—"}</span> },
+              { key: "status", header: "Status", render: (pb) => <StatusBadge tone="pending">{pb.paymentStatus.replace(/_/g, " ")}</StatusBadge> },
+              { key: "actions", header: "Actions", render: (pb) => (
+                <div className="flex gap-1">
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                    const start = new Date().toISOString();
+                    const end = new Date(Date.now() + pb.duration * 86400000).toISOString();
+                    updatePriorityBoost(pb.id, { paymentStatus: "active", priorityStart: start, priorityEnd: end, resolvedAt: start, makerId: currentUserId ?? undefined });
+                    addAudit({ adminId: currentUserId ?? "", adminRole: currentRole, action: "Priority boost confirmed", entity: "PriorityBoost", entityId: pb.id, oldStatus: pb.paymentStatus, newStatus: "active", reason: `${formatINR(pb.priorityFee)} for ${pb.duration} days` });
+                  }}><CheckCircle2 className="size-3" /> Confirm</Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs hover:text-destructive" onClick={() => {
+                    updatePriorityBoost(pb.id, { paymentStatus: "rejected", rejectionReason: "UTR not found in bank statement", resolvedAt: new Date().toISOString() });
+                    addAudit({ adminId: currentUserId ?? "", adminRole: currentRole, action: "Priority boost rejected", entity: "PriorityBoost", entityId: pb.id, oldStatus: pb.paymentStatus, newStatus: "rejected", reason: "UTR not found" });
+                  }}><XCircle className="size-3" /></Button>
+                </div>
+              ) },
+            ]}
+            rows={openPriorityBoosts}
+            emptyMessage="No pending priority boosts."
+          />
+        )}
       </SectionCard>
 
       <SectionCard title="Implementation assumptions (v0.1)" description="Hard constraints for this prototype. Do not display contradicting features.">

@@ -40,6 +40,7 @@ import {
 } from "@/components/qq/shared";
 import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
 import { DeliveryVault } from "@/components/qq/shared/DeliveryVault";
+import { PriorityBoostPanel } from "@/components/qq/shared/PriorityBoostPanel";
 import type { VaultItem as VaultItemType, VaultState as VaultStateType } from "@/lib/qq/types";
 import { PortfolioGallery } from "@/components/qq/shared/PortfolioGallery";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
@@ -3175,10 +3176,11 @@ export function ProGigNew() {
 // ============================================================
 
 export function ProGigDetail() {
-  const { viewParams, gigs, navigate, updateGig, addAudit, currentUserId } = useQQ();
+  const { viewParams, gigs, navigate, updateGig, addAudit, currentUserId, priorityBoosts, submitPriorityBoost } = useQQ();
   const { toast } = useToast();
   const gig = gigs.find((g) => g.id === viewParams.gigId);
   const [confirmArchive, setConfirmArchive] = React.useState(false);
+  const priorityBoost = priorityBoosts.find((pb) => pb.gigId === viewParams.gigId);
 
   if (!gig) {
     return (
@@ -3349,6 +3351,21 @@ export function ProGigDetail() {
             <FeeBreakdown proFee={gig.proFee} compact />
             <div className="mt-2 text-xs text-muted-foreground">Pro fee {formatINR(gig.proFee)} · commission {formatINR(0)} · Buyer fee 14% {formatINR(fee)} · Buyer total {formatINR(total)}.</div>
           </SectionCard>
+
+          {gig.status === "approved_live" && (
+            <PriorityBoostPanel
+              gigId={gig.id}
+              gigTitle={gig.title}
+              proId={gig.proId}
+              proName={gig.proName}
+              boost={priorityBoost}
+              onSubmit={(pb) => {
+                submitPriorityBoost(pb);
+                addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Priority boost payment submitted", entity: "PriorityBoost", entityId: pb.id, newStatus: "payment_evidence_submitted", reason: `${formatINR(pb.priorityFee)} for ${pb.duration} days` });
+                toast({ title: "Priority payment submitted", description: "Under Admin review. Target: 24 hours." });
+              }}
+            />
+          )}
 
           <InterlockCard tone="info" icon={Info} title="Versioning" body="Changing price, scope, timeline, or deliverables creates a new version and may require re-review. Existing contracts retain original terms." />
         </div>

@@ -598,3 +598,38 @@ export type VaultState =
   | "disputed"
   | "access_restricted"
   | "unsupported_failed";
+
+// ===== Paid Priority Gig Feed (v0.1 Live) =====
+
+export type PriorityDuration = 3 | 7 | 14;
+export type PriorityPaymentStatus =
+  | "draft"
+  | "payment_evidence_submitted"
+  | "under_admin_verification"
+  | "payment_confirmed"
+  | "active"
+  | "expired"
+  | "rejected";
+
+export interface PriorityBoost {
+  id: string;
+  gigId: string;
+  proId: string;
+  proName: string;
+  priorityFee: number;
+  duration: PriorityDuration;
+  paymentReference?: string;
+  paymentMethod?: string;
+  paymentStatus: PriorityPaymentStatus;
+  priorityStart?: string;
+  priorityEnd?: string;
+  createdAt: string;
+  resolvedAt?: string;
+  rejectionReason?: string;
+  makerId?: string;
+  analytics?: {
+    views: number;
+    clicks: number;
+    requests: number;
+  };
+}

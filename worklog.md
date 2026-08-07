@@ -645,3 +645,61 @@ Produced `QUICKQUID_COMPLETION_TEST.md` with:
 - Add "Publish to portfolio" explicit action on accepted deliverables.
 - Surface retention hold status in the Vault UI.
 - Add notification deep-links for all Vault state changes.
+
+---
+
+## Cron Review Round 12 — Paid Priority Gig Feed (v0.1 Live), v0.3 Labels Removed
+
+### Current project status assessment
+This round responded to the "Scope Override V2" addendum declaring everything is v0.1 Live — including the Paid Priority Gig Feed (previously planned for v0.3). I verified zero remaining v0.2/v0.3/future labels, then built the complete Priority Boost system: Pro side (toggle, duration, fee calc, payment evidence, status, analytics), Buyer side (promoted section + Priority badge), Admin side (verification queue + confirm/reject + audit), with full store integration and seed data.
+
+### Completed modifications
+
+**Scope verification:**
+1. **Zero v0.2/v0.3/future labels** — Searched entire codebase: `rg "v0\.2|v0\.3|coming soon|Coming in v0|future release|planned for|coming later|deferred"` returns 0 results. All remaining `v0.1` references are legitimate (describing the manual payment model). Gigs and Priority Feed are both v0.1 Live.
+
+**Priority Boost system:**
+2. **New types** — Added `PriorityBoost` interface (id, gigId, proId, proName, priorityFee, duration, paymentReference, paymentMethod, paymentStatus, priorityStart, priorityEnd, createdAt, resolvedAt, rejectionReason, makerId, analytics), `PriorityDuration` (3/7/14 days), `PriorityPaymentStatus` (7 states: draft, payment_evidence_submitted, under_admin_verification, payment_confirmed, active, expired, rejected). (`src/lib/qq/types.ts`)
+3. **Store actions** — Added `priorityBoosts` state, `submitPriorityBoost(pb)`, `updatePriorityBoost(id, patch)` to the Zustand store. Persisted to localStorage. (`src/lib/qq/store.ts`)
+4. **Seed data** — 4 priority boosts: PB-5001 (active, GIG-3001, ₹1,500/7d, 89 views), PB-5002 (under verification, GIG-3007, ₹2,500/14d), PB-5003 (draft, GIG-3008, ₹800/3d), PB-5004 (expired, GIG-3010, ₹1,500/7d, 145 views). (`src/lib/qq/seed.ts`)
+5. **PriorityBoostPanel component** (`src/components/qq/shared/PriorityBoostPanel.tsx`) — The Pro-side panel with:
+   - **Default state**: "Boost this gig" card with duration options (3/7/14 days, ₹800/₹1,500/₹2,500).
+   - **Fee calculator**: Shows priority fee as separate line item + "This is a marketing fee, not deducted from your professional fee. 0% commission unchanged."
+   - **Payment evidence form**: UTR + method (NEFT/IMPS/RTGS/UPI) → status `payment_evidence_submitted`.
+   - **Active state**: Violet card with "Priority active" + Promoted badge + countdown ("ends in N days") + analytics (views/clicks/requests).
+   - **Under verification**: Amber card with UTR reference + "Admin will verify. Target: 24 hours."
+   - **Expired**: Neutral card with "Boost again" button + total analytics.
+   - **Rejected**: Red card with rejection reason + "Resubmit" button.
+6. **Pro gig detail integration** — Wired PriorityBoostPanel into ProGigDetail (after Commercial summary) for `approved_live` gigs. On submit: creates PriorityBoost + audit event + toast. (`src/components/qq/screens/pro/ProScreens.tsx`)
+7. **Buyer feed promoted section** — Updated buyer Gigs tab to split gigs into Promoted (active priority) + Organic. Promoted section has violet "Promoted gigs" header with "Pro paid for visibility" label, and each promoted gig card has a violet "Priority" badge. VLM-confirmed: "PROMOTED GIGS section with violet Priority badge, ALL GIGS section below with 5 organic cards." (`src/components/qq/screens/buyer/BuyerScreens.tsx`)
+8. **Admin Priority Boost queue** — Added "Priority boost verification" queue card to AdminOperations dashboard + a full Priority Boost Verification Queue section in AdminNotes with QueueTable (Ref, Pro, Gig, fee, duration, UTR, status, Confirm/Reject actions). Confirm → activates priority (sets start/end dates) + audit event. Reject → sets rejection reason + audit event. (`src/components/qq/screens/admin/AdminScreens.tsx`)
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser end-to-end: Buyer → Talent → Gigs tab → "Promoted gigs" section with violet Priority badge + "All gigs" organic section (VLM-confirmed). Pro → Gigs → gig detail → "Priority active" with Promoted badge + countdown + analytics + "marketing fee" copy. Ops → Admin notes → "Priority boost verification queue" with PB-5002 (under verification) + Confirm/Reject actions. All clean, no console/runtime errors.
+- VLM confirmed: buyer feed "PROMOTED GIGS section with violet Priority badge, ALL GIGS section with 5 organic cards".
+
+### Completion test update
+Updated `QUICKQUID_COMPLETION_TEST.md` with the new Priority Feed row:
+- **Workflow**: Paid Priority Gig Feed
+- **Route**: `/buyer/talent` (Gigs tab) + `/pro/gigs` (detail) + `/admin_notes` (verification queue)
+- **Owner**: Pro (submits) / Finance (verifies)
+- **Valid start state**: Draft
+- **Success state**: Active (promoted in feed)
+- **Failure states**: Rejected, Expired
+- **Audit event**: Priority boost confirmed/rejected
+- **Notification**: Priority payment submitted/confirmed active/expired/rejected
+- **Remaining gap**: None
+
+### Unresolved issues / risks + next-phase priorities
+1. **Priority notifications** — The notification copy is specified but not yet wired to the notification store. Could add priority-specific notifications. **Priority: low**.
+2. **Priority-only filter** — The buyer feed doesn't have a "Priority only" toggle filter yet. Could add it. **Priority: low**.
+3. **Expiry auto-detection** — Priority boosts expire based on `priorityEnd` date but there's no automatic check that moves expired boosts back to organic. Could add a time-based check. **Priority: low** (prototype limitation).
+4. **Priority analytics tracking** — Views/clicks/requests are seeded but not incremented by user actions. Could wire up view tracking. **Priority: low**.
+
+### Recommended next-phase focus
+- Add priority-specific notifications to the notification store.
+- Add "Priority only" filter toggle to the buyer gigs feed.
+- Add automatic expiry detection (check priorityEnd on load).
+- Wire up view/click tracking for promoted gigs.

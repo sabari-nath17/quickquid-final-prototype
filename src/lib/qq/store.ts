@@ -8,12 +8,14 @@ import type {
   NotificationItem, AuditEvent, KycSubmission, GigDraft, OfflineInstrument,
   TrustSafetyCase, ViewName, ViewParams, VerificationStatus, MilestoneStatus,
   PaymentEvidenceStatus, PayoutStatus, ContractStatus, DisputeStatus,
+  PriorityBoost,
 } from "./types";
 import {
   SEED_USERS, SEED_PRO_PROFILES, SEED_BUYER_PROFILES, SEED_BRIEFS,
   SEED_PROPOSALS, SEED_CONTRACTS, SEED_PAYMENTS, SEED_PAYOUTS, SEED_REFUNDS,
   SEED_DISPUTES, SEED_REVIEWS, SEED_TICKETS, SEED_NOTIFICATIONS, SEED_AUDIT,
   SEED_KYC, SEED_GIGS, SEED_OFFLINE_INSTRUMENTS, SEED_TRUST_CASES, ADMIN_NOTES,
+  SEED_PRIORITY_BOOSTS,
 } from "./seed";
 import { buyerFee, genId } from "./format";
 
@@ -114,6 +116,9 @@ interface QQState {
   updateKyc: (id: string, patch: Partial<KycSubmission>) => void;
   upsertGig: (g: GigDraft) => void;
   updateGig: (id: string, patch: Partial<GigDraft>) => void;
+  priorityBoosts: PriorityBoost[];
+  submitPriorityBoost: (pb: PriorityBoost) => void;
+  updatePriorityBoost: (id: string, patch: Partial<PriorityBoost>) => void;
   updateOfflineInstrument: (id: string, patch: Partial<OfflineInstrument>) => void;
   updateTrustCase: (id: string, patch: Partial<TrustSafetyCase>) => void;
   addMessage: (m: Message) => void;
@@ -153,6 +158,7 @@ const initialState = {
   gigs: SEED_GIGS,
   offlineInstruments: SEED_OFFLINE_INSTRUMENTS,
   trustCases: SEED_TRUST_CASES,
+  priorityBoosts: SEED_PRIORITY_BOOSTS,
   messages: [
     { id: "MSG-1", contractId: "QQ-0892", from: "system", fromName: "QuickQuid", text: "Contract QQ-0892 accepted. Funding pending for M1. Pro should not begin work until payment is confirmed.", at: "2025-01-14T09:05:00Z" },
     { id: "MSG-2", contractId: "QQ-0892", from: "buyer", fromName: "Northstar Labs", text: "Hi Akhil, just submitted the M1 payment via NEFT. UTR is UTR982341771. Looking forward to kickoff once confirmed.", at: "2025-01-14T11:36:00Z" },
@@ -241,6 +247,8 @@ export const useQQ = create<QQState>()(
         return { gigs: idx >= 0 ? s.gigs.map((x) => (x.id === g.id ? g : x)) : [g, ...s.gigs] };
       }),
       updateGig: (id, patch) => set((s) => ({ gigs: s.gigs.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+      submitPriorityBoost: (pb) => set((s) => ({ priorityBoosts: [pb, ...s.priorityBoosts] })),
+      updatePriorityBoost: (id, patch) => set((s) => ({ priorityBoosts: s.priorityBoosts.map((pb) => (pb.id === id ? { ...pb, ...patch } : pb)) })),
       updateOfflineInstrument: (id, patch) => set((s) => ({ offlineInstruments: s.offlineInstruments.map((o) => (o.id === id ? { ...o, ...patch } : o)) })),
       updateTrustCase: (id, patch) => set((s) => ({ trustCases: s.trustCases.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
       addMessage: (m) => set((s) => ({ messages: [...s.messages, m] })),
@@ -315,6 +323,7 @@ export const useQQ = create<QQState>()(
         gigs: s.gigs,
         offlineInstruments: s.offlineInstruments,
         trustCases: s.trustCases,
+        priorityBoosts: s.priorityBoosts,
         messages: s.messages,
         scopeChanges: s.scopeChanges,
         consent: s.consent,
