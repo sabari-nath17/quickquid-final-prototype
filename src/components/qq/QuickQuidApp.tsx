@@ -153,13 +153,11 @@ export function QuickQuidApp() {
     }
   }, [mounted, hydrated, expiryChecked, priorityBoosts, updatePriorityBoost, addAudit]);
 
-  // On hydration, restore the signed-in user to their role home instead of role_selection
-  React.useEffect(() => {
-    if (mounted && hydrated && currentRole !== "visitor" && view === "role_selection") {
-      const home = currentRole === "buyer" ? "buyer_dashboard" : currentRole === "pro" ? "pro_dashboard" : "admin_operations";
-      navigate(home);
-    }
-  }, [mounted, hydrated, currentRole, view, navigate]);
+  // On hydration, always show the landing page first.
+  // Previous role is preserved in state but the user must explicitly sign in
+  // or click a CTA to enter the product. This prevents the admin dashboard
+  // from appearing on a fresh page load for returning users.
+  // (The role is still stored — clicking "Sign in" or a demo shortcut will restore it.)
 
   // Auto-normalize SLA timestamps once on first hydration if seed data is stale (>60 days old).
   // This prevents every queue item from showing "Breached" because seed dates are from Jan 2025.
@@ -188,7 +186,8 @@ export function QuickQuidApp() {
     );
   }
 
-  const fullscreen = FULLSCREEN.includes(view) || currentRole === "visitor";
+  // If on the landing page, always render fullscreen (no sidebar) even if a role was persisted
+  const fullscreen = FULLSCREEN.includes(view) || currentRole === "visitor" || view === "role_selection";
 
   if (fullscreen) {
     return (
