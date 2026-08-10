@@ -60,7 +60,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold">Q</div>
+            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
             <span className="font-semibold">QuickQuid</span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
@@ -501,7 +501,7 @@ export function LandingPage() {
       <footer className="border-t border-border bg-card py-6 px-4">
         <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="flex size-6 items-center justify-center rounded bg-foreground text-background font-bold text-xs">Q</div>
+            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-6 w-auto" />
             <span className="font-medium">QuickQuid</span>
             <span>· Founding beta in Kochi</span>
           </div>

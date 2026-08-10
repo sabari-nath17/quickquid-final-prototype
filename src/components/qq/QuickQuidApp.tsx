@@ -181,7 +181,7 @@ export function QuickQuidApp() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold">Q</div>
+          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
           <span className="font-medium">QuickQuid</span>
         </div>
       </div>

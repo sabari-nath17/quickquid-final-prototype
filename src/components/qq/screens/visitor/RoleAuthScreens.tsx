@@ -42,7 +42,7 @@ export function RoleSelectionScreen() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/40">
       <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-border bg-background/80 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold">Q</div>
+          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
           <span className="font-semibold">QuickQuid</span>
           <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">the execution marketplace</span>
         </div>

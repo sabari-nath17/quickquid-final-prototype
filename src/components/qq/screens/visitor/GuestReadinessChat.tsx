@@ -183,7 +183,7 @@ export function GuestReadinessChat() {
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate("role_selection")} className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-md bg-foreground text-background font-bold text-sm">Q</div>
+            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-7 w-auto" />
             <span className="font-semibold text-sm hidden sm:inline">QuickQuid</span>
           </button>
           <Separator />

@@ -88,7 +88,7 @@ const ROLE_LABELS: Record<Role, string> = {
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold text-sm">Q</div>
+      <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
       <div className="leading-tight">
         <div className="font-semibold text-sm">QuickQuid</div>
         <div className="text-[10px] text-muted-foreground">the execution marketplace</div>
