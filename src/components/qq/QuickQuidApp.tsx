@@ -215,8 +215,8 @@ export function QuickQuidApp() {
         </div>
         <footer className="mt-auto border-t border-border bg-card px-4 py-4 pb-20 md:pb-4 text-center text-xs text-muted-foreground">
           <div className="mx-auto max-w-[1200px] flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>QuickQuid v0.1 prototype · 0% Pro commission · 14% beta Buyer fee · Manual payment verification</span>
-            <span className="hidden sm:inline">No wallet · No automated escrow · Payouts manually processed</span>
+            <span>QuickQuid — the execution marketplace</span>
+            <span className="hidden sm:inline">QuickQuid fee ₹0 during founding beta</span>
           </div>
         </footer>
         <MobileBottomNav />

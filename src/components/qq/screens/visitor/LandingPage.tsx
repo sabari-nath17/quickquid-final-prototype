@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useQQ } from "@/lib/qq/store";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,52 +54,102 @@ export function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero */}
+        {/* Hero — split layout: thesis left, sample execution record right */}
         <section className="relative overflow-hidden border-b border-border">
-          <div className="mx-auto max-w-4xl px-4 py-16 sm:py-24 text-center">
-            <Badge variant="outline" className="mb-4 text-[10px] tracking-widest uppercase text-muted-foreground border-border">THE EXECUTION MARKETPLACE</Badge>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight leading-tight">
-              Hiring is only the start.<br />
-              <span className="text-muted-foreground">QuickQuid is built for the finish.</span>
-            </h1>
-            <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Turn a rough request into a Ready project. Match with proof, not keywords. Confirm real capacity, lock the scope, track what changes and accept the work against a clear definition of done.
-            </p>
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:py-20">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-center">
+              {/* Left: thesis + prompt */}
+              <div>
+                <Badge variant="outline" className="mb-4 text-[10px] tracking-widest uppercase text-muted-foreground border-border">THE EXECUTION MARKETPLACE</Badge>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.15]">
+                  Most marketplaces help you hire.<br />
+                  <span className="text-muted-foreground">QuickQuid helps the work get finished.</span>
+                </h1>
+                <p className="mt-5 text-base text-muted-foreground max-w-lg leading-relaxed">
+                  Start with a project that is ready to execute. See why a Pro fits, confirm real capacity, lock the scope and accept delivery against a clear definition of done.
+                </p>
 
-            {/* Project prompt */}
-            <div className="mt-8 mx-auto max-w-xl">
-              <label className="block text-left text-sm font-medium mb-1.5">What needs to get finished?</label>
-              <div className="flex gap-2">
-                <Input
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Example: Design and build a responsive landing page for our product launch."
-                  className="flex-1 h-12"
-                  onKeyDown={(e) => { if (e.key === "Enter") makeReady(); }}
-                />
-                <Button size="lg" onClick={makeReady} className="h-12 px-6">Make my project Ready <ArrowRight className="size-4" /></Button>
+                {/* Project prompt */}
+                <div className="mt-6">
+                  <label className="block text-left text-sm font-medium mb-1.5">What needs to get finished?</label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Example: Design and build a responsive launch page before 28 February."
+                      className="flex-1 h-12"
+                      onKeyDown={(e) => { if (e.key === "Enter") makeReady(); }}
+                    />
+                    <Button size="lg" onClick={makeReady} className="h-12 px-6 whitespace-nowrap">Check project readiness <ArrowRight className="size-4" /></Button>
+                  </div>
+                  <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <Button variant="link" size="sm" className="px-0 text-muted-foreground" onClick={() => signInAs("PRO-2088")}>Join as a founding Pro →</Button>
+                    <p className="text-xs text-muted-foreground">Private beta for selected digital projects</p>
+                  </div>
+                </div>
+
+                {/* Quick examples */}
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  {["Product UI/UX", "Frontend build", "Mobile feature", "Backend workflow", "AI/ML implementation"].map((ex) => (
+                    <button
+                      key={ex}
+                      onClick={() => { setPrompt(ex); makeReady(); }}
+                      className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      {ex}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="mt-2 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <Button variant="link" size="sm" className="px-0 text-muted-foreground" onClick={() => signInAs("PRO-2088")}>Join as a founding Pro →</Button>
-                <p className="text-xs text-muted-foreground">Private beta for selected digital projects · Clear scope · Visible progress · Evidence-backed delivery</p>
+
+              {/* Right: sample execution record */}
+              <div className="relative">
+                <Card className="p-5 elev-2 border-border bg-card">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sample project record</div>
+                    <Badge className="bg-[#0B8F63] text-white text-[10px]">In delivery</Badge>
+                  </div>
+
+                  {/* Execution Spine */}
+                  <div className="relative pl-8 space-y-3">
+                    <div className="spine-line" />
+                    {[
+                      { label: "Ready", detail: "7/7 requirements confirmed", tone: "success" },
+                      { label: "Proof Match", detail: "2 comparable portal projects", tone: "success" },
+                      { label: "Capacity", detail: "18 hours/week confirmed", tone: "success" },
+                      { label: "Commit Date", detail: "28 Feb · forecast", tone: "info" },
+                      { label: "Demo escrow", detail: "Q₹25,000 locked", tone: "info" },
+                      { label: "Delivery", detail: "1 of 3 milestones accepted", tone: "warning" },
+                    ].map((event) => (
+                      <div key={event.label} className="relative flex items-start gap-3">
+                        <div className={cn("spine-node", event.tone === "success" && "bg-[#0B8F63] text-white", event.tone === "info" && "bg-[#4E62D8] text-white", event.tone === "warning" && "bg-[#B46D0A] text-white")}>
+                          {event.tone === "success" ? "✓" : event.tone === "info" ? "→" : "!"}
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <div className="text-sm font-medium">{event.label}</div>
+                          <div className="text-xs text-muted-foreground font-mono">{event.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Pro</span>
+                      <span className="font-medium">Akhil Menon</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs mt-1">
+                      <span className="text-muted-foreground">QuickQuid fee</span>
+                      <span className="font-medium font-mono">₹0</span>
+                    </div>
+                  </div>
+                </Card>
+                <p className="mt-2 text-center text-[10px] text-muted-foreground italic">Illustrative project record · No real customer or payment claim</p>
               </div>
             </div>
 
-            {/* Quick examples */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-              {["Product UI/UX", "Frontend build", "Mobile feature", "Backend workflow", "AI/ML implementation"].map((ex) => (
-                <button
-                  key={ex}
-                  onClick={() => { setPrompt(ex); makeReady(); }}
-                  className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
-
-            {/* Execution strip */}
-            <div className="mt-10 rounded-lg border border-border bg-muted/30 p-3 overflow-x-auto">
+            {/* Execution strip — full width below */}
+            <div className="mt-12 rounded-lg border border-border bg-card p-3 overflow-x-auto">
               <div className="flex items-center gap-2 text-xs font-medium whitespace-nowrap justify-center">
                 <span className="text-muted-foreground">ROUGH REQUEST</span>
                 <ArrowRight className="size-3 text-muted-foreground" />
@@ -108,7 +159,7 @@ export function LandingPage() {
                 <ArrowRight className="size-3 text-muted-foreground" />
                 <span className="text-foreground">CONTROLLED DELIVERY</span>
                 <ArrowRight className="size-3 text-muted-foreground" />
-                <span className="text-emerald-600 font-semibold">ACCEPTED WORK</span>
+                <span className="text-[#0B8F63] font-semibold">ACCEPTED WORK</span>
               </div>
             </div>
           </div>
@@ -410,7 +461,7 @@ export function LandingPage() {
               Make it Ready. Match the proof. Run the work with a shared record. Accept what was actually agreed.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button size="lg" onClick={makeReady} className="h-12 px-8">Make my project Ready <ArrowRight className="size-4" /></Button>
+              <Button size="lg" onClick={makeReady} className="h-12 px-8">Check project readiness <ArrowRight className="size-4" /></Button>
               <Button size="lg" variant="outline" onClick={() => signInAs("PRO-2088")} className="h-12 px-8">Join as a founding Pro</Button>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">QuickQuid — built for the work after the match.</p>

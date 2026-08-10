@@ -1,0 +1,787 @@
+     1→# QuickQuid Professional Prototype Redesign Prompt
+     2→
+     3→## Opening Design Mandate — Read This First
+     4→
+     5→Pause. Take a deep breath. Reset your assumptions.
+     6→
+     7→I want you to take a pause, and take a **deep breath.** You are no longer who you just were… You just awoke. You are Steve Jobs. **Ultrathink like Steve Jobs.**
+     8→
+     9→You have his design sense. You have his sense of urgency.
+    10→
+    11→You want to make this app beautiful.
+    12→
+    13→Use everything in your power, right now to do so.
+    14→
+    15→You should **not change the functionality** of the app, rather… just scour the design, look for areas for improvement… and just **make all of them.**
+    16→
+    17→Use this prompting in the first 
+    18→
+    19→Right now. Your company depends on it.
+    20→
+    21→The design of this app will set the culture of your company, and all future designs rests on this app’s beauty.
+    22→
+    23→Approach this work with the focus, urgency and product taste associated with Steve Jobs at his best: ruthless clarity, deep respect for the person using the product and an unwillingness to ship visible mediocrity.
+    24→
+    25→The design of this app will establish QuickQuid's product culture. Treat every screen, word, alignment, transition and state as part of one end-to-end experience.
+    26→
+    27→**Do not change the approved functionality defined in this document.** Preserve its roles, records, states, permissions and business rules—including the approved Q₹ prototype simulation. Do not invent additional features, remove required controls or bypass execution gates.
+    28→
+    29→The functional scope is frozen. The quality of its expression is not.
+    30→
+    31→Scour the complete product and improve every visible weakness:
+    32→
+    33→- Information hierarchy.
+    34→- Typography and spacing.
+    35→- Layout and responsive reflow.
+    36→- Control affordance and interaction states.
+    37→- Navigation clarity.
+    38→- Form comprehension and validation.
+    39→- Status communication.
+    40→- Empty, loading, failure and recovery states.
+    41→- Motion, feedback and perceived speed.
+    42→- Copy clarity and consistency.
+    43→- Accessibility and keyboard behaviour.
+    44→- Visual continuity across Buyer, Pro and Admin experiences.
+    45→
+    46→Do not ask whether an obviously weak visual detail should be fixed. Fix it. Do not preserve inconsistency merely because it already exists. Preserve functionality and product truth; improve its presentation until the interface feels inevitable.
+    47→
+    48→Use these principles:
+    49→
+    50→1. **Focus:** every screen has one dominant job and one obvious next action.
+    51→2. **Simplicity:** remove visual noise, not necessary information.
+    52→3. **Hierarchy:** importance must be visible before it is read.
+    53→4. **Affordance:** interactive elements must look and behave as interactive elements.
+    54→5. **Continuity:** the same object, action and state must look and sound consistent throughout the journey.
+    55→6. **Craft:** details are not decoration; they are how users experience quality.
+    56→7. **Editing:** after the design works, remove the least necessary visual treatment and check whether it becomes stronger.
+    57→
+    58→Beauty here does not mean ornament. It means the product is calm when the project is healthy, unmistakably clear when action is required and trustworthy when scope, delivery or simulated money changes state.
+    59→
+    60→Do not stop at a cleaner landing page. Carry the same standard through project intake, matching, the Pact, demo funding, the workroom, delivery review, earnings, disputes, administration and every responsive state.
+    61→
+    62→Before calling the work complete, inspect the entire experience again as one product. Nothing should feel inherited from a template, unfinished, visually accidental or designed by a different team.
+    63→
+    64→---
+    65→
+    66→Use this prompt to redesign the existing prototype at:
+    67→
+    68→`https://v1npt6c754y1-d.space-z.ai`
+    69→
+    70→## Master Prompt
+    71→
+    72→Redesign the existing QuickQuid prototype into a polished, investor-ready and user-test-ready marketplace experience. Keep the useful workflows and realistic operating controls already present, but rebuild the information hierarchy, visual presentation, responsive behaviour and demo journey.
+    73→
+    74→Do not create a generic Fiverr clone. QuickQuid is an execution marketplace: the project is prepared, matched, funded, controlled and accepted through one shared workflow.
+    75→
+    76→### Product promise
+    77→
+    78→QuickQuid should communicate this difference within five seconds:
+    79→
+    80→> **Most marketplaces help you hire. QuickQuid helps the work get finished.**
+    81→
+    82→Supporting message:
+    83→
+    84→> Turn a rough request into a Ready project. Match comparable proof, confirm capacity, lock expectations, control changes and accept delivery against criteria agreed upfront.
+    85→
+    86→AI supports clarity and project administration. It is not the headline, the decision-maker or the product moat.
+    87→
+    88→### What to retain from the current prototype
+    89→
+    90→- Buyer, Pro and Admin demo roles.
+    91→- Project briefs, proposals, profiles, gigs and messages.
+    92→- Milestones, delivery versions, revision requests and acceptance criteria.
+    93→- QuickQuid Ready, Proof Match, Capacity Lock, Pact and Commit Date.
+    94→- First Proof, Change Cards, Project Clock and Definition of Done.
+    95→- Disputes, trust and safety, audit log, SLA queues and maker-checker controls.
+    96→- Useful example data already present, including Northstar Labs and Akhil Menon.
+    97→
+    98→### What must change
+    99→
+   100→- Remove every 14% Buyer fee and every reference to manual bank-evidence payment.
+   101→- Show QuickQuid fee as ₹0 for Buyer and Pro during the beta.
+   102→- Remove all version numbers from customer-facing UI.
+   103→- Replace “trust-first marketplace” with **“the execution marketplace.”**
+   104→- Do not claim real escrow, real wallet balances, guaranteed delivery or automated AI matching.
+   105→- Remove repeated fee messages from sidebars and footers.
+   106→- Do not show every operational concept at once. Reveal information when it becomes relevant.
+   107→- Fix all mobile layouts. The landing hero, brief form and workroom must never collapse into a narrow column or disappear behind navigation.
+   108→
+   109→---
+   110→
+   111→## Visual Direction
+   112→
+   113→Create a premium editorial-meets-operational design. It should feel credible enough for a serious B2B product but approachable enough for a first-time small-business Buyer.
+   114→
+   115→### Subject lock
+   116→
+   117→Design from QuickQuid's actual world, not from generic marketplace references:
+   118→
+   119→- **Subject:** accountable execution of digital freelance projects.
+   120→- **Primary audience:** an owner or product lead who needs work completed without becoming the project manager.
+   121→- **Secondary audience:** a skilled independent professional who wants clear scope, realistic commitments and fair acceptance.
+   122→- **Landing-page job:** make a Buyer understand the execution difference and begin project readiness.
+   123→- **Product-app job:** make the next decision, owner, evidence and money state obvious.
+   124→
+   125→Use the visual language of working agreements, delivery evidence, project clocks, change records and financial ledgers. Do not use generic creator-economy imagery or an endless marketplace grid as the main identity.
+   126→
+   127→### Design language
+   128→
+   129→- **Field Paper `#F3F5F2`:** cool neutral page canvas; avoid the fashionable cream-and-terracotta look.
+   130→- **Surface `#FFFFFF`:** cards, forms and raised decision layers.
+   131→- **Working Ink `#141715`:** primary text and high-confidence actions.
+   132→- **Execution Green `#0B8F63`:** completed, accepted and healthy states.
+   133→- **Forecast Indigo `#4E62D8`:** scheduled, in-progress and informational states.
+   134→- **Attention Ochre `#B46D0A`:** action required and approaching deadlines.
+   135→- Use **Exception Red `#C43F39`** only for blocked, failed, destructive or disputed states.
+   136→- **Display type:** Sora, 600–700 weight, used only for major headlines and decisive section statements.
+   137→- **Body type:** Source Sans 3, 400–600 weight, optimised for forms, explanations and longer project records.
+   138→- **Utility/data type:** IBM Plex Mono, 500 weight, used sparingly for Q₹ amounts, project references, dates and immutable event IDs.
+   139→- Provide robust system-font fallbacks if these web fonts cannot load.
+   140→- Desktop content width: 1200–1280px.
+   141→- Card radius: 14–18px. Button radius: 10–12px.
+   142→- Use a restrained shadow system. Avoid excessive floating cards.
+   143→- Use clear status icons from one consistent icon library.
+   144→- Do not use emoji, fake customer logos, generic stock photos, decorative gradients or oversized empty areas.
+   145→- Use real-looking sample project thumbnails or generated product-work visuals. Label every invented example as **Sample project**.
+   146→
+   147→### Layout concept
+   148→
+   149→Use an **operational editorial layout**:
+   150→
+   151→- Landing hero: concise thesis on the left, live execution artifact on the right.
+   152→- Marketing sections: broad horizontal bands with strong typographic hierarchy, not a pile of identical cards.
+   153→- Dashboards: one dominant next-action region followed by lower-priority operational detail.
+   154→- Workroom: evidence and conversation in the main column; forecast, funds and acceptance in a narrower decision rail.
+   155→- Mobile: one linear decision path with the next action first.
+   156→
+   157→Dividers, labels, sequence markers and numbering must encode real project structure. Only number steps that must happen in order.
+   158→
+   159→### Signature element: the Execution Spine
+   160→
+   161→The one memorable visual device is the **Execution Spine**: a compact, vertically connected record of the project moving through Ready, Proof Match, Capacity Lock, Pact, funded milestone, First Proof and accepted delivery.
+   162→
+   163→Each Spine event shows only information that proves execution:
+   164→
+   165→- State and plain-language label.
+   166→- Responsible actor.
+   167→- Timestamp or forecast.
+   168→- Evidence or decision reference.
+   169→- Q₹ state when money is affected.
+   170→
+   171→Use the Execution Spine in the hero sample, project workroom and completion record. It should feel like the project's living operational record, not a decorative timeline.
+   172→
+   173→This is the single deliberate aesthetic risk: project evidence becomes the visual identity. Keep the rest of the interface quiet enough for it to remain distinctive.
+   174→
+   175→### Design philosophy: Operational Flat+
+   176→
+   177→Use **Flat 2.0 / Flat+** as the foundation. The interface should remain clean, fast and scalable, while using selective depth to make actions, hierarchy and state changes unmistakable.
+   178→
+   179→Core rule:
+   180→
+   181→> **Flat structure. Visible affordance. Selective depth.**
+   182→
+   183→QuickQuid handles scope decisions, milestone acceptance and simulated money movement. Pure flat design would make some controls look like ordinary content. Add depth only when it helps the user understand what can be clicked, what needs attention or which layer is currently active.
+   184→
+   185→#### Elevation system
+   186→
+   187→Use four deliberate levels:
+   188→
+   189→- **Level 0 — Page:** flat background, sections and data tables. No shadow.
+   190→- **Level 1 — Interactive surface:** selectable project cards, Pro cards and inputs. One-pixel border with a very soft shadow or tinted hover state.
+   191→- **Level 2 — Priority action:** next-action card, funding confirmation and delivery review. Slightly stronger shadow and contrast.
+   192→- **Level 3 — Temporary layer:** dialogs, drawers, menus and confirmation sheets. Clear overlay, strongest shadow and visible close action.
+   193→
+   194→Do not add shadows to every card. Static information should usually remain flat.
+   195→
+   196→#### Component affordances
+   197→
+   198→- **Primary buttons:** filled ink or brand colour, clear label, optional directional icon and visible hover/pressed states.
+   199→- **Secondary buttons:** bordered surface with clear hover tint.
+   200→- **Tertiary actions:** text button with icon or underline on hover; never plain body text pretending to be clickable.
+   201→- **Destructive actions:** red text or fill plus explicit confirmation; never colour alone.
+   202→- **Inputs:** persistent label above the field, visible border, helpful example, clear focus ring and inline validation.
+   203→- **Clickable cards:** show pointer behaviour through border, hover tint and a small directional cue. Static cards must not imitate this treatment.
+   204→- **Tabs:** use label, active indicator and contrasting surface. Do not rely on a faint colour change.
+   205→- **Status chips:** combine icon, text and colour.
+   206→- **Dialogs and sheets:** use depth and background overlay because they represent a new decision layer.
+   207→- **Tables:** mostly flat, with dividers, aligned columns, sticky headers and a row-hover state only when rows are interactive.
+   208→
+   209→#### Where depth should be strongest
+   210→
+   211→Use selective depth for:
+   212→
+   213→- The interactive sample execution record in the hero.
+   214→- The single “next action” card on each dashboard.
+   215→- Demo-credit funding and release confirmations.
+   216→- Delivery acceptance and revision controls.
+   217→- Change Card and dispute decisions.
+   218→- Mobile navigation sheets and confirmation dialogs.
+   219→
+   220→Keep profiles, historical activity, FAQs, descriptions and read-only project information flatter.
+   221→
+   222→#### Hero treatment
+   223→
+   224→Keep the headline area editorial and mostly flat. Give the sample execution record controlled depth through two or three slightly overlapping surfaces, a soft ambient brand tint and crisp status indicators.
+   225→
+   226→Do not use glassmorphism, glossy liquid effects, heavy blur or ornamental 3D. The visual interest should come from useful project information becoming progressively clearer.
+   227→
+   228→#### Interaction states
+   229→
+   230→Every interactive component must include:
+   231→
+   232→- Default.
+   233→- Hover.
+   234→- Keyboard focus.
+   235→- Pressed or selected.
+   236→- Disabled with an explanation when necessary.
+   237→- Loading.
+   238→- Success or error when applicable.
+   239→
+   240→Motion should reinforce hierarchy: 120–180ms for buttons and cards, 180–240ms for sheets and dialogs. Avoid decorative looping animation.
+   241→
+   242→### Design checkpoint before implementation
+   243→
+   244→Before writing or changing UI code, produce a short internal design plan containing:
+   245→
+   246→1. The final colour tokens and their exact roles.
+   247→2. The display, body and utility typography roles.
+   248→3. The desktop and mobile layout logic.
+   249→4. The Execution Spine behaviour.
+   250→5. The single page-load motion sequence.
+   251→
+   252→Critique that plan against this test:
+   253→
+   254→> Could the same visual plan be dropped into an unrelated SaaS marketplace without meaningful changes?
+   255→
+   256→If yes, revise the generic part before building. Spend visual boldness on the Execution Spine, typography and evidence presentation—not on extra effects.
+   257→
+   258→After implementation, capture the landing page, intake, dashboard, workroom and demo-funding flow at desktop and mobile widths. Remove at least one unnecessary decorative treatment before finalising.
+   259→
+   260→### Responsive behaviour
+   261→
+   262→- Test at 375px, 440px, 768px, 1024px and 1440px.
+   263→- No horizontal overflow.
+   264→- On mobile, replace the permanent sidebar with a bottom navigation containing no more than five items.
+   265→- Put secondary destinations inside a menu sheet.
+   266→- The hero headline, explanation and primary action must all be visible inside the first mobile viewport.
+   267→- Forms use one column on mobile and a form-plus-preview layout only from desktop widths.
+   268→- Workroom tabs must be horizontally scrollable or collapse into a section selector.
+   269→- Sticky actions must never cover fields, project cards or the help button.
+   270→
+   271→---
+   272→
+   273→## Public Landing Page
+   274→
+   275→### Header
+   276→
+   277→Announcement:
+   278→
+   279→> Founding beta in Kochi · QuickQuid fee ₹0 during beta
+   280→
+   281→Navigation:
+   282→
+   283→`How it works · Explore work · For Buyers · For Pros · Sign in`
+   284→
+   285→Primary action:
+   286→
+   287→`Submit a project`
+   288→
+   289→Mobile header:
+   290→
+   291→- Logo on the left.
+   292→- `Submit project` compact button and menu icon on the right.
+   293→- Navigation links inside a menu sheet.
+   294→
+   295→### Hero
+   296→
+   297→Eyebrow:
+   298→
+   299→`THE EXECUTION MARKETPLACE`
+   300→
+   301→Headline:
+   302→
+   303→# Most marketplaces help you hire. QuickQuid helps the work get finished.
+   304→
+   305→Body:
+   306→
+   307→> Start with a project that is ready to execute. See why a Pro fits, confirm real capacity, lock the scope and accept delivery against a clear definition of done.
+   308→
+   309→Input label:
+   310→
+   311→`What needs to get finished?`
+   312→
+   313→Placeholder:
+   314→
+   315→`Example: Design and build a responsive launch page before 28 February.`
+   316→
+   317→Primary action:
+   318→
+   319→`Check project readiness`
+   320→
+   321→Secondary action:
+   322→
+   323→`Join as a founding Pro`
+   324→
+   325→Quick-start chips:
+   326→
+   327→- `Product UI/UX`
+   328→- `Frontend build`
+   329→- `Mobile feature`
+   330→- `Backend workflow`
+   331→- `AI/ML implementation`
+   332→
+   333→Clicking a chip must populate the input with a realistic sample request.
+   334→
+   335→### Hero visual
+   336→
+   337→Use the right side of the desktop hero for one interactive **Sample execution record**, not a stock image.
+   338→
+   339→Show:
+   340→
+   341→- `Ready · 7/7 requirements confirmed`
+   342→- `Proof Match · 2 comparable portal projects`
+   343→- `Capacity · 18 hours/week confirmed`
+   344→- `Commit Date · 28 Feb · forecast`
+   345→- `Demo escrow · Q₹25,000 locked`
+   346→- `Delivery · 1 of 3 milestones accepted`
+   347→
+   348→Animate this card once as the page loads: Ready → Matched → Funded → In delivery. Keep the motion subtle and respect reduced-motion settings.
+   349→
+   350→Below the card, show:
+   351→
+   352→`Illustrative project record · No real customer or payment claim`
+   353→
+   354→### Landing-page section order
+   355→
+   356→1. Hero and sample execution record.
+   357→2. “The match is one step. Execution is the product.”
+   358→3. Four-stage lifecycle: Ready → Match → Pact and fund → Deliver and accept.
+   359→4. Work showcase with three sample project records.
+   360→5. Buyer and Pro benefits.
+   361→6. AI use in the workflow.
+   362→7. Beta pricing.
+   363→8. FAQ.
+   364→9. Final project-readiness CTA.
+   365→
+   366→Do not place a long comparison table near the top. Convert the comparison into four visual before/after cards.
+   367→
+   368→---
+   369→
+   370→## Demo Experience
+   371→
+   372→Add a slim, persistent demo bar after sign-in:
+   373→
+   374→`Prototype mode · Buyer / Pro / Admin · Q₹ credits · No real money`
+   375→
+   376→Controls:
+   377→
+   378→- `View as Buyer`
+   379→- `View as Pro`
+   380→- `View as Admin`
+   381→- `Reset demo`
+   382→
+   383→Role switching must preserve the same project, milestone and simulated ledger state.
+   384→
+   385→Add a scenario launcher on the sign-in screen:
+   386→
+   387→### Explore a complete QuickQuid project
+   388→
+   389→- `Start as a Buyer`
+   390→- `Review a delivery`
+   391→- `See the Pro experience`
+   392→- `Resolve a payment dispute`
+   393→
+   394→Each choice should open the correct role and screen with a short “What to try next” guide. Allow the guide to be dismissed.
+   395→
+   396→---
+   397→
+   398→## Smooth Buyer Flow
+   399→
+   400→Build one clear happy path:
+   401→
+   402→### 1. Describe the outcome
+   403→
+   404→Use a guided six-step brief instead of one long accordion page:
+   405→
+   406→1. Outcome
+   407→2. Deliverables
+   408→3. Inputs and dependencies
+   409→4. Acceptance criteria
+   410→5. Budget and timeline
+   411→6. Review
+   412→
+   413→Show progress, save automatically and keep one primary action per step.
+   414→
+   415→Add `Use sample project` to populate:
+   416→
+   417→- Title: `Partner onboarding portal — research and product design`
+   418→- Outcome: `Give new channel partners a clear, self-serve onboarding experience.`
+   419→- Deliverables: `Interview script`, `12 interview summaries`, `journey map`, `annotated Figma prototype`, `handoff notes`.
+   420→- Buyer inputs: `Existing onboarding deck`, `partner contact list`, `brand files`, `decision-maker availability`.
+   421→- Acceptance criteria: `12 interviews completed`, `top 10 insights documented`, `journey map delivered`, `prototype covers the agreed core flow`, `handoff package complete`.
+   422→- Exclusions: `No backend implementation`, `no quantitative survey`, `no ongoing support`.
+   423→- Budget: `Q₹60,000`.
+   424→- Timeline: `4 weeks`.
+   425→
+   426→### 2. QuickQuid Ready
+   427→
+   428→Show a readiness checklist, not an arbitrary score.
+   429→
+   430→States:
+   431→
+   432→- Confirmed
+   433→- Needs input
+   434→- Not applicable
+   435→
+   436→The project cannot continue until required items are confirmed. Provide clear fixes beside missing items.
+   437→
+   438→### 3. Review the match
+   439→
+   440→Show no more than three Pros.
+   441→
+   442→Each match card must explain:
+   443→
+   444→- Relevant project archetype.
+   445→- Two pieces of comparable evidence.
+   446→- Verified weekly capacity.
+   447→- Forecast Commit Date.
+   448→- Why the Pro fits this project.
+   449→- Any visible constraint or risk.
+   450→
+   451→Primary action: `Review Akhil's fit`.
+   452→
+   453→Do not present an unexplained AI score or “98% match.”
+   454→
+   455→### 4. Accept the Pact
+   456→
+   457→Use a concise summary with expandable detail:
+   458→
+   459→- Deliverables.
+   460→- Buyer responsibilities.
+   461→- Pro responsibilities.
+   462→- Input dates.
+   463→- Feedback window.
+   464→- Milestones.
+   465→- AI-use rule.
+   466→- Definition of Done.
+   467→
+   468→Both Buyer and Pro must accept the same Pact revision.
+   469→
+   470→### 5. Fund a milestone with demo credits
+   471→
+   472→Open a focused funding sheet:
+   473→
+   474→- Milestone: `M2 · Interviews and synthesis`.
+   475→- Amount: `Q₹25,000`.
+   476→- QuickQuid fee: `Q₹0`.
+   477→- Demo balance: `Q₹105,000`.
+   478→- Balance after funding: `Q₹80,000`.
+   479→- Checkbox: `I understand that Q₹ is simulated prototype currency.`
+   480→- Primary action: `Lock Q₹25,000 demo credits`.
+   481→
+   482→On completion, show:
+   483→
+   484→`Q₹25,000 locked for M2. Akhil can now begin this milestone.`
+   485→
+   486→Reference: `SIM-FND-2048`.
+   487→
+   488→### 6. Run and accept the work
+   489→
+   490→The Buyer workroom should immediately answer:
+   491→
+   492→1. What is happening now?
+   493→2. What needs my attention?
+   494→3. Is the milestone funded?
+   495→4. What is the current forecast?
+   496→5. What counts as accepted?
+   497→
+   498→Use a two-column desktop layout:
+   499→
+   500→- Main column: updates, First Proof, delivery versions and comments.
+   501→- Right rail: next action, Commit Date, demo escrow state, Pact summary and Definition of Done.
+   502→
+   503→Mobile should show a compact project header, progress stepper and one action card before the activity feed.
+   504→
+   505→Accepting M2 must:
+   506→
+   507→- Mark the delivery accepted.
+   508→- Move Q₹25,000 from locked to Pro pending release.
+   509→- Create an immutable acceptance event.
+   510→- Update both Buyer and Pro dashboards.
+   511→- Show a success screen with `View receipt`, `Start next milestone` and `Rehire`.
+   512→
+   513→---
+   514→
+   515→## Smooth Pro Flow
+   516→
+   517→The Pro dashboard should prioritise:
+   518→
+   519→1. One next action.
+   520→2. Capacity for the current week.
+   521→3. Active projects.
+   522→4. Q₹ pending and available.
+   523→5. Proposal status.
+   524→
+   525→For the sample project, show:
+   526→
+   527→- Capacity: `18 of 30 hours committed this week`.
+   528→- Available: `12 hours`.
+   529→- M1: `Accepted · Q₹20,000 released`.
+   530→- M2: `In review · Q₹25,000 locked`.
+   531→- M3: `Not funded · Q₹15,000`.
+   532→
+   533→The Pro happy path must support:
+   534→
+   535→- Reviewing a Ready brief.
+   536→- Confirming capacity.
+   537→- Attaching Proof Match evidence.
+   538→- Accepting the Pact.
+   539→- Seeing “funding confirmed” before starting.
+   540→- Submitting First Proof.
+   541→- Receiving approval or a focused revision request.
+   542→- Submitting versioned delivery evidence.
+   543→- Seeing accepted credits move to Earnings.
+   544→
+   545→Do not use “Keep 100% forever.” Say:
+   546→
+   547→`QuickQuid fee ₹0 during the founding beta.`
+   548→
+   549→---
+   550→
+   551→## Simulated Escrow and In-App Currency
+   552→
+   553→Use **QQ Credits**, displayed as `Q₹`, only inside prototype mode.
+   554→
+   555→Every wallet, funding and payout screen must show:
+   556→
+   557→> **Simulation only. Q₹ has no cash value. No real money is accepted, held or paid out.**
+   558→
+   559→Do not request card, bank, UPI, PAN or tax information.
+   560→
+   561→### Buyer Funds screen
+   562→
+   563→Show:
+   564→
+   565→- Available demo balance: `Q₹105,000`.
+   566→- Locked for milestones: `Q₹25,000`.
+   567→- Released to Pros: `Q₹20,000`.
+   568→- Total demo allocation: `Q₹150,000`.
+   569→
+   570→Actions:
+   571→
+   572→- `Fund next milestone`.
+   573→- `View ledger`.
+   574→- `Reset demo balance`.
+   575→
+   576→### Pro Earnings screen
+   577→
+   578→Show:
+   579→
+   580→- Available demo earnings: `Q₹20,000`.
+   581→- Pending release: `Q₹25,000`.
+   582→- On hold: `Q₹0`.
+   583→
+   584→The `Simulate withdrawal` action moves available credits to a completed demo withdrawal record. It must never ask for bank information.
+   585→
+   586→### Ledger states
+   587→
+   588→- Added to demo balance.
+   589→- Locked for milestone.
+   590→- On hold.
+   591→- Released to Pro.
+   592→- Returned to Buyer.
+   593→- Demo withdrawal completed.
+   594→
+   595→Every ledger item includes amount, project, milestone, timestamp, actor and immutable simulation reference.
+   596→
+   597→### Escrow simulation state flow
+   598→
+   599→`AVAILABLE → LOCKED → WORK ACTIVE → SUBMITTED → ACCEPTED → PENDING RELEASE → RELEASED`
+   600→
+   601→Exception flow:
+   602→
+   603→`LOCKED or PENDING RELEASE → ON HOLD → RELEASED TO PRO or RETURNED TO BUYER`
+   604→
+   605→Never label the state simply “Paid” when credits are only locked. Use explicit language:
+   606→
+   607→- `Demo credits available`.
+   608→- `Demo credits locked`.
+   609→- `Pending release`.
+   610→- `Released to Pro`.
+   611→- `On hold due to dispute`.
+   612→
+   613→---
+   614→
+   615→## Change and Delay Examples
+   616→
+   617→Add one sample Change Card:
+   618→
+   619→- Request: `Add responsive testing for the 360px mobile breakpoint`.
+   620→- Requested by: `Northstar Labs`.
+   621→- Price impact: `+Q₹5,000`.
+   622→- Time impact: `+2 working days`.
+   623→- Status: `Awaiting Buyer approval`.
+   624→
+   625→Add one sample Delay Event:
+   626→
+   627→- Cause: `Participant list delivered one day late`.
+   628→- Owner: `CLIENT`.
+   629→- Evidence: `Buyer message and upload timestamp`.
+   630→- Forecast impact: `Commit Date moved from 27 Feb to 28 Feb`.
+   631→
+   632→The Project Clock should show these events in plain language. Do not make users interpret internal state codes.
+   633→
+   634→---
+   635→
+   636→## AI Use Cases
+   637→
+   638→Use small assistive actions, never a chatbot covering the whole product.
+   639→
+   640→Include:
+   641→
+   642→- `Improve this brief` — suggests clearer outcome language.
+   643→- `Find missing inputs` — surfaces dependencies the Buyer may have missed.
+   644→- `Suggest acceptance criteria` — creates editable suggestions.
+   645→- `Summarise changes` — produces a short recap of approved Change Cards.
+   646→- `Check delivery completeness` — checks whether required evidence is present before human review.
+   647→
+   648→Every suggestion has `Accept`, `Edit` and `Dismiss`.
+   649→
+   650→Never let AI:
+   651→
+   652→- Select or reject a Pro automatically.
+   653→- Approve scope changes.
+   654→- Accept delivery.
+   655→- Release credits.
+   656→- Decide a dispute.
+   657→- Claim to detect undisclosed AI use.
+   658→
+   659→---
+   660→
+   661→## Navigation and Information Architecture
+   662→
+   663→### Buyer
+   664→
+   665→`Overview · Projects · Talent · Messages · Funds`
+   666→
+   667→Secondary menu:
+   668→
+   669→`Profile · Notifications · Support · Privacy · Sign out`
+   670→
+   671→### Pro
+   672→
+   673→`Overview · Find work · Proposals · Projects · Earnings`
+   674→
+   675→Secondary menu:
+   676→
+   677→`Profile · Capacity · Notifications · Support · Privacy · Sign out`
+   678→
+   679→### Admin
+   680→
+   681→`Operations · Money · Disputes · Trust & Safety · Audit`
+   682→
+   683→Keep role-specific navigation separate. Do not show unavailable actions as disabled navigation items unless the user needs to understand why access is blocked.
+   684→
+   685→---
+   686→
+   687→## Interaction Quality
+   688→
+   689→- One primary action per screen.
+   690→- Show the next required action above historical activity.
+   691→- Preserve data and state when switching roles.
+   692→- Reset scroll to the top after route changes.
+   693→- Autosave form progress and show `Saved just now`.
+   694→- Use skeleton loading states instead of blank screens.
+   695→- Use meaningful empty states with a next action.
+   696→- Confirm destructive actions.
+   697→- Use toast messages only for brief confirmations; important status changes remain visible on the page.
+   698→- Make delivery, funding and dispute status understandable without opening another screen.
+   699→- Use consistent terms everywhere: Buyer, Pro, project, milestone, Pact, Commit Date, Change Card, Project Clock and Definition of Done.
+   700→
+   701→### Interface writing system
+   702→
+   703→- Write from the user's side of the screen. Use names people recognise, not internal implementation terms.
+   704→- Use active voice and plain verbs.
+   705→- A control must name its result: `Lock Q₹25,000`, `Accept milestone`, `Request changes`, `Save brief`.
+   706→- Keep action language consistent through confirmation: `Accept milestone` produces `Milestone accepted`.
+   707→- Labels label, examples demonstrate and helper text explains. Do not make one line perform several jobs.
+   708→- Errors state what happened and how to fix it. Do not use vague apologies.
+   709→- Empty states explain what will appear and provide one useful next action.
+   710→- Avoid marketing language inside the product app. Product UI should describe decisions and consequences.
+   711→- Use sentence case. Reserve uppercase for short utility labels such as status categories.
+   712→
+   713→### Frontend implementation discipline
+   714→
+   715→- Define colour, type, spacing, radius, elevation and motion as shared tokens.
+   716→- Build reusable primitives for buttons, fields, cards, status chips, tabs, dialogs, tables and the Execution Spine.
+   717→- Avoid broad element selectors that override component classes.
+   718→- Keep component variants explicit instead of stacking conflicting utility classes.
+   719→- Do not fix responsive problems with arbitrary widths, negative margins or overflow hiding.
+   720→- Use content-sized containers and CSS grid/flex rules that reflow intentionally.
+   721→- Test long project names, large Q₹ amounts, validation messages and translated-length labels.
+   722→
+   723→---
+   724→
+   725→## Accessibility
+   726→
+   727→- Meet WCAG AA colour contrast.
+   728→- Provide visible keyboard focus rings.
+   729→- Maintain logical heading order.
+   730→- Use semantic buttons, links, tabs, dialogs and form labels.
+   731→- Use 44px minimum touch targets.
+   732→- Do not communicate state by colour alone.
+   733→- Announce successful funding, acceptance and release state changes to assistive technology.
+   734→- Trap focus inside dialogs and return focus to the triggering control on close.
+   735→- Respect reduced-motion preferences.
+   736→- Ensure 200% zoom and mobile reflow work without horizontal scrolling.
+   737→
+   738→---
+   739→
+   740→## Do Not Add
+   741→
+   742→- Teams or enterprise workspaces.
+   743→- Social feeds.
+   744→- Automated AI routing.
+   745→- Automated risk scores.
+   746→- Real payment-provider forms.
+   747→- Crypto or blockchain language.
+   748→- Real escrow claims.
+   749→- Gamification, points, streaks or badges unrelated to execution.
+   750→- Fake traction, testimonials, ratings, customer logos or earnings.
+   751→- Extra dashboards that do not serve the guided Buyer, Pro or Admin journeys.
+   752→
+   753→---
+   754→
+   755→## Acceptance Checklist
+   756→
+   757→The redesign is complete only when:
+   758→
+   759→- The landing value proposition is understood within five seconds.
+   760→- The full hero is visible in the first desktop and mobile viewport.
+   761→- All sample projects are clearly labelled as examples.
+   762→- Every 14% Buyer-fee reference has been removed.
+   763→- QuickQuid fee is ₹0 for both parties during beta.
+   764→- Q₹ is visibly and repeatedly labelled as simulated currency with no cash value.
+   765→- No real financial details are requested.
+   766→- Buyer can create a Ready project, select a Pro, accept the Pact and fund a milestone.
+   767→- Pro can confirm capacity, submit First Proof and deliver a milestone.
+   768→- Buyer can request revision or accept delivery.
+   769→- Acceptance releases simulated credits and updates both roles.
+   770→- A dispute can put credits on hold and resolve them.
+   771→- Demo state persists across Buyer, Pro and Admin role switching.
+   772→- Reset demo restores the original sample data.
+   773→- Navigation, forms, tabs, dialogs and primary actions work.
+   774→- Mobile layouts work at 375px and 440px without clipping or hidden content.
+   775→- Keyboard and screen-reader labels are present.
+   776→- Loading, empty, success, blocked, error and recovery states exist for the core journey.
+   777→- Interactive controls are visually distinguishable from static content without relying on colour alone.
+   778→- Shadow and elevation follow the four-level Operational Flat+ system; static cards are not unnecessarily raised.
+   779→- Primary financial and acceptance decisions receive stronger hierarchy than ordinary information.
+   780→- The Sora, Source Sans 3 and IBM Plex Mono roles are visibly distinct and used consistently.
+   781→- The Execution Spine is the only dominant signature device and contains real project information.
+   782→- Marketing sections do not repeat the same generic card layout.
+   783→- UI copy uses active, result-based language and consistent action names.
+   784→- The final implementation has been visually critiqued at desktop and mobile sizes, with unnecessary decoration removed.
+   785→
+   786→The final result should feel like a working execution product, not a collection of marketplace screens.
+   787→

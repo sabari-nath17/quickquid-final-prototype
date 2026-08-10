@@ -44,7 +44,7 @@ export function RoleSelectionScreen() {
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold">Q</div>
           <span className="font-semibold">QuickQuid</span>
-          <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">trust-first marketplace</span>
+          <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">the execution marketplace</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">

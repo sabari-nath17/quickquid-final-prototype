@@ -1038,3 +1038,35 @@ The user provided a complete landing page copy spec with 15 sections: announceme
 - `bun run lint`: 0 errors, 0 warnings.
 - `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
 - agent-browser: Landing page loads with correct headline "Hiring is only the start. QuickQuid is built for the finish." All 15 sections verified present (hero, prompt, makeReady, problem, howItWorks, difference, showcase, ai, buyers, pros, measures, pricing, faq, cta, footer). Project prompt fills and navigates to brief creation. Sign in button navigates to auth. No console/runtime errors.
+
+---
+
+## Round 20 — Design System Overhaul + Landing Page Redesign
+
+### Design plan
+1. **Color tokens:** Field Paper `#F3F5F2` (page bg), Surface `#FFFFFF` (cards), Working Ink `#141715` (text/actions), Execution Green `#0B8F63`, Forecast Indigo `#4E62D8`, Attention Ochre `#B46D0A`, Exception Red `#C43F39`
+2. **Typography:** Sora (display, 600-700), Source Sans 3 (body, 400-600), IBM Plex Mono (data/refs)
+3. **Layout:** 1200-1280px content width, 14px card radius, 10px button radius
+4. **Elevation:** 4-level system (elev-0 flat, elev-1 interactive, elev-2 priority action, elev-3 dialog)
+5. **Execution Spine:** Vertical connected record with colored nodes
+
+### Completed modifications
+
+**Design system:**
+1. **globals.css** — Complete rewrite with QuickQuid color tokens (Field Paper, Working Ink, Execution Green, Forecast Indigo, Attention Ochre, Exception Red), Sora/Source Sans 3/IBM Plex Mono font families, 4-level elevation system (.elev-0/1/2/3), Execution Spine CSS (.spine-line, .spine-node), dark mode support, 14px card radius. (`src/app/globals.css`)
+2. **layout.tsx** — Replaced Geist fonts with Sora (display), Source Sans 3 (body), IBM Plex Mono (utility). Updated metadata to "QuickQuid — The execution marketplace". (`src/app/layout.tsx`)
+
+**Copy changes:**
+3. **Removed all "trust-first marketplace"** → replaced with "the execution marketplace" across Shell, OnboardingTour, RoleAuthScreens.
+4. **Removed 14% Buyer fee** from sidebar trust panel → "QuickQuid fee ₹0 / No platform fee during founding beta."
+5. **Removed fee clutter** from footer → "QuickQuid — the execution marketplace · QuickQuid fee ₹0 during founding beta"
+6. **Updated landing hero** — New headline: "Most marketplaces help you hire. QuickQuid helps the work get finished." Changed CTA from "Make my project Ready" to "Check project readiness".
+
+**Landing page redesign:**
+7. **Split hero layout** — Left: thesis headline + project prompt + quick examples. Right: interactive sample execution record card with Execution Spine (Ready → Proof Match → Capacity → Commit Date → Demo escrow → Delivery), Pro name, ₹0 fee, "Illustrative project record" disclaimer. VLM-confirmed: split layout, colored spine dots, cool off-white background, Sora display font.
+8. **Execution strip** — Full-width below hero: ROUGH REQUEST → READY PROJECT → PROOF + CAPACITY MATCH → CONTROLLED DELIVERY → ACCEPTED WORK (with green final state).
+
+### Verification
+- `bun run lint`: 0 errors ✅
+- `npx tsc`: 0 src/ errors ✅
+- agent-browser: Hero headline correct, Execution Spine present (Ready/Proof Match/Capacity/Commit Date), ₹0 fee shown, "Check project readiness" CTA, no 14% references, no "trust-first". VLM confirmed split layout, colored dots, off-white bg, Sora font.

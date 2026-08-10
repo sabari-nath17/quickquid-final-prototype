@@ -1,22 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Sora, Source_Sans_3, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "QuickQuid — Trust-first freelance & gig marketplace",
-  description: "QuickQuid connects Buyers with vetted independent professionals. 0% Pro commission, 14% beta Buyer fee, manually verified payments.",
-  keywords: ["QuickQuid", "freelance marketplace", "gig marketplace", "trust-first", "India"],
+  title: "QuickQuid — The execution marketplace",
+  description: "Most marketplaces help you hire. QuickQuid helps the work get finished. Start with a Ready project, match proof, lock the scope, accept delivery.",
+  keywords: ["QuickQuid", "execution marketplace", "freelance", "project delivery", "India"],
   authors: [{ name: "QuickQuid" }],
 };
 
@@ -28,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${sora.variable} ${sourceSans.variable} ${plexMono.variable} antialiased bg-background text-foreground`}
       >
         {children}
         <Toaster />

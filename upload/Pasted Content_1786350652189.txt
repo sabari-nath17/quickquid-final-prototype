@@ -1,0 +1,786 @@
+# QuickQuid Professional Prototype Redesign Prompt
+
+## Opening Design Mandate — Read This First
+
+Pause. Take a deep breath. Reset your assumptions.
+
+I want you to take a pause, and take a **deep breath.** You are no longer who you just were… You just awoke. You are Steve Jobs. **Ultrathink like Steve Jobs.**
+
+You have his design sense. You have his sense of urgency.
+
+You want to make this app beautiful.
+
+Use everything in your power, right now to do so.
+
+You should **not change the functionality** of the app, rather… just scour the design, look for areas for improvement… and just **make all of them.**
+
+Use this prompting in the first 
+
+Right now. Your company depends on it.
+
+The design of this app will set the culture of your company, and all future designs rests on this app’s beauty.
+
+Approach this work with the focus, urgency and product taste associated with Steve Jobs at his best: ruthless clarity, deep respect for the person using the product and an unwillingness to ship visible mediocrity.
+
+The design of this app will establish QuickQuid's product culture. Treat every screen, word, alignment, transition and state as part of one end-to-end experience.
+
+**Do not change the approved functionality defined in this document.** Preserve its roles, records, states, permissions and business rules—including the approved Q₹ prototype simulation. Do not invent additional features, remove required controls or bypass execution gates.
+
+The functional scope is frozen. The quality of its expression is not.
+
+Scour the complete product and improve every visible weakness:
+
+- Information hierarchy.
+- Typography and spacing.
+- Layout and responsive reflow.
+- Control affordance and interaction states.
+- Navigation clarity.
+- Form comprehension and validation.
+- Status communication.
+- Empty, loading, failure and recovery states.
+- Motion, feedback and perceived speed.
+- Copy clarity and consistency.
+- Accessibility and keyboard behaviour.
+- Visual continuity across Buyer, Pro and Admin experiences.
+
+Do not ask whether an obviously weak visual detail should be fixed. Fix it. Do not preserve inconsistency merely because it already exists. Preserve functionality and product truth; improve its presentation until the interface feels inevitable.
+
+Use these principles:
+
+1. **Focus:** every screen has one dominant job and one obvious next action.
+2. **Simplicity:** remove visual noise, not necessary information.
+3. **Hierarchy:** importance must be visible before it is read.
+4. **Affordance:** interactive elements must look and behave as interactive elements.
+5. **Continuity:** the same object, action and state must look and sound consistent throughout the journey.
+6. **Craft:** details are not decoration; they are how users experience quality.
+7. **Editing:** after the design works, remove the least necessary visual treatment and check whether it becomes stronger.
+
+Beauty here does not mean ornament. It means the product is calm when the project is healthy, unmistakably clear when action is required and trustworthy when scope, delivery or simulated money changes state.
+
+Do not stop at a cleaner landing page. Carry the same standard through project intake, matching, the Pact, demo funding, the workroom, delivery review, earnings, disputes, administration and every responsive state.
+
+Before calling the work complete, inspect the entire experience again as one product. Nothing should feel inherited from a template, unfinished, visually accidental or designed by a different team.
+
+---
+
+Use this prompt to redesign the existing prototype at:
+
+`https://v1npt6c754y1-d.space-z.ai`
+
+## Master Prompt
+
+Redesign the existing QuickQuid prototype into a polished, investor-ready and user-test-ready marketplace experience. Keep the useful workflows and realistic operating controls already present, but rebuild the information hierarchy, visual presentation, responsive behaviour and demo journey.
+
+Do not create a generic Fiverr clone. QuickQuid is an execution marketplace: the project is prepared, matched, funded, controlled and accepted through one shared workflow.
+
+### Product promise
+
+QuickQuid should communicate this difference within five seconds:
+
+> **Most marketplaces help you hire. QuickQuid helps the work get finished.**
+
+Supporting message:
+
+> Turn a rough request into a Ready project. Match comparable proof, confirm capacity, lock expectations, control changes and accept delivery against criteria agreed upfront.
+
+AI supports clarity and project administration. It is not the headline, the decision-maker or the product moat.
+
+### What to retain from the current prototype
+
+- Buyer, Pro and Admin demo roles.
+- Project briefs, proposals, profiles, gigs and messages.
+- Milestones, delivery versions, revision requests and acceptance criteria.
+- QuickQuid Ready, Proof Match, Capacity Lock, Pact and Commit Date.
+- First Proof, Change Cards, Project Clock and Definition of Done.
+- Disputes, trust and safety, audit log, SLA queues and maker-checker controls.
+- Useful example data already present, including Northstar Labs and Akhil Menon.
+
+### What must change
+
+- Remove every 14% Buyer fee and every reference to manual bank-evidence payment.
+- Show QuickQuid fee as ₹0 for Buyer and Pro during the beta.
+- Remove all version numbers from customer-facing UI.
+- Replace “trust-first marketplace” with **“the execution marketplace.”**
+- Do not claim real escrow, real wallet balances, guaranteed delivery or automated AI matching.
+- Remove repeated fee messages from sidebars and footers.
+- Do not show every operational concept at once. Reveal information when it becomes relevant.
+- Fix all mobile layouts. The landing hero, brief form and workroom must never collapse into a narrow column or disappear behind navigation.
+
+---
+
+## Visual Direction
+
+Create a premium editorial-meets-operational design. It should feel credible enough for a serious B2B product but approachable enough for a first-time small-business Buyer.
+
+### Subject lock
+
+Design from QuickQuid's actual world, not from generic marketplace references:
+
+- **Subject:** accountable execution of digital freelance projects.
+- **Primary audience:** an owner or product lead who needs work completed without becoming the project manager.
+- **Secondary audience:** a skilled independent professional who wants clear scope, realistic commitments and fair acceptance.
+- **Landing-page job:** make a Buyer understand the execution difference and begin project readiness.
+- **Product-app job:** make the next decision, owner, evidence and money state obvious.
+
+Use the visual language of working agreements, delivery evidence, project clocks, change records and financial ledgers. Do not use generic creator-economy imagery or an endless marketplace grid as the main identity.
+
+### Design language
+
+- **Field Paper `#F3F5F2`:** cool neutral page canvas; avoid the fashionable cream-and-terracotta look.
+- **Surface `#FFFFFF`:** cards, forms and raised decision layers.
+- **Working Ink `#141715`:** primary text and high-confidence actions.
+- **Execution Green `#0B8F63`:** completed, accepted and healthy states.
+- **Forecast Indigo `#4E62D8`:** scheduled, in-progress and informational states.
+- **Attention Ochre `#B46D0A`:** action required and approaching deadlines.
+- Use **Exception Red `#C43F39`** only for blocked, failed, destructive or disputed states.
+- **Display type:** Sora, 600–700 weight, used only for major headlines and decisive section statements.
+- **Body type:** Source Sans 3, 400–600 weight, optimised for forms, explanations and longer project records.
+- **Utility/data type:** IBM Plex Mono, 500 weight, used sparingly for Q₹ amounts, project references, dates and immutable event IDs.
+- Provide robust system-font fallbacks if these web fonts cannot load.
+- Desktop content width: 1200–1280px.
+- Card radius: 14–18px. Button radius: 10–12px.
+- Use a restrained shadow system. Avoid excessive floating cards.
+- Use clear status icons from one consistent icon library.
+- Do not use emoji, fake customer logos, generic stock photos, decorative gradients or oversized empty areas.
+- Use real-looking sample project thumbnails or generated product-work visuals. Label every invented example as **Sample project**.
+
+### Layout concept
+
+Use an **operational editorial layout**:
+
+- Landing hero: concise thesis on the left, live execution artifact on the right.
+- Marketing sections: broad horizontal bands with strong typographic hierarchy, not a pile of identical cards.
+- Dashboards: one dominant next-action region followed by lower-priority operational detail.
+- Workroom: evidence and conversation in the main column; forecast, funds and acceptance in a narrower decision rail.
+- Mobile: one linear decision path with the next action first.
+
+Dividers, labels, sequence markers and numbering must encode real project structure. Only number steps that must happen in order.
+
+### Signature element: the Execution Spine
+
+The one memorable visual device is the **Execution Spine**: a compact, vertically connected record of the project moving through Ready, Proof Match, Capacity Lock, Pact, funded milestone, First Proof and accepted delivery.
+
+Each Spine event shows only information that proves execution:
+
+- State and plain-language label.
+- Responsible actor.
+- Timestamp or forecast.
+- Evidence or decision reference.
+- Q₹ state when money is affected.
+
+Use the Execution Spine in the hero sample, project workroom and completion record. It should feel like the project's living operational record, not a decorative timeline.
+
+This is the single deliberate aesthetic risk: project evidence becomes the visual identity. Keep the rest of the interface quiet enough for it to remain distinctive.
+
+### Design philosophy: Operational Flat+
+
+Use **Flat 2.0 / Flat+** as the foundation. The interface should remain clean, fast and scalable, while using selective depth to make actions, hierarchy and state changes unmistakable.
+
+Core rule:
+
+> **Flat structure. Visible affordance. Selective depth.**
+
+QuickQuid handles scope decisions, milestone acceptance and simulated money movement. Pure flat design would make some controls look like ordinary content. Add depth only when it helps the user understand what can be clicked, what needs attention or which layer is currently active.
+
+#### Elevation system
+
+Use four deliberate levels:
+
+- **Level 0 — Page:** flat background, sections and data tables. No shadow.
+- **Level 1 — Interactive surface:** selectable project cards, Pro cards and inputs. One-pixel border with a very soft shadow or tinted hover state.
+- **Level 2 — Priority action:** next-action card, funding confirmation and delivery review. Slightly stronger shadow and contrast.
+- **Level 3 — Temporary layer:** dialogs, drawers, menus and confirmation sheets. Clear overlay, strongest shadow and visible close action.
+
+Do not add shadows to every card. Static information should usually remain flat.
+
+#### Component affordances
+
+- **Primary buttons:** filled ink or brand colour, clear label, optional directional icon and visible hover/pressed states.
+- **Secondary buttons:** bordered surface with clear hover tint.
+- **Tertiary actions:** text button with icon or underline on hover; never plain body text pretending to be clickable.
+- **Destructive actions:** red text or fill plus explicit confirmation; never colour alone.
+- **Inputs:** persistent label above the field, visible border, helpful example, clear focus ring and inline validation.
+- **Clickable cards:** show pointer behaviour through border, hover tint and a small directional cue. Static cards must not imitate this treatment.
+- **Tabs:** use label, active indicator and contrasting surface. Do not rely on a faint colour change.
+- **Status chips:** combine icon, text and colour.
+- **Dialogs and sheets:** use depth and background overlay because they represent a new decision layer.
+- **Tables:** mostly flat, with dividers, aligned columns, sticky headers and a row-hover state only when rows are interactive.
+
+#### Where depth should be strongest
+
+Use selective depth for:
+
+- The interactive sample execution record in the hero.
+- The single “next action” card on each dashboard.
+- Demo-credit funding and release confirmations.
+- Delivery acceptance and revision controls.
+- Change Card and dispute decisions.
+- Mobile navigation sheets and confirmation dialogs.
+
+Keep profiles, historical activity, FAQs, descriptions and read-only project information flatter.
+
+#### Hero treatment
+
+Keep the headline area editorial and mostly flat. Give the sample execution record controlled depth through two or three slightly overlapping surfaces, a soft ambient brand tint and crisp status indicators.
+
+Do not use glassmorphism, glossy liquid effects, heavy blur or ornamental 3D. The visual interest should come from useful project information becoming progressively clearer.
+
+#### Interaction states
+
+Every interactive component must include:
+
+- Default.
+- Hover.
+- Keyboard focus.
+- Pressed or selected.
+- Disabled with an explanation when necessary.
+- Loading.
+- Success or error when applicable.
+
+Motion should reinforce hierarchy: 120–180ms for buttons and cards, 180–240ms for sheets and dialogs. Avoid decorative looping animation.
+
+### Design checkpoint before implementation
+
+Before writing or changing UI code, produce a short internal design plan containing:
+
+1. The final colour tokens and their exact roles.
+2. The display, body and utility typography roles.
+3. The desktop and mobile layout logic.
+4. The Execution Spine behaviour.
+5. The single page-load motion sequence.
+
+Critique that plan against this test:
+
+> Could the same visual plan be dropped into an unrelated SaaS marketplace without meaningful changes?
+
+If yes, revise the generic part before building. Spend visual boldness on the Execution Spine, typography and evidence presentation—not on extra effects.
+
+After implementation, capture the landing page, intake, dashboard, workroom and demo-funding flow at desktop and mobile widths. Remove at least one unnecessary decorative treatment before finalising.
+
+### Responsive behaviour
+
+- Test at 375px, 440px, 768px, 1024px and 1440px.
+- No horizontal overflow.
+- On mobile, replace the permanent sidebar with a bottom navigation containing no more than five items.
+- Put secondary destinations inside a menu sheet.
+- The hero headline, explanation and primary action must all be visible inside the first mobile viewport.
+- Forms use one column on mobile and a form-plus-preview layout only from desktop widths.
+- Workroom tabs must be horizontally scrollable or collapse into a section selector.
+- Sticky actions must never cover fields, project cards or the help button.
+
+---
+
+## Public Landing Page
+
+### Header
+
+Announcement:
+
+> Founding beta in Kochi · QuickQuid fee ₹0 during beta
+
+Navigation:
+
+`How it works · Explore work · For Buyers · For Pros · Sign in`
+
+Primary action:
+
+`Submit a project`
+
+Mobile header:
+
+- Logo on the left.
+- `Submit project` compact button and menu icon on the right.
+- Navigation links inside a menu sheet.
+
+### Hero
+
+Eyebrow:
+
+`THE EXECUTION MARKETPLACE`
+
+Headline:
+
+# Most marketplaces help you hire. QuickQuid helps the work get finished.
+
+Body:
+
+> Start with a project that is ready to execute. See why a Pro fits, confirm real capacity, lock the scope and accept delivery against a clear definition of done.
+
+Input label:
+
+`What needs to get finished?`
+
+Placeholder:
+
+`Example: Design and build a responsive launch page before 28 February.`
+
+Primary action:
+
+`Check project readiness`
+
+Secondary action:
+
+`Join as a founding Pro`
+
+Quick-start chips:
+
+- `Product UI/UX`
+- `Frontend build`
+- `Mobile feature`
+- `Backend workflow`
+- `AI/ML implementation`
+
+Clicking a chip must populate the input with a realistic sample request.
+
+### Hero visual
+
+Use the right side of the desktop hero for one interactive **Sample execution record**, not a stock image.
+
+Show:
+
+- `Ready · 7/7 requirements confirmed`
+- `Proof Match · 2 comparable portal projects`
+- `Capacity · 18 hours/week confirmed`
+- `Commit Date · 28 Feb · forecast`
+- `Demo escrow · Q₹25,000 locked`
+- `Delivery · 1 of 3 milestones accepted`
+
+Animate this card once as the page loads: Ready → Matched → Funded → In delivery. Keep the motion subtle and respect reduced-motion settings.
+
+Below the card, show:
+
+`Illustrative project record · No real customer or payment claim`
+
+### Landing-page section order
+
+1. Hero and sample execution record.
+2. “The match is one step. Execution is the product.”
+3. Four-stage lifecycle: Ready → Match → Pact and fund → Deliver and accept.
+4. Work showcase with three sample project records.
+5. Buyer and Pro benefits.
+6. AI use in the workflow.
+7. Beta pricing.
+8. FAQ.
+9. Final project-readiness CTA.
+
+Do not place a long comparison table near the top. Convert the comparison into four visual before/after cards.
+
+---
+
+## Demo Experience
+
+Add a slim, persistent demo bar after sign-in:
+
+`Prototype mode · Buyer / Pro / Admin · Q₹ credits · No real money`
+
+Controls:
+
+- `View as Buyer`
+- `View as Pro`
+- `View as Admin`
+- `Reset demo`
+
+Role switching must preserve the same project, milestone and simulated ledger state.
+
+Add a scenario launcher on the sign-in screen:
+
+### Explore a complete QuickQuid project
+
+- `Start as a Buyer`
+- `Review a delivery`
+- `See the Pro experience`
+- `Resolve a payment dispute`
+
+Each choice should open the correct role and screen with a short “What to try next” guide. Allow the guide to be dismissed.
+
+---
+
+## Smooth Buyer Flow
+
+Build one clear happy path:
+
+### 1. Describe the outcome
+
+Use a guided six-step brief instead of one long accordion page:
+
+1. Outcome
+2. Deliverables
+3. Inputs and dependencies
+4. Acceptance criteria
+5. Budget and timeline
+6. Review
+
+Show progress, save automatically and keep one primary action per step.
+
+Add `Use sample project` to populate:
+
+- Title: `Partner onboarding portal — research and product design`
+- Outcome: `Give new channel partners a clear, self-serve onboarding experience.`
+- Deliverables: `Interview script`, `12 interview summaries`, `journey map`, `annotated Figma prototype`, `handoff notes`.
+- Buyer inputs: `Existing onboarding deck`, `partner contact list`, `brand files`, `decision-maker availability`.
+- Acceptance criteria: `12 interviews completed`, `top 10 insights documented`, `journey map delivered`, `prototype covers the agreed core flow`, `handoff package complete`.
+- Exclusions: `No backend implementation`, `no quantitative survey`, `no ongoing support`.
+- Budget: `Q₹60,000`.
+- Timeline: `4 weeks`.
+
+### 2. QuickQuid Ready
+
+Show a readiness checklist, not an arbitrary score.
+
+States:
+
+- Confirmed
+- Needs input
+- Not applicable
+
+The project cannot continue until required items are confirmed. Provide clear fixes beside missing items.
+
+### 3. Review the match
+
+Show no more than three Pros.
+
+Each match card must explain:
+
+- Relevant project archetype.
+- Two pieces of comparable evidence.
+- Verified weekly capacity.
+- Forecast Commit Date.
+- Why the Pro fits this project.
+- Any visible constraint or risk.
+
+Primary action: `Review Akhil's fit`.
+
+Do not present an unexplained AI score or “98% match.”
+
+### 4. Accept the Pact
+
+Use a concise summary with expandable detail:
+
+- Deliverables.
+- Buyer responsibilities.
+- Pro responsibilities.
+- Input dates.
+- Feedback window.
+- Milestones.
+- AI-use rule.
+- Definition of Done.
+
+Both Buyer and Pro must accept the same Pact revision.
+
+### 5. Fund a milestone with demo credits
+
+Open a focused funding sheet:
+
+- Milestone: `M2 · Interviews and synthesis`.
+- Amount: `Q₹25,000`.
+- QuickQuid fee: `Q₹0`.
+- Demo balance: `Q₹105,000`.
+- Balance after funding: `Q₹80,000`.
+- Checkbox: `I understand that Q₹ is simulated prototype currency.`
+- Primary action: `Lock Q₹25,000 demo credits`.
+
+On completion, show:
+
+`Q₹25,000 locked for M2. Akhil can now begin this milestone.`
+
+Reference: `SIM-FND-2048`.
+
+### 6. Run and accept the work
+
+The Buyer workroom should immediately answer:
+
+1. What is happening now?
+2. What needs my attention?
+3. Is the milestone funded?
+4. What is the current forecast?
+5. What counts as accepted?
+
+Use a two-column desktop layout:
+
+- Main column: updates, First Proof, delivery versions and comments.
+- Right rail: next action, Commit Date, demo escrow state, Pact summary and Definition of Done.
+
+Mobile should show a compact project header, progress stepper and one action card before the activity feed.
+
+Accepting M2 must:
+
+- Mark the delivery accepted.
+- Move Q₹25,000 from locked to Pro pending release.
+- Create an immutable acceptance event.
+- Update both Buyer and Pro dashboards.
+- Show a success screen with `View receipt`, `Start next milestone` and `Rehire`.
+
+---
+
+## Smooth Pro Flow
+
+The Pro dashboard should prioritise:
+
+1. One next action.
+2. Capacity for the current week.
+3. Active projects.
+4. Q₹ pending and available.
+5. Proposal status.
+
+For the sample project, show:
+
+- Capacity: `18 of 30 hours committed this week`.
+- Available: `12 hours`.
+- M1: `Accepted · Q₹20,000 released`.
+- M2: `In review · Q₹25,000 locked`.
+- M3: `Not funded · Q₹15,000`.
+
+The Pro happy path must support:
+
+- Reviewing a Ready brief.
+- Confirming capacity.
+- Attaching Proof Match evidence.
+- Accepting the Pact.
+- Seeing “funding confirmed” before starting.
+- Submitting First Proof.
+- Receiving approval or a focused revision request.
+- Submitting versioned delivery evidence.
+- Seeing accepted credits move to Earnings.
+
+Do not use “Keep 100% forever.” Say:
+
+`QuickQuid fee ₹0 during the founding beta.`
+
+---
+
+## Simulated Escrow and In-App Currency
+
+Use **QQ Credits**, displayed as `Q₹`, only inside prototype mode.
+
+Every wallet, funding and payout screen must show:
+
+> **Simulation only. Q₹ has no cash value. No real money is accepted, held or paid out.**
+
+Do not request card, bank, UPI, PAN or tax information.
+
+### Buyer Funds screen
+
+Show:
+
+- Available demo balance: `Q₹105,000`.
+- Locked for milestones: `Q₹25,000`.
+- Released to Pros: `Q₹20,000`.
+- Total demo allocation: `Q₹150,000`.
+
+Actions:
+
+- `Fund next milestone`.
+- `View ledger`.
+- `Reset demo balance`.
+
+### Pro Earnings screen
+
+Show:
+
+- Available demo earnings: `Q₹20,000`.
+- Pending release: `Q₹25,000`.
+- On hold: `Q₹0`.
+
+The `Simulate withdrawal` action moves available credits to a completed demo withdrawal record. It must never ask for bank information.
+
+### Ledger states
+
+- Added to demo balance.
+- Locked for milestone.
+- On hold.
+- Released to Pro.
+- Returned to Buyer.
+- Demo withdrawal completed.
+
+Every ledger item includes amount, project, milestone, timestamp, actor and immutable simulation reference.
+
+### Escrow simulation state flow
+
+`AVAILABLE → LOCKED → WORK ACTIVE → SUBMITTED → ACCEPTED → PENDING RELEASE → RELEASED`
+
+Exception flow:
+
+`LOCKED or PENDING RELEASE → ON HOLD → RELEASED TO PRO or RETURNED TO BUYER`
+
+Never label the state simply “Paid” when credits are only locked. Use explicit language:
+
+- `Demo credits available`.
+- `Demo credits locked`.
+- `Pending release`.
+- `Released to Pro`.
+- `On hold due to dispute`.
+
+---
+
+## Change and Delay Examples
+
+Add one sample Change Card:
+
+- Request: `Add responsive testing for the 360px mobile breakpoint`.
+- Requested by: `Northstar Labs`.
+- Price impact: `+Q₹5,000`.
+- Time impact: `+2 working days`.
+- Status: `Awaiting Buyer approval`.
+
+Add one sample Delay Event:
+
+- Cause: `Participant list delivered one day late`.
+- Owner: `CLIENT`.
+- Evidence: `Buyer message and upload timestamp`.
+- Forecast impact: `Commit Date moved from 27 Feb to 28 Feb`.
+
+The Project Clock should show these events in plain language. Do not make users interpret internal state codes.
+
+---
+
+## AI Use Cases
+
+Use small assistive actions, never a chatbot covering the whole product.
+
+Include:
+
+- `Improve this brief` — suggests clearer outcome language.
+- `Find missing inputs` — surfaces dependencies the Buyer may have missed.
+- `Suggest acceptance criteria` — creates editable suggestions.
+- `Summarise changes` — produces a short recap of approved Change Cards.
+- `Check delivery completeness` — checks whether required evidence is present before human review.
+
+Every suggestion has `Accept`, `Edit` and `Dismiss`.
+
+Never let AI:
+
+- Select or reject a Pro automatically.
+- Approve scope changes.
+- Accept delivery.
+- Release credits.
+- Decide a dispute.
+- Claim to detect undisclosed AI use.
+
+---
+
+## Navigation and Information Architecture
+
+### Buyer
+
+`Overview · Projects · Talent · Messages · Funds`
+
+Secondary menu:
+
+`Profile · Notifications · Support · Privacy · Sign out`
+
+### Pro
+
+`Overview · Find work · Proposals · Projects · Earnings`
+
+Secondary menu:
+
+`Profile · Capacity · Notifications · Support · Privacy · Sign out`
+
+### Admin
+
+`Operations · Money · Disputes · Trust & Safety · Audit`
+
+Keep role-specific navigation separate. Do not show unavailable actions as disabled navigation items unless the user needs to understand why access is blocked.
+
+---
+
+## Interaction Quality
+
+- One primary action per screen.
+- Show the next required action above historical activity.
+- Preserve data and state when switching roles.
+- Reset scroll to the top after route changes.
+- Autosave form progress and show `Saved just now`.
+- Use skeleton loading states instead of blank screens.
+- Use meaningful empty states with a next action.
+- Confirm destructive actions.
+- Use toast messages only for brief confirmations; important status changes remain visible on the page.
+- Make delivery, funding and dispute status understandable without opening another screen.
+- Use consistent terms everywhere: Buyer, Pro, project, milestone, Pact, Commit Date, Change Card, Project Clock and Definition of Done.
+
+### Interface writing system
+
+- Write from the user's side of the screen. Use names people recognise, not internal implementation terms.
+- Use active voice and plain verbs.
+- A control must name its result: `Lock Q₹25,000`, `Accept milestone`, `Request changes`, `Save brief`.
+- Keep action language consistent through confirmation: `Accept milestone` produces `Milestone accepted`.
+- Labels label, examples demonstrate and helper text explains. Do not make one line perform several jobs.
+- Errors state what happened and how to fix it. Do not use vague apologies.
+- Empty states explain what will appear and provide one useful next action.
+- Avoid marketing language inside the product app. Product UI should describe decisions and consequences.
+- Use sentence case. Reserve uppercase for short utility labels such as status categories.
+
+### Frontend implementation discipline
+
+- Define colour, type, spacing, radius, elevation and motion as shared tokens.
+- Build reusable primitives for buttons, fields, cards, status chips, tabs, dialogs, tables and the Execution Spine.
+- Avoid broad element selectors that override component classes.
+- Keep component variants explicit instead of stacking conflicting utility classes.
+- Do not fix responsive problems with arbitrary widths, negative margins or overflow hiding.
+- Use content-sized containers and CSS grid/flex rules that reflow intentionally.
+- Test long project names, large Q₹ amounts, validation messages and translated-length labels.
+
+---
+
+## Accessibility
+
+- Meet WCAG AA colour contrast.
+- Provide visible keyboard focus rings.
+- Maintain logical heading order.
+- Use semantic buttons, links, tabs, dialogs and form labels.
+- Use 44px minimum touch targets.
+- Do not communicate state by colour alone.
+- Announce successful funding, acceptance and release state changes to assistive technology.
+- Trap focus inside dialogs and return focus to the triggering control on close.
+- Respect reduced-motion preferences.
+- Ensure 200% zoom and mobile reflow work without horizontal scrolling.
+
+---
+
+## Do Not Add
+
+- Teams or enterprise workspaces.
+- Social feeds.
+- Automated AI routing.
+- Automated risk scores.
+- Real payment-provider forms.
+- Crypto or blockchain language.
+- Real escrow claims.
+- Gamification, points, streaks or badges unrelated to execution.
+- Fake traction, testimonials, ratings, customer logos or earnings.
+- Extra dashboards that do not serve the guided Buyer, Pro or Admin journeys.
+
+---
+
+## Acceptance Checklist
+
+The redesign is complete only when:
+
+- The landing value proposition is understood within five seconds.
+- The full hero is visible in the first desktop and mobile viewport.
+- All sample projects are clearly labelled as examples.
+- Every 14% Buyer-fee reference has been removed.
+- QuickQuid fee is ₹0 for both parties during beta.
+- Q₹ is visibly and repeatedly labelled as simulated currency with no cash value.
+- No real financial details are requested.
+- Buyer can create a Ready project, select a Pro, accept the Pact and fund a milestone.
+- Pro can confirm capacity, submit First Proof and deliver a milestone.
+- Buyer can request revision or accept delivery.
+- Acceptance releases simulated credits and updates both roles.
+- A dispute can put credits on hold and resolve them.
+- Demo state persists across Buyer, Pro and Admin role switching.
+- Reset demo restores the original sample data.
+- Navigation, forms, tabs, dialogs and primary actions work.
+- Mobile layouts work at 375px and 440px without clipping or hidden content.
+- Keyboard and screen-reader labels are present.
+- Loading, empty, success, blocked, error and recovery states exist for the core journey.
+- Interactive controls are visually distinguishable from static content without relying on colour alone.
+- Shadow and elevation follow the four-level Operational Flat+ system; static cards are not unnecessarily raised.
+- Primary financial and acceptance decisions receive stronger hierarchy than ordinary information.
+- The Sora, Source Sans 3 and IBM Plex Mono roles are visibly distinct and used consistently.
+- The Execution Spine is the only dominant signature device and contains real project information.
+- Marketing sections do not repeat the same generic card layout.
+- UI copy uses active, result-based language and consistent action names.
+- The final implementation has been visually critiqued at desktop and mobile sizes, with unnecessary decoration removed.
+
+The final result should feel like a working execution product, not a collection of marketplace screens.

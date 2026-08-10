@@ -91,7 +91,7 @@ function Logo() {
       <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-bold text-sm">Q</div>
       <div className="leading-tight">
         <div className="font-semibold text-sm">QuickQuid</div>
-        <div className="text-[10px] text-muted-foreground">trust-first marketplace</div>
+        <div className="text-[10px] text-muted-foreground">the execution marketplace</div>
       </div>
     </div>
   );
@@ -138,7 +138,7 @@ function SidebarTrustPanel({ role }: { role: Role }) {
   const facts = role === "pro"
     ? { title: "0% commission", body: "Keep 100% of your agreed fee." }
     : role === "buyer"
-    ? { title: "14% beta Buyer fee", body: "Shown before payment. Manual verification." }
+    ? { title: "QuickQuid fee ₹0", body: "No platform fee during founding beta." }
     : { title: "Maker-checker", body: "All money actions are audited." };
   return (
     <div className="mt-4 mx-1 rounded-lg border border-border bg-muted/40 p-3">
