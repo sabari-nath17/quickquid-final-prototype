@@ -10,6 +10,8 @@ import { OnboardingTour } from "./shell/OnboardingTour";
 import { MessagingQuickAccess } from "./shell/MessagingQuickAccess";
 import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor/RoleAuthScreens";
 import { LandingPage } from "@/components/qq/screens/visitor/LandingPage";
+import { GuestReadinessChat } from "@/components/qq/screens/visitor/GuestReadinessChat";
+import { ReadinessSummary } from "@/components/qq/screens/visitor/ReadinessSummary";
 import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
 import { ProDashboard, ProProfile, ProBriefs, ProProposals, ProContract, ProPayouts, ProGigs, ProGigNew, ProGigDetail } from "@/components/qq/screens/pro/ProScreens";
@@ -21,6 +23,9 @@ import type { ViewName } from "@/lib/qq/types";
 const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
   role_selection: LandingPage,
   auth: AuthScreen,
+  guest_readiness_chat: GuestReadinessChat,
+  readiness_summary: ReadinessSummary,
+  buyer_onboarding: ReadinessSummary,
   readiness: ReadinessScreen,
   buyer_dashboard: BuyerDashboard,
   buyer_profile: BuyerProfile,
@@ -57,7 +62,7 @@ const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
 };
 
 // Views that render full-screen (no app shell) — visitor pre-auth + public browse
-const FULLSCREEN: ViewName[] = ["role_selection", "auth"];
+const FULLSCREEN: ViewName[] = ["role_selection", "auth", "guest_readiness_chat", "readiness_summary", "buyer_onboarding"];
 
 function ViewRouter() {
   const { view } = useQQ();

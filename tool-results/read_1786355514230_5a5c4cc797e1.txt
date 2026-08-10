@@ -1,0 +1,1581 @@
+     1→# QuickQuid Buyer AI Readiness and Account Onboarding
+     2→
+     3→Use this prompt to improve the existing QuickQuid prototype.
+     4→
+     5→## Objective
+     6→
+     7→Fix the public project-readiness journey without redesigning or rebuilding the rest of the product.
+     8→
+     9→The current problem is critical: an unauthenticated visitor can type into **“What needs to get finished?”**, click **“Check project readiness”**, and enter Buyer product screens without completing account creation and Buyer onboarding.
+    10→
+    11→Replace that behavior with a smooth, deterministic Buyer–AI readiness conversation. Let the visitor receive useful project guidance before asking them to create an account. Require account creation and minimal Buyer onboarding before the project can be saved or any Buyer dashboard can be opened.
+    12→
+    13→This is a prototype. Do not build a real LLM, authentication service, payment system, KYC service or escrow system. Use realistic hard-coded responses and local prototype state.
+    14→
+    15→## Product Rule
+    16→
+    17→> A guest may explore and prepare a project. Only an onboarded Buyer may save it, publish it or enter the Buyer product.
+    18→
+    19→Never assign a Buyer role, create a Buyer session or show the Buyer dashboard merely because a visitor clicked the readiness CTA.
+    20→
+    21→## Required Journey
+    22→
+    23→```mermaid
+    24→flowchart LR
+    25→    Landing["Landing page"] --> Input["Visitor enters rough request"]
+    26→    Input --> Chat["Guest AI readiness conversation"]
+    27→    Chat --> Ready{"Seven readiness areas complete?"}
+    28→    Ready -- "No" --> Chat
+    29→    Ready -- "Yes" --> Summary["Ready project summary"]
+    30→    Summary --> Auth["Create account or sign in"]
+    31→    Auth --> Buyer["Minimal Buyer onboarding"]
+    32→    Buyer --> Restore["Restore prepared project"]
+    33→    Restore --> Draft["Buyer reviews and saves draft"]
+    34→    Draft --> Workspace["Project workspace"]
+    35→    Workspace --> Dashboard["Buyer dashboard"]
+    36→```
+    37→
+    38→The Buyer dashboard is the end of onboarding, not the substitute for onboarding.
+    39→
+    40→## Route and State Guards
+    41→
+    42→Use these prototype states even if the application remains a single-page experience:
+    43→
+    44→1. `PUBLIC_LANDING`
+    45→2. `GUEST_READINESS_CHAT`
+    46→3. `READINESS_SUMMARY`
+    47→4. `AUTH_REQUIRED`
+    48→5. `BUYER_ONBOARDING`
+    49→6. `PROJECT_DRAFT_RESTORED`
+    50→7. `BUYER_PROJECT`
+    51→8. `BUYER_DASHBOARD`
+    52→
+    53→The guard for Buyer product screens is:
+    54→
+    55→```text
+    56→isAuthenticated === true
+    57→AND activeRole === "BUYER"
+    58→AND buyerProfileComplete === true
+    59→```
+    60→
+    61→If any condition is false, preserve the prepared project and send the user to the missing step. Do not silently create a Buyer identity.
+    62→
+    63→## Landing-Page Behavior
+    64→
+    65→Keep the existing hero and positioning.
+    66→
+    67→### Input
+    68→
+    69→- Label: **What needs to get finished?**
+    70→- Placeholder: **Example: Design and build a responsive launch page before 28 February.**
+    71→- Primary CTA: **Check project readiness**
+    72→- Pressing Enter performs the same action as the CTA.
+    73→- An empty submission shows: **Describe the outcome you need before we check readiness.**
+    74→- The input must have a real programmatic label; do not rely only on placeholder text.
+    75→
+    76→### On submission
+    77→
+    78→1. Copy the text into `guestProjectDraft.originalRequest`.
+    79→2. Open the readiness conversation in guest mode.
+    80→3. Do not open Create a brief.
+    81→4. Do not open the Buyer dashboard.
+    82→5. Do not create a Buyer role.
+    83→6. Preserve the rough request if the visitor returns to the landing page.
+    84→
+    85→Store unfinished prototype progress in `sessionStorage` under `qq_guest_readiness_draft`. Restore it after refresh. Provide a visible **Start over** action that clears only this draft.
+    86→
+    87→## Readiness Conversation Screen
+    88→
+    89→### Page structure
+    90→
+    91→Use the existing **Operational Flat+** design language: flat structure, visible affordance and selective depth.
+    92→
+    93→Desktop:
+    94→
+    95→- 60% conversational workspace on the left.
+    96→- 40% live project-readiness panel on the right.
+    97→- A restrained sticky footer containing the current response control.
+    98→
+    99→Mobile:
+   100→
+   101→- Chat first.
+   102→- A compact sticky progress control such as **4 of 7 ready**.
+   103→- The readiness panel opens as a sheet or collapsible section.
+   104→
+   105→Top bar:
+   106→
+   107→- QuickQuid logo.
+   108→- **Project readiness** title.
+   109→- **Guest session** status.
+   110→- **Exit** and **Start over** actions.
+   111→
+   112→Trust note:
+   113→
+   114→> AI is helping structure your brief. QuickQuid reviews readiness before matching. No account or project has been created yet.
+   115→
+   116→Do not show the application sidebar, Buyer navigation, project counts, payment controls or dashboard shell during guest readiness.
+   117→
+   118→### Conversation style
+   119→
+   120→- Ask one clear question at a time.
+   121→- Confirm what was understood before asking the next question.
+   122→- Use short answer chips where helpful, while always permitting typed input.
+   123→- Never claim that AI has approved the project, selected a Pro or guaranteed a delivery date.
+   124→- Call the output **Prepared for QuickQuid review**, not automatically approved.
+   125→- Show why a missing answer matters in one sentence.
+   126→- Do not turn the experience into a long multi-section form.
+   127→
+   128→## Seven Readiness Areas
+   129→
+   130→The live panel must show these seven areas. A project is prepared only when all seven contain an answer.
+   131→
+   132→| Area | Information captured | Why QuickQuid needs it |
+   133→|---|---|---|
+   134→| Outcome and category | Desired result, inferred category and project archetype | Makes the request understandable and matchable |
+   135→| Scope | Deliverables and explicit exclusions | Prevents hidden or moving work |
+   136→| Inputs and dependencies | Existing materials, missing inputs, access and ownership | Identifies whether work can start |
+   137→| Budget | Professional-fee range and flexibility | Prevents unfinanceable matching |
+   138→| Timeline | Target date, reason and hard dependencies | Supports a realistic Commit Date later |
+   139→| Decision and feedback | Decision-maker and expected review window | Makes Buyer responsibility explicit |
+   140→| Acceptance | Objective completion and handoff criteria | Establishes what “done” means |
+   141→
+   142→Use clear status labels:
+   143→
+   144→- **Missing**
+   145→- **Answered**
+   146→- **Needs confirmation**
+   147→- **Prepared for review**
+   148→
+   149→Do not use a false AI confidence percentage.
+   150→
+   151→## Hard-Coded Conversation
+   152→
+   153→The prototype must support free typing, but it should advance through deterministic stages. Use this exact scenario as the polished demonstration path.
+   154→
+   155→### Initial visitor request
+   156→
+   157→> We need a responsive SaaS launch page designed and built in three weeks.
+   158→
+   159→### Opening response
+   160→
+   161→> Got it — you need a responsive SaaS launch page in three weeks. I’ll help turn that into a project a professional can confidently accept. First, do you need the design, the frontend build, or both?
+   162→
+   163→Chips:
+   164→
+   165→- **Design only**
+   166→- **Frontend build only**
+   167→- **Design + frontend build**
+   168→- **Not sure**
+   169→
+   170→For the demonstration path, select **Design + frontend build**.
+   171→
+   172→### Question 2 — deliverables and exclusions
+   173→
+   174→AI response:
+   175→
+   176→> I’ll treat this as a combined UI/UX and frontend project. What must be handed over at the end?
+   177→
+   178→Preselected editable suggestions:
+   179→
+   180→- Responsive landing-page design
+   181→- Desktop, tablet and mobile implementation
+   182→- Editable design source
+   183→- Source repository
+   184→- Deployed preview
+   185→- Basic browser and responsive checks
+   186→
+   187→Follow-up:
+   188→
+   189→> Is anything explicitly outside this project?
+   190→
+   191→Suggested answer:
+   192→
+   193→> No backend, CMS, SEO campaign, copywriting or ongoing hosting support.
+   194→
+   195→### Question 3 — inputs and dependencies
+   196→
+   197→AI response:
+   198→
+   199→> What is already available, and who owns anything that is still missing?
+   200→
+   201→Show rows with **Ready**, **Missing** and **Need help** controls:
+   202→
+   203→| Input | Demonstration state |
+   204→|---|---|
+   205→| Brand logo and colours | Ready |
+   206→| Final page copy | Buyer will provide within two days |
+   207→| Product screenshots | Ready |
+   208→| Domain or deployment access | Buyer will provide before build handoff |
+   209→| Analytics ID | Outside current scope |
+   210→
+   211→The AI should respond:
+   212→
+   213→> The project can continue, but the final Commit Date will depend on copy arriving within two days.
+   214→
+   215→### Question 4 — budget
+   216→
+   217→AI response:
+   218→
+   219→> What professional-fee range have you approved for this work?
+   220→
+   221→Chips:
+   222→
+   223→- **₹25,000–₹50,000**
+   224→- **₹50,000–₹80,000**
+   225→- **₹80,000+**
+   226→- **I need guidance**
+   227→
+   228→Demonstration selection: **₹50,000–₹80,000**.
+   229→
+   230→Supporting copy:
+   231→
+   232→> QuickQuid charges the Buyer and Pro ₹0 during the founding beta. Provider charges or applicable taxes may still apply when real payments are introduced.
+   233→
+   234→### Question 5 — timeline
+   235→
+   236→AI response:
+   237→
+   238→> You mentioned three weeks. What date is this needed, and what happens on that date?
+   239→
+   240→Demonstration answer:
+   241→
+   242→> The launch is on 30 August. The final approved page must be ready two business days earlier.
+   243→
+   244→AI confirmation:
+   245→
+   246→> I’ll record 28 August as the target handoff date and 30 August as the launch dependency. This is an input to a later Commit Date forecast, not a guarantee.
+   247→
+   248→### Question 6 — decision-maker and feedback
+   249→
+   250→AI response:
+   251→
+   252→> Who gives final approval, and how quickly can feedback be returned during the project?
+   253→
+   254→Chips:
+   255→
+   256→- **I approve — within 24 hours**
+   257→- **I approve — within 48 hours**
+   258→- **A teammate approves**
+   259→- **Multiple approvers**
+   260→
+   261→Demonstration selection: **I approve — within 24 hours**.
+   262→
+   263→### Question 7 — acceptance
+   264→
+   265→AI response:
+   266→
+   267→> Last step: what must be true for you to accept the work?
+   268→
+   269→Editable suggestions:
+   270→
+   271→- Matches the approved design at agreed breakpoints
+   272→- Works in current Chrome, Safari and Edge versions
+   273→- No broken links or visible layout overflow
+   274→- Page meets the agreed performance baseline
+   275→- Repository and deployment access are transferred
+   276→- Editable design file and handoff notes are included
+   277→- Known issues are disclosed before review
+   278→
+   279→Final confirmation:
+   280→
+   281→> Your request is now prepared for QuickQuid review. Check the summary before creating an account and saving it.
+   282→
+   283→## Prepared Project Summary
+   284→
+   285→Show a clean, editable summary—not another chat message.
+   286→
+   287→### Summary content
+   288→
+   289→**Working title**  
+   290→Design and build a responsive SaaS launch page
+   291→
+   292→**Category**  
+   293→UI/UX + Frontend
+   294→
+   295→**Outcome**  
+   296→A launch-ready responsive page for the 30 August SaaS release.
+   297→
+   298→**Deliverables**  
+   299→Responsive design, frontend implementation, editable design source, repository, deployed preview and handoff notes.
+   300→
+   301→**Exclusions**  
+   302→Backend, CMS, SEO campaign, copywriting and ongoing hosting support.
+   303→
+   304→**Inputs and dependencies**  
+   305→Brand assets and screenshots are ready. Buyer supplies final copy within two days and deployment access before handoff.
+   306→
+   307→**Budget**  
+   308→₹50,000–₹80,000 professional fee.
+   309→
+   310→**Target timing**  
+   311→Target handoff 28 August; launch dependency 30 August; final Commit Date determined after proof and capacity review.
+   312→
+   313→**Decision and feedback**  
+   314→Buyer is the decision-maker and responds within 24 hours.
+   315→
+   316→**Acceptance**  
+   317→Show the seven editable acceptance checks from the conversation.
+   318→
+   319→### Summary actions
+   320→
+   321→- Primary: **Create account and save project**
+   322→- Secondary: **Edit answers**
+   323→- Tertiary: **Start over**
+   324→
+   325→Include:
+   326→
+   327→> Nothing has been published. Your project will remain a private draft until you review and submit it.
+   328→
+   329→## Authentication Gate
+   330→
+   331→The account gate opens only after the visitor has received the prepared summary.
+   332→
+   333→### Create-account mode
+   334→
+   335→- Heading: **Save your prepared project**
+   336→- Supporting copy: **Create a Buyer account to keep this draft and continue.**
+   337→- Email input
+   338→- Primary CTA: **Continue with email**
+   339→- Secondary link: **Already have an account? Sign in**
+   340→- Preserve the project during the entire account flow.
+   341→
+   342→### Sign-in mode
+   343→
+   344→- Heading: **Welcome back**
+   345→- Supporting copy: **Sign in to continue with your prepared project.**
+   346→- Primary CTA: **Sign in**
+   347→- Secondary link: **New to QuickQuid? Create an account**
+   348→
+   349→The header **Sign in** action on the public landing page must open sign-in mode. It must not open a screen headed **Create your account**.
+   350→
+   351→Keep demo-account shortcuts visually separated under **Prototype shortcuts** so they cannot be mistaken for production authentication.
+   352→
+   353→## Minimal Buyer Onboarding
+   354→
+   355→After account creation, the product already knows the user entered through a Buyer project flow. Set the active role to Buyer, then require a short profile step before entering the product.
+   356→
+   357→Fields:
+   358→
+   359→- Full name
+   360→- Company or organization name
+   361→- Work role or title, optional
+   362→- Business type: Startup, agency, SME or individual
+   363→- City, defaulting to Kochi but editable
+   364→- Checkbox confirming acceptance of prototype terms and privacy notice
+   365→
+   366→Do not request PAN, bank details, GSTIN, billing address or payment instructions here. Those are only required when the user reaches a real action that needs them.
+   367→
+   368→After submission:
+   369→
+   370→1. Mark **Account created** complete.
+   371→2. Mark **Buyer profile complete** complete.
+   372→3. Restore the prepared project.
+   373→4. Show the summary with a primary action: **Save as private draft**.
+   374→5. Save it as a Buyer-owned draft.
+   375→6. Open the project draft page, not the general dashboard.
+   376→
+   377→The Buyer may reach the dashboard after this sequence is complete.
+   378→
+   379→## Existing Issues to Correct in the Same Pass
+   380→
+   381→These are consistency defects in the current prototype, not new features.
+   382→
+   383→### Commercial truth
+   384→
+   385→- Remove all 10%, 13% and 14% Buyer-fee calculations, copy and examples.
+   386→- Buyer QuickQuid fee: **₹0 during founding beta**.
+   387→- Pro QuickQuid fee: **₹0 during founding beta**.
+   388→- Buyer total must not add an old platform fee.
+   389→- Replace **QuickQuid commission (deducted from Pro)** with **QuickQuid fee — ₹0 during founding beta**.
+   390→- Provider charges and applicable taxes may be shown only as separate, configurable placeholders.
+   391→
+   392→### Payment language
+   393→
+   394→- Replace **Demo escrow** with **Demo milestone funds**.
+   395→- Show: **Q₹25,000 locked · simulation only**.
+   396→- Add: **Q₹ has no cash value. No real money is accepted, held or paid out.**
+   397→- Remove claims that QuickQuid provides escrow, custody, guaranteed payout or automatic release.
+   398→- Remove manual NEFT, IMPS and UTR evidence from the primary production story.
+   399→- Do not present a simulated ledger as a wallet or bank balance.
+   400→
+   401→### Product language
+   402→
+   403→- Remove version numbers from customer-facing copy.
+   404→- Replace **Max 4 milestones per contract in v0.1 due to manual payment verification** with **Keep the founding-beta plan to four or fewer clear milestones.**
+   405→- Replace **No wallet, no automated escrow in v0.1** with **QuickQuid does not provide a wallet or escrow in this prototype.**
+   406→
+   407→### Account-state defects
+   408→
+   409→- A newly created account must not show **0% complete** with **Account created** unchecked.
+   410→- **Complete profile** must open a working Buyer profile form.
+   411→- Never show **No profile loaded — Sign in as a buyer** immediately after Buyer account creation.
+   412→- Cancelling an unfinished brief must return to the prepared summary or authenticated project list, according to context. It must not manufacture an empty Buyer session.
+   413→- A guest must never see project counts, contracts, payments, role navigation or dashboard content.
+   414→
+   415→## Visual Requirements
+   416→
+   417→- Preserve the current black, warm-white and muted-green palette.
+   418→- Preserve the strong landing-page typography.
+   419→- Keep the interface flatter and operational; use depth only for the active chat composer, readiness summary and primary action.
+   420→- Do not add glassmorphism, large gradients, decorative 3D art, floating AI orbs or generic chatbot sparkle icons.
+   421→- Use the existing icon library.
+   422→- Make the readiness progress the distinctive visual element.
+   423→- Status must use text and icon, not colour alone.
+   424→- Keep line lengths readable and targets at least 44px high on touch screens.
+   425→- Provide visible keyboard focus.
+   426→- Announce new AI messages and validation errors accessibly without unexpectedly moving keyboard focus.
+   427→- Respect reduced-motion preferences.
+   428→
+   429→## Prototype Data Model
+   430→
+   431→Use a local deterministic object similar to:
+   432→
+   433→```ts
+   434→type GuestReadinessDraft = {
+   435→  originalRequest: string;
+   436→  workingTitle: string;
+   437→  category: "UI_UX" | "FRONTEND" | "UI_UX_AND_FRONTEND" | "OTHER";
+   438→  outcome: string;
+   439→  deliverables: string[];
+   440→  exclusions: string[];
+   441→  inputs: Array<{
+   442→    name: string;
+   443→    state: "READY" | "MISSING" | "NEED_HELP" | "OUT_OF_SCOPE";
+   444→    owner?: "BUYER" | "PRO" | "QUICKQUID";
+   445→    dueText?: string;
+   446→  }>;
+   447→  budgetBand: string;
+   448→  targetDate: string;
+   449→  deadlineReason: string;
+   450→  decisionMaker: string;
+   451→  feedbackWindow: string;
+   452→  acceptanceCriteria: string[];
+   453→  completedAreas: string[];
+   454→  conversationStep: number;
+   455→  status: "IN_PROGRESS" | "PREPARED" | "SAVED_AS_DRAFT";
+   456→};
+   457→```
+   458→
+   459→No field in this object represents a real approval, contract, payment or guaranteed date.
+   460→
+   461→## Analytics Events
+   462→
+   463→Record local prototype events so the intended funnel is visible:
+   464→
+   465→- `readiness_input_submitted`
+   466→- `readiness_chat_started`
+   467→- `readiness_question_answered`
+   468→- `readiness_completed`
+   469→- `readiness_summary_viewed`
+   470→- `signup_gate_viewed`
+   471→- `account_created`
+   472→- `buyer_onboarding_completed`
+   473→- `project_draft_restored`
+   474→- `project_draft_saved`
+   475→- `readiness_abandoned` with the last completed step
+   476→
+   477→The business funnel is:
+   478→
+   479→```text
+   480→Landing submission
+   481→→ Readiness conversation completed
+   482→→ Account created or signed in
+   483→→ Buyer onboarding completed
+   484→→ Project draft saved
+   485→→ QuickQuid Ready review submitted
+   486→```
+   487→
+   488→## Acceptance Tests
+   489→
+   490→1. A guest entering a request and clicking **Check project readiness** always enters the guest readiness conversation.
+   491→2. No guest action can render the Buyer dashboard, Buyer sidebar, payment surfaces or project counts.
+   492→3. The original request appears in the first AI response and in the live readiness panel.
+   493→4. The demonstration path can complete all seven readiness areas with hard-coded responses.
+   494→5. Typed answers and suggested chips both work.
+   495→6. Back and refresh preserve the unfinished draft.
+   496→7. **Start over** clears the readiness draft only after a confirmation.
+   497→8. The summary remains private and editable.
+   498→9. Saving the summary requires authentication.
+   499→10. A new account enters Buyer onboarding and cannot bypass the required profile fields.
+   500→11. After onboarding, the prepared project is restored without losing answers.
+   501→12. The project is saved as a private draft before any publish action.
+   502→13. The public **Sign in** action opens sign-in mode; **Submit a project** opens the Buyer acquisition path.
+   503→14. Account-created progress is accurate.
+   504→15. **Complete profile** never produces **No profile loaded** for an authenticated Buyer.
+   505→16. No 10%, 13% or 14% platform fee remains anywhere.
+   506→17. No customer-facing screen says escrow, guarantee, wallet balance or real payout for Q₹.
+   507→18. Q₹ surfaces always state that they are simulations with no cash value.
+   508→19. All controls work with keyboard navigation and visible focus.
+   509→20. Mobile preserves the next action, progress and user-entered content without horizontal overflow.
+   510→
+   511→## Scope Control
+   512→
+   513→Do not add:
+   514→
+   515→- Real generative AI
+   516→- Real authentication
+   517→- Real KYC
+   518→- Real payments or escrow
+   519→- Automated Pro selection
+   520→- Automated project approval
+   521→- New marketplace categories
+   522→- Teams or Enterprise workflows
+   523→- Complex scoring models
+   524→
+   525→Build the smallest credible prototype that demonstrates this sequence correctly:
+   526→
+   527→> Rough request → structured readiness conversation → useful summary → account → Buyer onboarding → restored private project draft.# QuickQuid Buyer AI Readiness and Account Onboarding
+   528→
+   529→Use this prompt to improve the existing QuickQuid prototype.
+   530→
+   531→## Objective
+   532→
+   533→Fix the public project-readiness journey without redesigning or rebuilding the rest of the product.
+   534→
+   535→The current problem is critical: an unauthenticated visitor can type into **“What needs to get finished?”**, click **“Check project readiness”**, and enter Buyer product screens without completing account creation and Buyer onboarding.
+   536→
+   537→Replace that behavior with a smooth, deterministic Buyer–AI readiness conversation. Let the visitor receive useful project guidance before asking them to create an account. Require account creation and minimal Buyer onboarding before the project can be saved or any Buyer dashboard can be opened.
+   538→
+   539→This is a prototype. Do not build a real LLM, authentication service, payment system, KYC service or escrow system. Use realistic hard-coded responses and local prototype state.
+   540→
+   541→## Product Rule
+   542→
+   543→> A guest may explore and prepare a project. Only an onboarded Buyer may save it, publish it or enter the Buyer product.
+   544→
+   545→Never assign a Buyer role, create a Buyer session or show the Buyer dashboard merely because a visitor clicked the readiness CTA.
+   546→
+   547→## Required Journey
+   548→
+   549→```mermaid
+   550→flowchart LR
+   551→    Landing["Landing page"] --> Input["Visitor enters rough request"]
+   552→    Input --> Chat["Guest AI readiness conversation"]
+   553→    Chat --> Ready{"Seven readiness areas complete?"}
+   554→    Ready -- "No" --> Chat
+   555→    Ready -- "Yes" --> Summary["Ready project summary"]
+   556→    Summary --> Auth["Create account or sign in"]
+   557→    Auth --> Buyer["Minimal Buyer onboarding"]
+   558→    Buyer --> Restore["Restore prepared project"]
+   559→    Restore --> Draft["Buyer reviews and saves draft"]
+   560→    Draft --> Workspace["Project workspace"]
+   561→    Workspace --> Dashboard["Buyer dashboard"]
+   562→```
+   563→
+   564→The Buyer dashboard is the end of onboarding, not the substitute for onboarding.
+   565→
+   566→## Route and State Guards
+   567→
+   568→Use these prototype states even if the application remains a single-page experience:
+   569→
+   570→1. `PUBLIC_LANDING`
+   571→2. `GUEST_READINESS_CHAT`
+   572→3. `READINESS_SUMMARY`
+   573→4. `AUTH_REQUIRED`
+   574→5. `BUYER_ONBOARDING`
+   575→6. `PROJECT_DRAFT_RESTORED`
+   576→7. `BUYER_PROJECT`
+   577→8. `BUYER_DASHBOARD`
+   578→
+   579→The guard for Buyer product screens is:
+   580→
+   581→```text
+   582→isAuthenticated === true
+   583→AND activeRole === "BUYER"
+   584→AND buyerProfileComplete === true
+   585→```
+   586→
+   587→If any condition is false, preserve the prepared project and send the user to the missing step. Do not silently create a Buyer identity.
+   588→
+   589→## Landing-Page Behavior
+   590→
+   591→Keep the existing hero and positioning.
+   592→
+   593→### Input
+   594→
+   595→- Label: **What needs to get finished?**
+   596→- Placeholder: **Example: Design and build a responsive launch page before 28 February.**
+   597→- Primary CTA: **Check project readiness**
+   598→- Pressing Enter performs the same action as the CTA.
+   599→- An empty submission shows: **Describe the outcome you need before we check readiness.**
+   600→- The input must have a real programmatic label; do not rely only on placeholder text.
+   601→
+   602→### On submission
+   603→
+   604→1. Copy the text into `guestProjectDraft.originalRequest`.
+   605→2. Open the readiness conversation in guest mode.
+   606→3. Do not open Create a brief.
+   607→4. Do not open the Buyer dashboard.
+   608→5. Do not create a Buyer role.
+   609→6. Preserve the rough request if the visitor returns to the landing page.
+   610→
+   611→Store unfinished prototype progress in `sessionStorage` under `qq_guest_readiness_draft`. Restore it after refresh. Provide a visible **Start over** action that clears only this draft.
+   612→
+   613→## Readiness Conversation Screen
+   614→
+   615→### Page structure
+   616→
+   617→Use the existing **Operational Flat+** design language: flat structure, visible affordance and selective depth.
+   618→
+   619→Desktop:
+   620→
+   621→- 60% conversational workspace on the left.
+   622→- 40% live project-readiness panel on the right.
+   623→- A restrained sticky footer containing the current response control.
+   624→
+   625→Mobile:
+   626→
+   627→- Chat first.
+   628→- A compact sticky progress control such as **4 of 7 ready**.
+   629→- The readiness panel opens as a sheet or collapsible section.
+   630→
+   631→Top bar:
+   632→
+   633→- QuickQuid logo.
+   634→- **Project readiness** title.
+   635→- **Guest session** status.
+   636→- **Exit** and **Start over** actions.
+   637→
+   638→Trust note:
+   639→
+   640→> AI is helping structure your brief. QuickQuid reviews readiness before matching. No account or project has been created yet.
+   641→
+   642→Do not show the application sidebar, Buyer navigation, project counts, payment controls or dashboard shell during guest readiness.
+   643→
+   644→### Conversation style
+   645→
+   646→- Ask one clear question at a time.
+   647→- Confirm what was understood before asking the next question.
+   648→- Use short answer chips where helpful, while always permitting typed input.
+   649→- Never claim that AI has approved the project, selected a Pro or guaranteed a delivery date.
+   650→- Call the output **Prepared for QuickQuid review**, not automatically approved.
+   651→- Show why a missing answer matters in one sentence.
+   652→- Do not turn the experience into a long multi-section form.
+   653→
+   654→## Seven Readiness Areas
+   655→
+   656→The live panel must show these seven areas. A project is prepared only when all seven contain an answer.
+   657→
+   658→| Area | Information captured | Why QuickQuid needs it |
+   659→|---|---|---|
+   660→| Outcome and category | Desired result, inferred category and project archetype | Makes the request understandable and matchable |
+   661→| Scope | Deliverables and explicit exclusions | Prevents hidden or moving work |
+   662→| Inputs and dependencies | Existing materials, missing inputs, access and ownership | Identifies whether work can start |
+   663→| Budget | Professional-fee range and flexibility | Prevents unfinanceable matching |
+   664→| Timeline | Target date, reason and hard dependencies | Supports a realistic Commit Date later |
+   665→| Decision and feedback | Decision-maker and expected review window | Makes Buyer responsibility explicit |
+   666→| Acceptance | Objective completion and handoff criteria | Establishes what “done” means |
+   667→
+   668→Use clear status labels:
+   669→
+   670→- **Missing**
+   671→- **Answered**
+   672→- **Needs confirmation**
+   673→- **Prepared for review**
+   674→
+   675→Do not use a false AI confidence percentage.
+   676→
+   677→## Hard-Coded Conversation
+   678→
+   679→The prototype must support free typing, but it should advance through deterministic stages. Use this exact scenario as the polished demonstration path.
+   680→
+   681→### Initial visitor request
+   682→
+   683→> We need a responsive SaaS launch page designed and built in three weeks.
+   684→
+   685→### Opening response
+   686→
+   687→> Got it — you need a responsive SaaS launch page in three weeks. I’ll help turn that into a project a professional can confidently accept. First, do you need the design, the frontend build, or both?
+   688→
+   689→Chips:
+   690→
+   691→- **Design only**
+   692→- **Frontend build only**
+   693→- **Design + frontend build**
+   694→- **Not sure**
+   695→
+   696→For the demonstration path, select **Design + frontend build**.
+   697→
+   698→### Question 2 — deliverables and exclusions
+   699→
+   700→AI response:
+   701→
+   702→> I’ll treat this as a combined UI/UX and frontend project. What must be handed over at the end?
+   703→
+   704→Preselected editable suggestions:
+   705→
+   706→- Responsive landing-page design
+   707→- Desktop, tablet and mobile implementation
+   708→- Editable design source
+   709→- Source repository
+   710→- Deployed preview
+   711→- Basic browser and responsive checks
+   712→
+   713→Follow-up:
+   714→
+   715→> Is anything explicitly outside this project?
+   716→
+   717→Suggested answer:
+   718→
+   719→> No backend, CMS, SEO campaign, copywriting or ongoing hosting support.
+   720→
+   721→### Question 3 — inputs and dependencies
+   722→
+   723→AI response:
+   724→
+   725→> What is already available, and who owns anything that is still missing?
+   726→
+   727→Show rows with **Ready**, **Missing** and **Need help** controls:
+   728→
+   729→| Input | Demonstration state |
+   730→|---|---|
+   731→| Brand logo and colours | Ready |
+   732→| Final page copy | Buyer will provide within two days |
+   733→| Product screenshots | Ready |
+   734→| Domain or deployment access | Buyer will provide before build handoff |
+   735→| Analytics ID | Outside current scope |
+   736→
+   737→The AI should respond:
+   738→
+   739→> The project can continue, but the final Commit Date will depend on copy arriving within two days.
+   740→
+   741→### Question 4 — budget
+   742→
+   743→AI response:
+   744→
+   745→> What professional-fee range have you approved for this work?
+   746→
+   747→Chips:
+   748→
+   749→- **₹25,000–₹50,000**
+   750→- **₹50,000–₹80,000**
+   751→- **₹80,000+**
+   752→- **I need guidance**
+   753→
+   754→Demonstration selection: **₹50,000–₹80,000**.
+   755→
+   756→Supporting copy:
+   757→
+   758→> QuickQuid charges the Buyer and Pro ₹0 during the founding beta. Provider charges or applicable taxes may still apply when real payments are introduced.
+   759→
+   760→### Question 5 — timeline
+   761→
+   762→AI response:
+   763→
+   764→> You mentioned three weeks. What date is this needed, and what happens on that date?
+   765→
+   766→Demonstration answer:
+   767→
+   768→> The launch is on 30 August. The final approved page must be ready two business days earlier.
+   769→
+   770→AI confirmation:
+   771→
+   772→> I’ll record 28 August as the target handoff date and 30 August as the launch dependency. This is an input to a later Commit Date forecast, not a guarantee.
+   773→
+   774→### Question 6 — decision-maker and feedback
+   775→
+   776→AI response:
+   777→
+   778→> Who gives final approval, and how quickly can feedback be returned during the project?
+   779→
+   780→Chips:
+   781→
+   782→- **I approve — within 24 hours**
+   783→- **I approve — within 48 hours**
+   784→- **A teammate approves**
+   785→- **Multiple approvers**
+   786→
+   787→Demonstration selection: **I approve — within 24 hours**.
+   788→
+   789→### Question 7 — acceptance
+   790→
+   791→AI response:
+   792→
+   793→> Last step: what must be true for you to accept the work?
+   794→
+   795→Editable suggestions:
+   796→
+   797→- Matches the approved design at agreed breakpoints
+   798→- Works in current Chrome, Safari and Edge versions
+   799→- No broken links or visible layout overflow
+   800→- Page meets the agreed performance baseline
+   801→- Repository and deployment access are transferred
+   802→- Editable design file and handoff notes are included
+   803→- Known issues are disclosed before review
+   804→
+   805→Final confirmation:
+   806→
+   807→> Your request is now prepared for QuickQuid review. Check the summary before creating an account and saving it.
+   808→
+   809→## Prepared Project Summary
+   810→
+   811→Show a clean, editable summary—not another chat message.
+   812→
+   813→### Summary content
+   814→
+   815→**Working title**  
+   816→Design and build a responsive SaaS launch page
+   817→
+   818→**Category**  
+   819→UI/UX + Frontend
+   820→
+   821→**Outcome**  
+   822→A launch-ready responsive page for the 30 August SaaS release.
+   823→
+   824→**Deliverables**  
+   825→Responsive design, frontend implementation, editable design source, repository, deployed preview and handoff notes.
+   826→
+   827→**Exclusions**  
+   828→Backend, CMS, SEO campaign, copywriting and ongoing hosting support.
+   829→
+   830→**Inputs and dependencies**  
+   831→Brand assets and screenshots are ready. Buyer supplies final copy within two days and deployment access before handoff.
+   832→
+   833→**Budget**  
+   834→₹50,000–₹80,000 professional fee.
+   835→
+   836→**Target timing**  
+   837→Target handoff 28 August; launch dependency 30 August; final Commit Date determined after proof and capacity review.
+   838→
+   839→**Decision and feedback**  
+   840→Buyer is the decision-maker and responds within 24 hours.
+   841→
+   842→**Acceptance**  
+   843→Show the seven editable acceptance checks from the conversation.
+   844→
+   845→### Summary actions
+   846→
+   847→- Primary: **Create account and save project**
+   848→- Secondary: **Edit answers**
+   849→- Tertiary: **Start over**
+   850→
+   851→Include:
+   852→
+   853→> Nothing has been published. Your project will remain a private draft until you review and submit it.
+   854→
+   855→## Authentication Gate
+   856→
+   857→The account gate opens only after the visitor has received the prepared summary.
+   858→
+   859→### Create-account mode
+   860→
+   861→- Heading: **Save your prepared project**
+   862→- Supporting copy: **Create a Buyer account to keep this draft and continue.**
+   863→- Email input
+   864→- Primary CTA: **Continue with email**
+   865→- Secondary link: **Already have an account? Sign in**
+   866→- Preserve the project during the entire account flow.
+   867→
+   868→### Sign-in mode
+   869→
+   870→- Heading: **Welcome back**
+   871→- Supporting copy: **Sign in to continue with your prepared project.**
+   872→- Primary CTA: **Sign in**
+   873→- Secondary link: **New to QuickQuid? Create an account**
+   874→
+   875→The header **Sign in** action on the public landing page must open sign-in mode. It must not open a screen headed **Create your account**.
+   876→
+   877→Keep demo-account shortcuts visually separated under **Prototype shortcuts** so they cannot be mistaken for production authentication.
+   878→
+   879→## Minimal Buyer Onboarding
+   880→
+   881→After account creation, the product already knows the user entered through a Buyer project flow. Set the active role to Buyer, then require a short profile step before entering the product.
+   882→
+   883→Fields:
+   884→
+   885→- Full name
+   886→- Company or organization name
+   887→- Work role or title, optional
+   888→- Business type: Startup, agency, SME or individual
+   889→- City, defaulting to Kochi but editable
+   890→- Checkbox confirming acceptance of prototype terms and privacy notice
+   891→
+   892→Do not request PAN, bank details, GSTIN, billing address or payment instructions here. Those are only required when the user reaches a real action that needs them.
+   893→
+   894→After submission:
+   895→
+   896→1. Mark **Account created** complete.
+   897→2. Mark **Buyer profile complete** complete.
+   898→3. Restore the prepared project.
+   899→4. Show the summary with a primary action: **Save as private draft**.
+   900→5. Save it as a Buyer-owned draft.
+   901→6. Open the project draft page, not the general dashboard.
+   902→
+   903→The Buyer may reach the dashboard after this sequence is complete.
+   904→
+   905→## Existing Issues to Correct in the Same Pass
+   906→
+   907→These are consistency defects in the current prototype, not new features.
+   908→
+   909→### Commercial truth
+   910→
+   911→- Remove all 10%, 13% and 14% Buyer-fee calculations, copy and examples.
+   912→- Buyer QuickQuid fee: **₹0 during founding beta**.
+   913→- Pro QuickQuid fee: **₹0 during founding beta**.
+   914→- Buyer total must not add an old platform fee.
+   915→- Replace **QuickQuid commission (deducted from Pro)** with **QuickQuid fee — ₹0 during founding beta**.
+   916→- Provider charges and applicable taxes may be shown only as separate, configurable placeholders.
+   917→
+   918→### Payment language
+   919→
+   920→- Replace **Demo escrow** with **Demo milestone funds**.
+   921→- Show: **Q₹25,000 locked · simulation only**.
+   922→- Add: **Q₹ has no cash value. No real money is accepted, held or paid out.**
+   923→- Remove claims that QuickQuid provides escrow, custody, guaranteed payout or automatic release.
+   924→- Remove manual NEFT, IMPS and UTR evidence from the primary production story.
+   925→- Do not present a simulated ledger as a wallet or bank balance.
+   926→
+   927→### Product language
+   928→
+   929→- Remove version numbers from customer-facing copy.
+   930→- Replace **Max 4 milestones per contract in v0.1 due to manual payment verification** with **Keep the founding-beta plan to four or fewer clear milestones.**
+   931→- Replace **No wallet, no automated escrow in v0.1** with **QuickQuid does not provide a wallet or escrow in this prototype.**
+   932→
+   933→### Account-state defects
+   934→
+   935→- A newly created account must not show **0% complete** with **Account created** unchecked.
+   936→- **Complete profile** must open a working Buyer profile form.
+   937→- Never show **No profile loaded — Sign in as a buyer** immediately after Buyer account creation.
+   938→- Cancelling an unfinished brief must return to the prepared summary or authenticated project list, according to context. It must not manufacture an empty Buyer session.
+   939→- A guest must never see project counts, contracts, payments, role navigation or dashboard content.
+   940→
+   941→## Visual Requirements
+   942→
+   943→- Preserve the current black, warm-white and muted-green palette.
+   944→- Preserve the strong landing-page typography.
+   945→- Keep the interface flatter and operational; use depth only for the active chat composer, readiness summary and primary action.
+   946→- Do not add glassmorphism, large gradients, decorative 3D art, floating AI orbs or generic chatbot sparkle icons.
+   947→- Use the existing icon library.
+   948→- Make the readiness progress the distinctive visual element.
+   949→- Status must use text and icon, not colour alone.
+   950→- Keep line lengths readable and targets at least 44px high on touch screens.
+   951→- Provide visible keyboard focus.
+   952→- Announce new AI messages and validation errors accessibly without unexpectedly moving keyboard focus.
+   953→- Respect reduced-motion preferences.
+   954→
+   955→## Prototype Data Model
+   956→
+   957→Use a local deterministic object similar to:
+   958→
+   959→```ts
+   960→type GuestReadinessDraft = {
+   961→  originalRequest: string;
+   962→  workingTitle: string;
+   963→  category: "UI_UX" | "FRONTEND" | "UI_UX_AND_FRONTEND" | "OTHER";
+   964→  outcome: string;
+   965→  deliverables: string[];
+   966→  exclusions: string[];
+   967→  inputs: Array<{
+   968→    name: string;
+   969→    state: "READY" | "MISSING" | "NEED_HELP" | "OUT_OF_SCOPE";
+   970→    owner?: "BUYER" | "PRO" | "QUICKQUID";
+   971→    dueText?: string;
+   972→  }>;
+   973→  budgetBand: string;
+   974→  targetDate: string;
+   975→  deadlineReason: string;
+   976→  decisionMaker: string;
+   977→  feedbackWindow: string;
+   978→  acceptanceCriteria: string[];
+   979→  completedAreas: string[];
+   980→  conversationStep: number;
+   981→  status: "IN_PROGRESS" | "PREPARED" | "SAVED_AS_DRAFT";
+   982→};
+   983→```
+   984→
+   985→No field in this object represents a real approval, contract, payment or guaranteed date.
+   986→
+   987→## Analytics Events
+   988→
+   989→Record local prototype events so the intended funnel is visible:
+   990→
+   991→- `readiness_input_submitted`
+   992→- `readiness_chat_started`
+   993→- `readiness_question_answered`
+   994→- `readiness_completed`
+   995→- `readiness_summary_viewed`
+   996→- `signup_gate_viewed`
+   997→- `account_created`
+   998→- `buyer_onboarding_completed`
+   999→- `project_draft_restored`
+  1000→- `project_draft_saved`
+  1001→- `readiness_abandoned` with the last completed step
+  1002→
+  1003→The business funnel is:
+  1004→
+  1005→```text
+  1006→Landing submission
+  1007→→ Readiness conversation completed
+  1008→→ Account created or signed in
+  1009→→ Buyer onboarding completed
+  1010→→ Project draft saved
+  1011→→ QuickQuid Ready review submitted
+  1012→```
+  1013→
+  1014→## Acceptance Tests
+  1015→
+  1016→1. A guest entering a request and clicking **Check project readiness** always enters the guest readiness conversation.
+  1017→2. No guest action can render the Buyer dashboard, Buyer sidebar, payment surfaces or project counts.
+  1018→3. The original request appears in the first AI response and in the live readiness panel.
+  1019→4. The demonstration path can complete all seven readiness areas with hard-coded responses.
+  1020→5. Typed answers and suggested chips both work.
+  1021→6. Back and refresh preserve the unfinished draft.
+  1022→7. **Start over** clears the readiness draft only after a confirmation.
+  1023→8. The summary remains private and editable.
+  1024→9. Saving the summary requires authentication.
+  1025→10. A new account enters Buyer onboarding and cannot bypass the required profile fields.
+  1026→11. After onboarding, the prepared project is restored without losing answers.
+  1027→12. The project is saved as a private draft before any publish action.
+  1028→13. The public **Sign in** action opens sign-in mode; **Submit a project** opens the Buyer acquisition path.
+  1029→14. Account-created progress is accurate.
+  1030→15. **Complete profile** never produces **No profile loaded** for an authenticated Buyer.
+  1031→16. No 10%, 13% or 14% platform fee remains anywhere.
+  1032→17. No customer-facing screen says escrow, guarantee, wallet balance or real payout for Q₹.
+  1033→18. Q₹ surfaces always state that they are simulations with no cash value.
+  1034→19. All controls work with keyboard navigation and visible focus.
+  1035→20. Mobile preserves the next action, progress and user-entered content without horizontal overflow.
+  1036→
+  1037→## Scope Control
+  1038→
+  1039→Do not add:
+  1040→
+  1041→- Real generative AI
+  1042→- Real authentication
+  1043→- Real KYC
+  1044→- Real payments or escrow
+  1045→- Automated Pro selection
+  1046→- Automated project approval
+  1047→- New marketplace categories
+  1048→- Teams or Enterprise workflows
+  1049→- Complex scoring models
+  1050→
+  1051→Build the smallest credible prototype that demonstrates this sequence correctly:
+  1052→
+  1053→> Rough request → structured readiness conversation → useful summary → account → Buyer onboarding → restored private project draft.
+  1054→
+  1055→# QuickQuid Buyer AI Readiness and Account Onboarding
+  1056→
+  1057→Use this prompt to improve the existing QuickQuid prototype.
+  1058→
+  1059→## Objective
+  1060→
+  1061→Fix the public project-readiness journey without redesigning or rebuilding the rest of the product.
+  1062→
+  1063→The current problem is critical: an unauthenticated visitor can type into **“What needs to get finished?”**, click **“Check project readiness”**, and enter Buyer product screens without completing account creation and Buyer onboarding.
+  1064→
+  1065→Replace that behavior with a smooth, deterministic Buyer–AI readiness conversation. Let the visitor receive useful project guidance before asking them to create an account. Require account creation and minimal Buyer onboarding before the project can be saved or any Buyer dashboard can be opened.
+  1066→
+  1067→This is a prototype. Do not build a real LLM, authentication service, payment system, KYC service or escrow system. Use realistic hard-coded responses and local prototype state.
+  1068→
+  1069→## Product Rule
+  1070→
+  1071→> A guest may explore and prepare a project. Only an onboarded Buyer may save it, publish it or enter the Buyer product.
+  1072→
+  1073→Never assign a Buyer role, create a Buyer session or show the Buyer dashboard merely because a visitor clicked the readiness CTA.
+  1074→
+  1075→## Required Journey
+  1076→
+  1077→```mermaid
+  1078→flowchart LR
+  1079→    Landing["Landing page"] --> Input["Visitor enters rough request"]
+  1080→    Input --> Chat["Guest AI readiness conversation"]
+  1081→    Chat --> Ready{"Seven readiness areas complete?"}
+  1082→    Ready -- "No" --> Chat
+  1083→    Ready -- "Yes" --> Summary["Ready project summary"]
+  1084→    Summary --> Auth["Create account or sign in"]
+  1085→    Auth --> Buyer["Minimal Buyer onboarding"]
+  1086→    Buyer --> Restore["Restore prepared project"]
+  1087→    Restore --> Draft["Buyer reviews and saves draft"]
+  1088→    Draft --> Workspace["Project workspace"]
+  1089→    Workspace --> Dashboard["Buyer dashboard"]
+  1090→```
+  1091→
+  1092→The Buyer dashboard is the end of onboarding, not the substitute for onboarding.
+  1093→
+  1094→## Route and State Guards
+  1095→
+  1096→Use these prototype states even if the application remains a single-page experience:
+  1097→
+  1098→1. `PUBLIC_LANDING`
+  1099→2. `GUEST_READINESS_CHAT`
+  1100→3. `READINESS_SUMMARY`
+  1101→4. `AUTH_REQUIRED`
+  1102→5. `BUYER_ONBOARDING`
+  1103→6. `PROJECT_DRAFT_RESTORED`
+  1104→7. `BUYER_PROJECT`
+  1105→8. `BUYER_DASHBOARD`
+  1106→
+  1107→The guard for Buyer product screens is:
+  1108→
+  1109→```text
+  1110→isAuthenticated === true
+  1111→AND activeRole === "BUYER"
+  1112→AND buyerProfileComplete === true
+  1113→```
+  1114→
+  1115→If any condition is false, preserve the prepared project and send the user to the missing step. Do not silently create a Buyer identity.
+  1116→
+  1117→## Landing-Page Behavior
+  1118→
+  1119→Keep the existing hero and positioning.
+  1120→
+  1121→### Input
+  1122→
+  1123→- Label: **What needs to get finished?**
+  1124→- Placeholder: **Example: Design and build a responsive launch page before 28 February.**
+  1125→- Primary CTA: **Check project readiness**
+  1126→- Pressing Enter performs the same action as the CTA.
+  1127→- An empty submission shows: **Describe the outcome you need before we check readiness.**
+  1128→- The input must have a real programmatic label; do not rely only on placeholder text.
+  1129→
+  1130→### On submission
+  1131→
+  1132→1. Copy the text into `guestProjectDraft.originalRequest`.
+  1133→2. Open the readiness conversation in guest mode.
+  1134→3. Do not open Create a brief.
+  1135→4. Do not open the Buyer dashboard.
+  1136→5. Do not create a Buyer role.
+  1137→6. Preserve the rough request if the visitor returns to the landing page.
+  1138→
+  1139→Store unfinished prototype progress in `sessionStorage` under `qq_guest_readiness_draft`. Restore it after refresh. Provide a visible **Start over** action that clears only this draft.
+  1140→
+  1141→## Readiness Conversation Screen
+  1142→
+  1143→### Page structure
+  1144→
+  1145→Use the existing **Operational Flat+** design language: flat structure, visible affordance and selective depth.
+  1146→
+  1147→Desktop:
+  1148→
+  1149→- 60% conversational workspace on the left.
+  1150→- 40% live project-readiness panel on the right.
+  1151→- A restrained sticky footer containing the current response control.
+  1152→
+  1153→Mobile:
+  1154→
+  1155→- Chat first.
+  1156→- A compact sticky progress control such as **4 of 7 ready**.
+  1157→- The readiness panel opens as a sheet or collapsible section.
+  1158→
+  1159→Top bar:
+  1160→
+  1161→- QuickQuid logo.
+  1162→- **Project readiness** title.
+  1163→- **Guest session** status.
+  1164→- **Exit** and **Start over** actions.
+  1165→
+  1166→Trust note:
+  1167→
+  1168→> AI is helping structure your brief. QuickQuid reviews readiness before matching. No account or project has been created yet.
+  1169→
+  1170→Do not show the application sidebar, Buyer navigation, project counts, payment controls or dashboard shell during guest readiness.
+  1171→
+  1172→### Conversation style
+  1173→
+  1174→- Ask one clear question at a time.
+  1175→- Confirm what was understood before asking the next question.
+  1176→- Use short answer chips where helpful, while always permitting typed input.
+  1177→- Never claim that AI has approved the project, selected a Pro or guaranteed a delivery date.
+  1178→- Call the output **Prepared for QuickQuid review**, not automatically approved.
+  1179→- Show why a missing answer matters in one sentence.
+  1180→- Do not turn the experience into a long multi-section form.
+  1181→
+  1182→## Seven Readiness Areas
+  1183→
+  1184→The live panel must show these seven areas. A project is prepared only when all seven contain an answer.
+  1185→
+  1186→| Area | Information captured | Why QuickQuid needs it |
+  1187→|---|---|---|
+  1188→| Outcome and category | Desired result, inferred category and project archetype | Makes the request understandable and matchable |
+  1189→| Scope | Deliverables and explicit exclusions | Prevents hidden or moving work |
+  1190→| Inputs and dependencies | Existing materials, missing inputs, access and ownership | Identifies whether work can start |
+  1191→| Budget | Professional-fee range and flexibility | Prevents unfinanceable matching |
+  1192→| Timeline | Target date, reason and hard dependencies | Supports a realistic Commit Date later |
+  1193→| Decision and feedback | Decision-maker and expected review window | Makes Buyer responsibility explicit |
+  1194→| Acceptance | Objective completion and handoff criteria | Establishes what “done” means |
+  1195→
+  1196→Use clear status labels:
+  1197→
+  1198→- **Missing**
+  1199→- **Answered**
+  1200→- **Needs confirmation**
+  1201→- **Prepared for review**
+  1202→
+  1203→Do not use a false AI confidence percentage.
+  1204→
+  1205→## Hard-Coded Conversation
+  1206→
+  1207→The prototype must support free typing, but it should advance through deterministic stages. Use this exact scenario as the polished demonstration path.
+  1208→
+  1209→### Initial visitor request
+  1210→
+  1211→> We need a responsive SaaS launch page designed and built in three weeks.
+  1212→
+  1213→### Opening response
+  1214→
+  1215→> Got it — you need a responsive SaaS launch page in three weeks. I’ll help turn that into a project a professional can confidently accept. First, do you need the design, the frontend build, or both?
+  1216→
+  1217→Chips:
+  1218→
+  1219→- **Design only**
+  1220→- **Frontend build only**
+  1221→- **Design + frontend build**
+  1222→- **Not sure**
+  1223→
+  1224→For the demonstration path, select **Design + frontend build**.
+  1225→
+  1226→### Question 2 — deliverables and exclusions
+  1227→
+  1228→AI response:
+  1229→
+  1230→> I’ll treat this as a combined UI/UX and frontend project. What must be handed over at the end?
+  1231→
+  1232→Preselected editable suggestions:
+  1233→
+  1234→- Responsive landing-page design
+  1235→- Desktop, tablet and mobile implementation
+  1236→- Editable design source
+  1237→- Source repository
+  1238→- Deployed preview
+  1239→- Basic browser and responsive checks
+  1240→
+  1241→Follow-up:
+  1242→
+  1243→> Is anything explicitly outside this project?
+  1244→
+  1245→Suggested answer:
+  1246→
+  1247→> No backend, CMS, SEO campaign, copywriting or ongoing hosting support.
+  1248→
+  1249→### Question 3 — inputs and dependencies
+  1250→
+  1251→AI response:
+  1252→
+  1253→> What is already available, and who owns anything that is still missing?
+  1254→
+  1255→Show rows with **Ready**, **Missing** and **Need help** controls:
+  1256→
+  1257→| Input | Demonstration state |
+  1258→|---|---|
+  1259→| Brand logo and colours | Ready |
+  1260→| Final page copy | Buyer will provide within two days |
+  1261→| Product screenshots | Ready |
+  1262→| Domain or deployment access | Buyer will provide before build handoff |
+  1263→| Analytics ID | Outside current scope |
+  1264→
+  1265→The AI should respond:
+  1266→
+  1267→> The project can continue, but the final Commit Date will depend on copy arriving within two days.
+  1268→
+  1269→### Question 4 — budget
+  1270→
+  1271→AI response:
+  1272→
+  1273→> What professional-fee range have you approved for this work?
+  1274→
+  1275→Chips:
+  1276→
+  1277→- **₹25,000–₹50,000**
+  1278→- **₹50,000–₹80,000**
+  1279→- **₹80,000+**
+  1280→- **I need guidance**
+  1281→
+  1282→Demonstration selection: **₹50,000–₹80,000**.
+  1283→
+  1284→Supporting copy:
+  1285→
+  1286→> QuickQuid charges the Buyer and Pro ₹0 during the founding beta. Provider charges or applicable taxes may still apply when real payments are introduced.
+  1287→
+  1288→### Question 5 — timeline
+  1289→
+  1290→AI response:
+  1291→
+  1292→> You mentioned three weeks. What date is this needed, and what happens on that date?
+  1293→
+  1294→Demonstration answer:
+  1295→
+  1296→> The launch is on 30 August. The final approved page must be ready two business days earlier.
+  1297→
+  1298→AI confirmation:
+  1299→
+  1300→> I’ll record 28 August as the target handoff date and 30 August as the launch dependency. This is an input to a later Commit Date forecast, not a guarantee.
+  1301→
+  1302→### Question 6 — decision-maker and feedback
+  1303→
+  1304→AI response:
+  1305→
+  1306→> Who gives final approval, and how quickly can feedback be returned during the project?
+  1307→
+  1308→Chips:
+  1309→
+  1310→- **I approve — within 24 hours**
+  1311→- **I approve — within 48 hours**
+  1312→- **A teammate approves**
+  1313→- **Multiple approvers**
+  1314→
+  1315→Demonstration selection: **I approve — within 24 hours**.
+  1316→
+  1317→### Question 7 — acceptance
+  1318→
+  1319→AI response:
+  1320→
+  1321→> Last step: what must be true for you to accept the work?
+  1322→
+  1323→Editable suggestions:
+  1324→
+  1325→- Matches the approved design at agreed breakpoints
+  1326→- Works in current Chrome, Safari and Edge versions
+  1327→- No broken links or visible layout overflow
+  1328→- Page meets the agreed performance baseline
+  1329→- Repository and deployment access are transferred
+  1330→- Editable design file and handoff notes are included
+  1331→- Known issues are disclosed before review
+  1332→
+  1333→Final confirmation:
+  1334→
+  1335→> Your request is now prepared for QuickQuid review. Check the summary before creating an account and saving it.
+  1336→
+  1337→## Prepared Project Summary
+  1338→
+  1339→Show a clean, editable summary—not another chat message.
+  1340→
+  1341→### Summary content
+  1342→
+  1343→**Working title**  
+  1344→Design and build a responsive SaaS launch page
+  1345→
+  1346→**Category**  
+  1347→UI/UX + Frontend
+  1348→
+  1349→**Outcome**  
+  1350→A launch-ready responsive page for the 30 August SaaS release.
+  1351→
+  1352→**Deliverables**  
+  1353→Responsive design, frontend implementation, editable design source, repository, deployed preview and handoff notes.
+  1354→
+  1355→**Exclusions**  
+  1356→Backend, CMS, SEO campaign, copywriting and ongoing hosting support.
+  1357→
+  1358→**Inputs and dependencies**  
+  1359→Brand assets and screenshots are ready. Buyer supplies final copy within two days and deployment access before handoff.
+  1360→
+  1361→**Budget**  
+  1362→₹50,000–₹80,000 professional fee.
+  1363→
+  1364→**Target timing**  
+  1365→Target handoff 28 August; launch dependency 30 August; final Commit Date determined after proof and capacity review.
+  1366→
+  1367→**Decision and feedback**  
+  1368→Buyer is the decision-maker and responds within 24 hours.
+  1369→
+  1370→**Acceptance**  
+  1371→Show the seven editable acceptance checks from the conversation.
+  1372→
+  1373→### Summary actions
+  1374→
+  1375→- Primary: **Create account and save project**
+  1376→- Secondary: **Edit answers**
+  1377→- Tertiary: **Start over**
+  1378→
+  1379→Include:
+  1380→
+  1381→> Nothing has been published. Your project will remain a private draft until you review and submit it.
+  1382→
+  1383→## Authentication Gate
+  1384→
+  1385→The account gate opens only after the visitor has received the prepared summary.
+  1386→
+  1387→### Create-account mode
+  1388→
+  1389→- Heading: **Save your prepared project**
+  1390→- Supporting copy: **Create a Buyer account to keep this draft and continue.**
+  1391→- Email input
+  1392→- Primary CTA: **Continue with email**
+  1393→- Secondary link: **Already have an account? Sign in**
+  1394→- Preserve the project during the entire account flow.
+  1395→
+  1396→### Sign-in mode
+  1397→
+  1398→- Heading: **Welcome back**
+  1399→- Supporting copy: **Sign in to continue with your prepared project.**
+  1400→- Primary CTA: **Sign in**
+  1401→- Secondary link: **New to QuickQuid? Create an account**
+  1402→
+  1403→The header **Sign in** action on the public landing page must open sign-in mode. It must not open a screen headed **Create your account**.
+  1404→
+  1405→Keep demo-account shortcuts visually separated under **Prototype shortcuts** so they cannot be mistaken for production authentication.
+  1406→
+  1407→## Minimal Buyer Onboarding
+  1408→
+  1409→After account creation, the product already knows the user entered through a Buyer project flow. Set the active role to Buyer, then require a short profile step before entering the product.
+  1410→
+  1411→Fields:
+  1412→
+  1413→- Full name
+  1414→- Company or organization name
+  1415→- Work role or title, optional
+  1416→- Business type: Startup, agency, SME or individual
+  1417→- City, defaulting to Kochi but editable
+  1418→- Checkbox confirming acceptance of prototype terms and privacy notice
+  1419→
+  1420→Do not request PAN, bank details, GSTIN, billing address or payment instructions here. Those are only required when the user reaches a real action that needs them.
+  1421→
+  1422→After submission:
+  1423→
+  1424→1. Mark **Account created** complete.
+  1425→2. Mark **Buyer profile complete** complete.
+  1426→3. Restore the prepared project.
+  1427→4. Show the summary with a primary action: **Save as private draft**.
+  1428→5. Save it as a Buyer-owned draft.
+  1429→6. Open the project draft page, not the general dashboard.
+  1430→
+  1431→The Buyer may reach the dashboard after this sequence is complete.
+  1432→
+  1433→## Existing Issues to Correct in the Same Pass
+  1434→
+  1435→These are consistency defects in the current prototype, not new features.
+  1436→
+  1437→### Commercial truth
+  1438→
+  1439→- Remove all 10%, 13% and 14% Buyer-fee calculations, copy and examples.
+  1440→- Buyer QuickQuid fee: **₹0 during founding beta**.
+  1441→- Pro QuickQuid fee: **₹0 during founding beta**.
+  1442→- Buyer total must not add an old platform fee.
+  1443→- Replace **QuickQuid commission (deducted from Pro)** with **QuickQuid fee — ₹0 during founding beta**.
+  1444→- Provider charges and applicable taxes may be shown only as separate, configurable placeholders.
+  1445→
+  1446→### Payment language
+  1447→
+  1448→- Replace **Demo escrow** with **Demo milestone funds**.
+  1449→- Show: **Q₹25,000 locked · simulation only**.
+  1450→- Add: **Q₹ has no cash value. No real money is accepted, held or paid out.**
+  1451→- Remove claims that QuickQuid provides escrow, custody, guaranteed payout or automatic release.
+  1452→- Remove manual NEFT, IMPS and UTR evidence from the primary production story.
+  1453→- Do not present a simulated ledger as a wallet or bank balance.
+  1454→
+  1455→### Product language
+  1456→
+  1457→- Remove version numbers from customer-facing copy.
+  1458→- Replace **Max 4 milestones per contract in v0.1 due to manual payment verification** with **Keep the founding-beta plan to four or fewer clear milestones.**
+  1459→- Replace **No wallet, no automated escrow in v0.1** with **QuickQuid does not provide a wallet or escrow in this prototype.**
+  1460→
+  1461→### Account-state defects
+  1462→
+  1463→- A newly created account must not show **0% complete** with **Account created** unchecked.
+  1464→- **Complete profile** must open a working Buyer profile form.
+  1465→- Never show **No profile loaded — Sign in as a buyer** immediately after Buyer account creation.
+  1466→- Cancelling an unfinished brief must return to the prepared summary or authenticated project list, according to context. It must not manufacture an empty Buyer session.
+  1467→- A guest must never see project counts, contracts, payments, role navigation or dashboard content.
+  1468→
+  1469→## Visual Requirements
+  1470→
+  1471→- Preserve the current black, warm-white and muted-green palette.
+  1472→- Preserve the strong landing-page typography.
+  1473→- Keep the interface flatter and operational; use depth only for the active chat composer, readiness summary and primary action.
+  1474→- Do not add glassmorphism, large gradients, decorative 3D art, floating AI orbs or generic chatbot sparkle icons.
+  1475→- Use the existing icon library.
+  1476→- Make the readiness progress the distinctive visual element.
+  1477→- Status must use text and icon, not colour alone.
+  1478→- Keep line lengths readable and targets at least 44px high on touch screens.
+  1479→- Provide visible keyboard focus.
+  1480→- Announce new AI messages and validation errors accessibly without unexpectedly moving keyboard focus.
+  1481→- Respect reduced-motion preferences.
+  1482→
+  1483→## Prototype Data Model
+  1484→
+  1485→Use a local deterministic object similar to:
+  1486→
+  1487→```ts
+  1488→type GuestReadinessDraft = {
+  1489→  originalRequest: string;
+  1490→  workingTitle: string;
+  1491→  category: "UI_UX" | "FRONTEND" | "UI_UX_AND_FRONTEND" | "OTHER";
+  1492→  outcome: string;
+  1493→  deliverables: string[];
+  1494→  exclusions: string[];
+  1495→  inputs: Array<{
+  1496→    name: string;
+  1497→    state: "READY" | "MISSING" | "NEED_HELP" | "OUT_OF_SCOPE";
+  1498→    owner?: "BUYER" | "PRO" | "QUICKQUID";
+  1499→    dueText?: string;
+  1500→  }>;
+  1501→  budgetBand: string;
+  1502→  targetDate: string;
+  1503→  deadlineReason: string;
+  1504→  decisionMaker: string;
+  1505→  feedbackWindow: string;
+  1506→  acceptanceCriteria: string[];
+  1507→  completedAreas: string[];
+  1508→  conversationStep: number;
+  1509→  status: "IN_PROGRESS" | "PREPARED" | "SAVED_AS_DRAFT";
+  1510→};
+  1511→```
+  1512→
+  1513→No field in this object represents a real approval, contract, payment or guaranteed date.
+  1514→
+  1515→## Analytics Events
+  1516→
+  1517→Record local prototype events so the intended funnel is visible:
+  1518→
+  1519→- `readiness_input_submitted`
+  1520→- `readiness_chat_started`
+  1521→- `readiness_question_answered`
+  1522→- `readiness_completed`
+  1523→- `readiness_summary_viewed`
+  1524→- `signup_gate_viewed`
+  1525→- `account_created`
+  1526→- `buyer_onboarding_completed`
+  1527→- `project_draft_restored`
+  1528→- `project_draft_saved`
+  1529→- `readiness_abandoned` with the last completed step
+  1530→
+  1531→The business funnel is:
+  1532→
+  1533→```text
+  1534→Landing submission
+  1535→→ Readiness conversation completed
+  1536→→ Account created or signed in
+  1537→→ Buyer onboarding completed
+  1538→→ Project draft saved
+  1539→→ QuickQuid Ready review submitted
+  1540→```
+  1541→
+  1542→## Acceptance Tests
+  1543→
+  1544→1. A guest entering a request and clicking **Check project readiness** always enters the guest readiness conversation.
+  1545→2. No guest action can render the Buyer dashboard, Buyer sidebar, payment surfaces or project counts.
+  1546→3. The original request appears in the first AI response and in the live readiness panel.
+  1547→4. The demonstration path can complete all seven readiness areas with hard-coded responses.
+  1548→5. Typed answers and suggested chips both work.
+  1549→6. Back and refresh preserve the unfinished draft.
+  1550→7. **Start over** clears the readiness draft only after a confirmation.
+  1551→8. The summary remains private and editable.
+  1552→9. Saving the summary requires authentication.
+  1553→10. A new account enters Buyer onboarding and cannot bypass the required profile fields.
+  1554→11. After onboarding, the prepared project is restored without losing answers.
+  1555→12. The project is saved as a private draft before any publish action.
+  1556→13. The public **Sign in** action opens sign-in mode; **Submit a project** opens the Buyer acquisition path.
+  1557→14. Account-created progress is accurate.
+  1558→15. **Complete profile** never produces **No profile loaded** for an authenticated Buyer.
+  1559→16. No 10%, 13% or 14% platform fee remains anywhere.
+  1560→17. No customer-facing screen says escrow, guarantee, wallet balance or real payout for Q₹.
+  1561→18. Q₹ surfaces always state that they are simulations with no cash value.
+  1562→19. All controls work with keyboard navigation and visible focus.
+  1563→20. Mobile preserves the next action, progress and user-entered content without horizontal overflow.
+  1564→
+  1565→## Scope Control
+  1566→
+  1567→Do not add:
+  1568→
+  1569→- Real generative AI
+  1570→- Real authentication
+  1571→- Real KYC
+  1572→- Real payments or escrow
+  1573→- Automated Pro selection
+  1574→- Automated project approval
+  1575→- New marketplace categories
+  1576→- Teams or Enterprise workflows
+  1577→- Complex scoring models
+  1578→
+  1579→Build the smallest credible prototype that demonstrates this sequence correctly:
+  1580→
+  1581→> Rough request → structured readiness conversation → useful summary → account → Buyer onboarding → restored private project draft

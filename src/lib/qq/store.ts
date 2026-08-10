@@ -8,7 +8,7 @@ import type {
   NotificationItem, AuditEvent, KycSubmission, GigDraft, OfflineInstrument,
   TrustSafetyCase, ViewName, ViewParams, VerificationStatus, MilestoneStatus,
   PaymentEvidenceStatus, PayoutStatus, ContractStatus, DisputeStatus,
-  PriorityBoost,
+  PriorityBoost, GuestReadinessDraft,
 } from "./types";
 import {
   SEED_USERS, SEED_PRO_PROFILES, SEED_BUYER_PROFILES, SEED_BRIEFS,
@@ -133,6 +133,10 @@ interface QQState {
   toggleTheme: () => void;
   commandOpen: boolean;
   setCommandOpen: (open: boolean) => void;
+  guestDraft: GuestReadinessDraft | null;
+  setGuestDraft: (draft: GuestReadinessDraft | null) => void;
+  buyerOnboardingComplete: boolean;
+  setBuyerOnboardingComplete: (complete: boolean) => void;
 }
 
 const initialState = {
@@ -223,6 +227,8 @@ const initialState = {
   kycModalOpen: false,
   theme: "light" as "light" | "dark",
   commandOpen: false,
+  guestDraft: null as GuestReadinessDraft | null,
+  buyerOnboardingComplete: false,
 };
 
 export const useQQ = create<QQState>()(
@@ -348,7 +354,11 @@ export const useQQ = create<QQState>()(
       setTheme: (t) => set({ theme: t }),
       toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
       commandOpen: false,
+  guestDraft: null as GuestReadinessDraft | null,
+  buyerOnboardingComplete: false,
       setCommandOpen: (open) => set({ commandOpen: open }),
+      setGuestDraft: (draft) => set({ guestDraft: draft }),
+      setBuyerOnboardingComplete: (complete) => set({ buyerOnboardingComplete: complete }),
     }),
     {
       name: "quickquid-v0.1",
@@ -379,6 +389,8 @@ export const useQQ = create<QQState>()(
         scopeChanges: s.scopeChanges,
         consent: s.consent,
         theme: s.theme,
+        guestDraft: s.guestDraft,
+        buyerOnboardingComplete: s.buyerOnboardingComplete,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();

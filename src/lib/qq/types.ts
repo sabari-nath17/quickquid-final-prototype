@@ -550,7 +550,40 @@ export type ViewName =
   | "brief_detail_public"
   | "notifications"
   | "admin_notes"
-  | "media_lifecycle_demo";
+  | "media_lifecycle_demo"
+  | "guest_readiness_chat"
+  | "readiness_summary"
+  | "buyer_onboarding";
+
+// ===== Guest Readiness Draft =====
+
+export type ReadinessCategory = "UI_UX" | "FRONTEND" | "UI_UX_AND_FRONTEND" | "OTHER";
+export type InputState = "READY" | "MISSING" | "NEED_HELP" | "OUT_OF_SCOPE";
+export type ReadinessStatus = "IN_PROGRESS" | "PREPARED" | "SAVED_AS_DRAFT";
+
+export interface GuestReadinessDraft {
+  originalRequest: string;
+  workingTitle: string;
+  category: ReadinessCategory;
+  outcome: string;
+  deliverables: string[];
+  exclusions: string[];
+  inputs: Array<{
+    name: string;
+    state: InputState;
+    owner?: "BUYER" | "PRO" | "QUICKQUID";
+    dueText?: string;
+  }>;
+  budgetBand: string;
+  targetDate: string;
+  deadlineReason: string;
+  decisionMaker: string;
+  feedbackWindow: string;
+  acceptanceCriteria: string[];
+  completedAreas: string[];
+  conversationStep: number;
+  status: ReadinessStatus;
+}
 
 export interface ViewParams {
   [key: string]: string | undefined;

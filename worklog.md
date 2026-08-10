@@ -1070,3 +1070,47 @@ The user provided a complete landing page copy spec with 15 sections: announceme
 - `bun run lint`: 0 errors ✅
 - `npx tsc`: 0 src/ errors ✅
 - agent-browser: Hero headline correct, Execution Spine present (Ready/Proof Match/Capacity/Commit Date), ₹0 fee shown, "Check project readiness" CTA, no 14% references, no "trust-first". VLM confirmed split layout, colored dots, off-white bg, Sora font.
+
+---
+
+## Round 21 — Guest AI Readiness Conversation + Auth Gate
+
+### What was built
+
+**Guest Readiness Chat screen** (`src/components/qq/screens/visitor/GuestReadinessChat.tsx`):
+- 60/40 split: chat workspace left, live readiness panel right
+- Top bar: QuickQuid logo, "Project readiness" title, "Guest session" badge, Exit + Start over
+- Trust note: "AI is helping structure your brief. QuickQuid reviews readiness before matching. No account or project has been created yet."
+- No sidebar, no Buyer nav, no dashboard — full-screen guest experience
+- 7 readiness areas with live checklist (Missing → Answered)
+- Hard-coded conversation with chips: category → deliverables → exclusions → inputs → budget → timeline → decision → acceptance
+- sessionStorage persistence (`qq_guest_readiness_draft`)
+- Mobile: sticky progress bar "X of 7 ready"
+
+**Readiness Summary screen** (`src/components/qq/screens/visitor/ReadinessSummary.tsx`):
+- Clean editable summary (working title, category, outcome, deliverables, exclusions, inputs, budget, timeline, decision, acceptance)
+- "Prepared for QuickQuid review" status
+- Auth gate: Create account or Sign in modes
+- Buyer onboarding: Full name, company, business type, city, terms checkbox
+- Prototype shortcuts (demo accounts)
+- "Nothing has been published" notice
+
+**Landing page fix:**
+- CTA "Check project readiness" now creates a GuestReadinessDraft and opens the readiness chat (NOT brief creation)
+- Empty submission shows: "Describe the outcome you need before we check readiness."
+- Input has programmatic label (`id="project-prompt"`)
+- sessionStorage restore on return
+
+**Store changes:**
+- `guestDraft: GuestReadinessDraft | null` + `setGuestDraft`
+- `buyerOnboardingComplete: boolean` + `setBuyerOnboardingComplete`
+- Both persisted to localStorage
+
+**Route guards:**
+- `guest_readiness_chat`, `readiness_summary`, `buyer_onboarding` added to FULLSCREEN list (no app shell)
+- Guest never sees Buyer dashboard, sidebar, or project counts
+
+### Verified
+- `bun run lint`: 0 errors ✅
+- `npx tsc`: 0 src/ errors ✅
+- agent-browser: Landing → fill prompt → click "Check project readiness" → readiness chat opens (no Buyer dashboard). AI shows "Got it" response with chips. Click "Design + frontend build" → conversation advances to "1 of 7", next question appears. No sidebar, no dashboard, no project counts visible. No console errors.

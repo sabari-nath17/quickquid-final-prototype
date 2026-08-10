@@ -15,15 +15,38 @@ import {
 } from "lucide-react";
 
 export function LandingPage() {
-  const { navigate, signInAs } = useQQ();
+  const { navigate, signInAs, setGuestDraft } = useQQ();
   const [prompt, setPrompt] = React.useState("");
+  const [emptyError, setEmptyError] = React.useState(false);
 
   function makeReady() {
-    if (prompt.trim()) {
-      navigate("buyer_brief_new", { prefill: prompt.trim() });
-    } else {
-      navigate("buyer_brief_new");
+    if (!prompt.trim()) {
+      setEmptyError(true);
+      return;
     }
+    setEmptyError(false);
+    // Create guest draft and open readiness chat — NOT brief creation
+    const draft = {
+      originalRequest: prompt.trim(),
+      workingTitle: "",
+      category: "OTHER" as const,
+      outcome: "",
+      deliverables: [] as string[],
+      exclusions: [] as string[],
+      inputs: [],
+      budgetBand: "",
+      targetDate: "",
+      deadlineReason: "",
+      decisionMaker: "",
+      feedbackWindow: "",
+      acceptanceCriteria: [] as string[],
+      completedAreas: [] as string[],
+      conversationStep: 0,
+      status: "IN_PROGRESS" as const,
+    };
+    setGuestDraft(draft);
+    try { sessionStorage.setItem("qq_guest_readiness_draft", JSON.stringify(draft)); } catch { /* ignore */ }
+    navigate("guest_readiness_chat");
   }
 
   return (
@@ -71,17 +94,22 @@ export function LandingPage() {
 
                 {/* Project prompt */}
                 <div className="mt-6">
-                  <label className="block text-left text-sm font-medium mb-1.5">What needs to get finished?</label>
+                  <label htmlFor="project-prompt" className="block text-left text-sm font-medium mb-1.5">What needs to get finished?</label>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Input
+                      id="project-prompt"
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
+                      onChange={(e) => { setPrompt(e.target.value); setEmptyError(false); }}
                       placeholder="Example: Design and build a responsive launch page before 28 February."
                       className="flex-1 h-12"
+                      aria-invalid={emptyError}
                       onKeyDown={(e) => { if (e.key === "Enter") makeReady(); }}
                     />
                     <Button size="lg" onClick={makeReady} className="h-12 px-6 whitespace-nowrap">Check project readiness <ArrowRight className="size-4" /></Button>
                   </div>
+                  {emptyError && (
+                    <p className="mt-1.5 text-xs text-destructive" role="alert">Describe the outcome you need before we check readiness.</p>
+                  )}
                   <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <Button variant="link" size="sm" className="px-0 text-muted-foreground" onClick={() => signInAs("PRO-2088")}>Join as a founding Pro →</Button>
                     <p className="text-xs text-muted-foreground">Private beta for selected digital projects</p>
