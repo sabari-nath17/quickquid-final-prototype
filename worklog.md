@@ -1132,3 +1132,53 @@ The user provided a complete landing page copy spec with 15 sections: announceme
 ### Verified
 - `bun run lint`: 0 errors ✅
 - agent-browser: Landing → Sign in → "What are you here to do?" (Buyer/Pro cards + 10 demo shortcuts). Sign in as Sara → Pro dashboard shows "Add payout details before applying" interlock. Click "Add payout details" → KYC modal opens (Identity document, PAN, Continue). No console errors.
+
+---
+
+## Round 23 — Support Widget: Screenshots, Highlight, Files, Context Logs
+
+### What was built
+
+Complete rebuild of the Support Widget (`src/components/qq/shell/SupportWidget.tsx`):
+
+**1. Screenshot upload with highlight mode:**
+- "Capture / upload screenshot" button opens file picker (accept="image/*", multiple)
+- Highlighter toggle button — when on, shows instructions: "Highlight mode on — after upload, tap a screenshot to mark the problem area. The highlighted version is attached."
+- Screenshots show with image icon, type badge ("screenshot"), file size, and remove button
+- Simulated upload progress (uploading spinner → done checkmark)
+
+**2. Additional file attachment:**
+- "Add files (PDF, docs, logs — max 25MB each)" dashed-border button
+- Opens file picker (any file type, multiple)
+- Files show with file icon, type badge ("file"), file size, and remove button
+- Upload progress simulation
+
+**3. Category selection (8 categories):**
+- Payment issue, Contract issue, Verification / KYC, Payout issue, Dispute, Bug / UI issue, Priority boost, Other
+
+**4. Related contract selector:**
+- Dropdown of user's contracts for context
+- Selecting a contract auto-fills payment reference, status, and latest event
+
+**5. Auto-attached context for Admin:**
+- **User info:** Name, ID, role, email
+- **Contract:** ID, title, status, buyer, pro, pro fee, all milestones with status and amounts
+- **Payment:** ID, contract, milestone, amount, UTR, method, status, submitted/resolved timestamps
+- **Payouts:** Up to 5 recent payouts with ID, milestone, amount, status
+- **KYC:** ID, status, submitted date, rejection reason if any
+- **Proposals:** Count + top 3 with ID, title, status, fee
+- **Gigs:** Count + top 3 with ID, title, status
+- Full context log is a formatted string attached to `ticket.attachedContext.contextLog`
+- Attachment file names listed in `ticket.attachedContext.attachments`
+- Visible preview panel in the widget showing what Admin will receive
+
+**6. Submit button:**
+- Shows attachment count: "Submit ticket with 0 attachment(s)"
+- Disabled while uploading or if subject/description empty
+- Loading spinner during submission
+- Toast confirmation with ticket ID and attachment count
+- Navigates to Support screen after submission
+
+### Verified
+- `bun run lint`: 0 errors ✅
+- agent-browser: Help widget opens with category, related contract selector, screenshot upload, highlight toggle, file attachment, auto-attached context preview (user info, contract ID, payment ref, full context log description). Highlight mode toggle works. File inputs accept correct types. No console errors.
