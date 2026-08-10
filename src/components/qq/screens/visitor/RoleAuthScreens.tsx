@@ -244,6 +244,7 @@ export function AuthScreen() {
   const [mode, setMode] = useState<"signin" | "create">("create");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [intent, setIntent] = useState<"buyer" | "pro" | null>(null);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -252,54 +253,120 @@ export function AuthScreen() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      // simulate duplicate email for a known address
       if (email.toLowerCase() === "ops@northstarlabs.example") {
         setMode("signin");
         setError("This email is already in use. Sign in instead, or use the demo accounts.");
         return;
       }
-      toast({ title: "Account created", description: "Welcome to QuickQuid. Complete your profile to get started." });
+      toast({ title: "Account created", description: `Welcome to QuickQuid. Complete your ${intent === "buyer" ? "Buyer" : "Pro"} profile to get started.` });
       navigate("readiness");
     }, 900);
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/20">
+    <div className="min-h-screen flex flex-col bg-background">
       <header className="flex h-16 items-center px-4 sm:px-6 border-b border-border">
-        <Button variant="ghost" size="sm" onClick={() => navigate("role_selection")}><ArrowLeft className="size-4" /> Back</Button>
+        <div className="flex items-center gap-2">
+          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
+          <span className="font-semibold">QuickQuid</span>
+        </div>
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={() => navigate("role_selection")}><ArrowLeft className="size-4" /> Back to home</Button>
       </header>
+
       <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <Card className="w-full max-w-md p-6 space-y-4">
-          <div className="space-y-1">
-            <h1 className="text-xl font-semibold">{mode === "create" ? "Create your account" : "Sign in"}</h1>
-            <p className="text-sm text-muted-foreground">Continue with email. We’ll set up your role next.</p>
-          </div>
-          <form onSubmit={submit} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="auth-email">Email</Label>
-              <Input id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
+        {!intent ? (
+          <div className="w-full max-w-2xl space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold tracking-tight">What are you here to do?</h1>
+              <p className="text-sm text-muted-foreground">Choose how you want to use QuickQuid. You can switch roles anytime from the demo panel.</p>
             </div>
-            {error && <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2.5 text-xs text-destructive"><AlertCircle className="size-4 mt-0.5 shrink-0" />{error}</div>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : mode === "create" ? "Create account" : "Sign in"}
-            </Button>
-          </form>
-          <div className="flex items-center justify-between text-sm">
-            <button className="text-muted-foreground hover:underline" onClick={() => { setMode(mode === "create" ? "signin" : "create"); setError(""); }}>
-              {mode === "create" ? "Already have an account? Sign in" : "New here? Create an account"}
-            </button>
-          </div>
-          <Separator />
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground">Demo accounts (one-click)</div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1042")}>Northstar Labs (Buyer)</Button>
-              <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2088")}>Akhil Menon (Pro)</Button>
-              <Button variant="outline" size="sm" onClick={() => signInAs("FIN-F01")}>Finance T2</Button>
-              <Button variant="outline" size="sm" onClick={() => signInAs("RSK-R01")}>Risk T3</Button>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <button
+                onClick={() => setIntent("buyer")}
+                className="group text-left rounded-xl border-2 border-border p-5 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-foreground/30"
+              >
+                <div className="inline-flex size-11 items-center justify-center rounded-lg bg-[#0B8F63]/10 text-[#0B8F63] transition-transform group-hover:scale-105">
+                  <Briefcase className="size-5" />
+                </div>
+                <h3 className="mt-3 font-bold text-lg">I want to hire</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Find trusted professionals for your work.</p>
+                <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-[#0B8F63]/10 px-2 py-1 text-xs font-medium text-[#0B8F63]">
+                  QuickQuid fee ₹0 during beta
+                </div>
+              </button>
+              <button
+                onClick={() => setIntent("pro")}
+                className="group text-left rounded-xl border-2 border-border p-5 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-foreground/30"
+              >
+                <div className="inline-flex size-11 items-center justify-center rounded-lg bg-[#4E62D8]/10 text-[#4E62D8] transition-transform group-hover:scale-105">
+                  <User className="size-5" />
+                </div>
+                <h3 className="mt-3 font-bold text-lg">I want to work</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Keep 100% of your agreed professional fee.</p>
+                <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-[#4E62D8]/10 px-2 py-1 text-xs font-medium text-[#4E62D8]">
+                  QuickQuid fee ₹0 during beta
+                </div>
+              </button>
+            </div>
+            <Separator />
+            <div className="text-center">
+              <div className="text-xs font-medium text-muted-foreground mb-3">Prototype shortcuts (one-click sign-in)</div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1042")}>Northstar Labs (Buyer)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1050")}>Verdant Retail (Buyer)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2088")}>Akhil Menon (Pro)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2099")}>Priya Nair (Pro)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2101")}>Rahul Verma (Pro)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2102")}>Sara Khan (Pro)</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("ADM-S01")}>Support T1</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("FIN-F01")}>Finance T2</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("RSK-R01")}>Risk T3</Button>
+                <Button variant="outline" size="sm" onClick={() => signInAs("OPS-O01")}>Ops Manager</Button>
+              </div>
             </div>
           </div>
-        </Card>
+        ) : (
+          <Card className="w-full max-w-md p-6 space-y-4 elev-2">
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold">{mode === "create" ? `Create your ${intent === "buyer" ? "Buyer" : "Pro"} account` : "Sign in"}</h1>
+              <p className="text-sm text-muted-foreground">Continue with email. We'll set up your profile next.</p>
+            </div>
+            <form onSubmit={submit} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="auth-email">Email</Label>
+                <Input id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
+              </div>
+              {error && <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2.5 text-xs text-destructive"><AlertCircle className="size-4 mt-0.5 shrink-0" />{error}</div>}
+              <Button type="submit" className="w-full h-11" disabled={loading}>
+                {loading ? <Loader2 className="size-4 animate-spin" /> : mode === "create" ? "Create account" : "Sign in"}
+              </Button>
+            </form>
+            <div className="flex items-center justify-between text-sm">
+              <button className="text-muted-foreground hover:text-foreground hover:underline" onClick={() => { setMode(mode === "create" ? "signin" : "create"); setError(""); }}>
+                {mode === "create" ? "Already have an account? Sign in" : "New here? Create an account"}
+              </button>
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Prototype shortcuts</div>
+              <div className="grid grid-cols-2 gap-2">
+                {intent === "buyer" ? (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1042")}>Northstar Labs</Button>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1050")}>Verdant Retail</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2088")}>Akhil Menon</Button>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2099")}>Priya Nair</Button>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2101")}>Rahul Verma</Button>
+                  </>
+                )}
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setIntent(null)}><ArrowLeft className="size-3.5" /> Back to role selection</Button>
+          </Card>
+        )}
       </main>
     </div>
   );

@@ -196,6 +196,7 @@ function RoleSwitcher() {
     { role: "pro" as Role, userId: "PRO-2088" },
     { role: "pro" as Role, userId: "PRO-2099" },
     { role: "pro" as Role, userId: "PRO-2101" },
+    { role: "pro" as Role, userId: "PRO-2102" },
     { role: "admin_support" as Role, userId: "ADM-S01" },
     { role: "finance" as Role, userId: "FIN-F01" },
     { role: "risk" as Role, userId: "RSK-R01" },

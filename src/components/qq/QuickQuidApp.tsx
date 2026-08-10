@@ -12,7 +12,7 @@ import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor
 import { LandingPage } from "@/components/qq/screens/visitor/LandingPage";
 import { GuestReadinessChat } from "@/components/qq/screens/visitor/GuestReadinessChat";
 import { ReadinessSummary } from "@/components/qq/screens/visitor/ReadinessSummary";
-import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
+import { ReadinessScreen, KycModal } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
 import { ProDashboard, ProProfile, ProBriefs, ProProposals, ProContract, ProPayouts, ProGigs, ProGigNew, ProGigDetail } from "@/components/qq/screens/pro/ProScreens";
 import { AdminOperations, AdminKyc, AdminPayments, AdminPayouts, AdminRefunds, AdminDisputes, AdminTrust, AdminAudit, AdminGigModeration, AdminNotes } from "@/components/qq/screens/admin/AdminScreens";
@@ -228,6 +228,7 @@ export function QuickQuidApp() {
         <SupportWidget />
         <CommandPalette />
         <OnboardingTour />
+        <KycModal />
       </div>
     </ThemeProvider>
   );

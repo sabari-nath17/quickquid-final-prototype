@@ -1114,3 +1114,21 @@ The user provided a complete landing page copy spec with 15 sections: announceme
 - `bun run lint`: 0 errors ✅
 - `npx tsc`: 0 src/ errors ✅
 - agent-browser: Landing → fill prompt → click "Check project readiness" → readiness chat opens (no Buyer dashboard). AI shows "Got it" response with chips. Click "Design + frontend build" → conversation advances to "1 of 7", next question appears. No sidebar, no dashboard, no project counts visible. No console errors.
+
+---
+
+## Round 22 — Sign-in Role Selection, KYC Modal Global, Back Buttons, Sara Khan Demo
+
+### Fixes
+
+1. **Sign-in screen restored with role selection** — AuthScreen now has two steps: (1) "What are you here to do?" with Buyer/Pro intent cards + all demo account shortcuts, (2) Email form with role-specific demo shortcuts. Includes "Back to role selection" and "Back to home" navigation. Logo shown in header.
+
+2. **KYC modal now global** — The `KycModal` component was only rendered inside `ReadinessScreen`. Moved to `QuickQuidApp` so it's available from ANY screen. Verified: Sara Khan (Pro with `payoutReadiness: "under_review"`) → Pro dashboard → "Add payout details" → KYC modal opens with Identity document upload, PAN field, Continue button.
+
+3. **Sara Khan added to demo accounts** — Added to both the role switcher (sidebar) and the auth screen prototype shortcuts. Sara has `payoutReadiness: "under_review"` and `verificationStatus: "under_review"` — demonstrates the incomplete KYC workflow.
+
+4. **Landing page loads first** — Fixed in previous round: no auto-redirect to admin dashboard on page load. Verified: fresh visit and returning admin both see landing page.
+
+### Verified
+- `bun run lint`: 0 errors ✅
+- agent-browser: Landing → Sign in → "What are you here to do?" (Buyer/Pro cards + 10 demo shortcuts). Sign in as Sara → Pro dashboard shows "Add payout details before applying" interlock. Click "Add payout details" → KYC modal opens (Identity document, PAN, Continue). No console errors.
