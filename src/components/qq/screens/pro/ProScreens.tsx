@@ -583,19 +583,24 @@ export function ProProfile() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Pro profile"
-        description="Complete your profile so the right people can evaluate you quickly. Only information marked Public appears in discovery."
-        status={<StatusBadge tone={profile.publicVisibility ? "success" : "paused"} icon>{profile.publicVisibility ? "Public" : "Hidden"}</StatusBadge>}
-      >
-        <Button variant="outline" onClick={saveDraft}><Save className="size-4" /> Save draft</Button>
-        {profile.publicVisibility ? (
-          <Button variant="outline" onClick={unpublish}>Unpublish</Button>
-        ) : (
-          <Button onClick={publish}>Publish</Button>
-        )}
-        <Button variant="ghost" onClick={() => navigate("support")}><Flag className="size-4" /> Report</Button>
-      </PageHeader>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("pro_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Pro profile"
+          description="Complete your profile so the right people can evaluate you quickly. Only information marked Public appears in discovery."
+          status={<StatusBadge tone={profile.publicVisibility ? "success" : "paused"} icon>{profile.publicVisibility ? "Public" : "Hidden"}</StatusBadge>}
+        >
+          <Button variant="outline" onClick={saveDraft}><Save className="size-4" /> Save draft</Button>
+          {profile.publicVisibility ? (
+            <Button variant="outline" onClick={unpublish}>Unpublish</Button>
+          ) : (
+            <Button onClick={publish}>Publish</Button>
+          )}
+          <Button variant="ghost" onClick={() => navigate("support")}><Flag className="size-4" /> Report</Button>
+        </PageHeader>
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList>
@@ -1020,11 +1025,16 @@ export function ProBriefs() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Briefs"
-        description="Open briefs from Buyers. We surface budget, timeline, and exclusions up front so you can decide quickly."
-        status={<StatusBadge tone="info" icon>{filtered.length} brief{filtered.length === 1 ? "" : "s"}</StatusBadge>}
-      />
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("pro_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Briefs"
+          description="Open briefs from Buyers. We surface budget, timeline, and exclusions up front so you can decide quickly."
+          status={<StatusBadge tone="info" icon>{filtered.length} brief{filtered.length === 1 ? "" : "s"}</StatusBadge>}
+        />
+      </div>
 
       {!payoutReady && (
         <InterlockCard
@@ -1227,13 +1237,18 @@ export function ProProposals() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="My proposals"
-        description="Track submitted proposals, expiry, and counter-offers. 0% QuickQuid commission on your fee."
-        status={<StatusBadge tone={activeCount >= PROPOSAL_LIMIT ? "warning" : "info"} icon>{activeCount}/{PROPOSAL_LIMIT} active</StatusBadge>}
-      >
-        <Button variant="outline" onClick={() => navigate("pro_briefs")}><Briefcase className="size-4" /> Browse briefs</Button>
-      </PageHeader>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("pro_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="My proposals"
+          description="Track submitted proposals, expiry, and counter-offers. 0% QuickQuid commission on your fee."
+          status={<StatusBadge tone={activeCount >= PROPOSAL_LIMIT ? "warning" : "info"} icon>{activeCount}/{PROPOSAL_LIMIT} active</StatusBadge>}
+        >
+          <Button variant="outline" onClick={() => navigate("pro_briefs")}><Briefcase className="size-4" /> Browse briefs</Button>
+        </PageHeader>
+      </div>
 
       {activeCount >= PROPOSAL_LIMIT && (
         <InterlockCard tone="warning" icon={AlertTriangle} title="Proposal limit reached" body="You have reached your current active proposal limit. Withdraw an existing proposal or wait for a decision." />
@@ -2709,13 +2724,18 @@ export function ProPayouts() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Payouts"
-        description="0% QuickQuid commission. Every payout has an immutable reference ID. Payouts are processed manually in v0.1."
-        status={<StatusBadge tone="info" icon>{myPayouts.length} payout{myPayouts.length === 1 ? "" : "s"}</StatusBadge>}
-      >
-        <Button variant="outline" onClick={() => navigate("pro_dashboard")}><LayoutDashboard className="size-4" /> Dashboard</Button>
-      </PageHeader>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("pro_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Payouts"
+          description="0% QuickQuid commission. Every payout has an immutable reference ID. Payouts are processed manually in v0.1."
+          status={<StatusBadge tone="info" icon>{myPayouts.length} payout{myPayouts.length === 1 ? "" : "s"}</StatusBadge>}
+        >
+          <Button variant="outline" onClick={() => navigate("pro_dashboard")}><LayoutDashboard className="size-4" /> Dashboard</Button>
+        </PageHeader>
+      </div>
 
       {myPayouts.length === 0 ? (
         <EmptyState
@@ -2888,12 +2908,17 @@ export function ProGigs() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Gigs"
-        description="Gigs are fixed-scope services Buyers can order directly. 0% QuickQuid commission from your fee."
-      >
-        <Button onClick={() => navigate("pro_gig_new")}><Plus className="size-4" /> Create gig</Button>
-      </PageHeader>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("pro_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Gigs"
+          description="Gigs are fixed-scope services Buyers can order directly. 0% QuickQuid commission from your fee."
+        >
+          <Button onClick={() => navigate("pro_gig_new")}><Plus className="size-4" /> Create gig</Button>
+        </PageHeader>
+      </div>
 
       {myGigs.length === 0 ? (
         <EmptyState

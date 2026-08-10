@@ -1182,3 +1182,39 @@ Complete rebuild of the Support Widget (`src/components/qq/shell/SupportWidget.t
 ### Verified
 - `bun run lint`: 0 errors ✅
 - agent-browser: Help widget opens with category, related contract selector, screenshot upload, highlight toggle, file attachment, auto-attached context preview (user info, contract ID, payment ref, full context log description). Highlight mode toggle works. File inputs accept correct types. No console errors.
+
+---
+
+## Round 24 — Back Buttons + Talent/Gigs Layout Fixes
+
+### What was fixed
+
+**1. Back buttons added to all sub-screens:**
+- Buyer Talent: "← Dashboard" back button before PageHeader
+- Buyer Messages: "← Dashboard" back button before PageHeader
+- Buyer Profile: already had "← Dashboard" button
+- Pro Briefs: "← Dashboard" back button before PageHeader
+- Pro Proposals: "← Dashboard" back button before PageHeader
+- Pro Gigs: "← Dashboard" back button before PageHeader
+- Pro Payouts: "← Dashboard" back button before PageHeader
+- Pro Profile: "← Dashboard" back button before PageHeader
+- Pro Contract: already had "Back to dashboard" button
+- Pro Gig Detail: already had "Back to gigs" button
+
+**2. Talent grid fixed:**
+- Changed from 2-column to 3-column grid (`sm:grid-cols-2 lg:grid-cols-3`)
+- Added `items-stretch` for equal card heights
+- Filter sidebar narrowed from 260px to 220px to give more space to cards
+- VLM-confirmed: "3-column grid aligned, back button present, no overlapping elements"
+
+**3. Gigs grid fixed:**
+- Filter sidebar narrowed from 260px to 220px
+- Both promoted and organic grids use `items-stretch`
+- VLM-confirmed: "3-column grid, Promoted Gigs section labeled, All Gigs section labeled, back button present"
+
+**4. Syntax fix:**
+- Fixed a JSX closing tag error in ProPayouts (missing `</div>` for flex wrapper)
+
+### Verified
+- `bun run lint`: 0 errors ✅
+- VLM confirmed: Talent screen has back button + 3-column grid. Gigs screen has back button + 3-column grid + section labels.

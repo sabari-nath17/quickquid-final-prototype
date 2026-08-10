@@ -806,10 +806,15 @@ export function BuyerTalent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Find talent"
-        description="Browse verified professionals or live gigs. Invite a Pro to a private brief, or request a gig to start a contract."
-      />
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("buyer_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Find talent"
+          description="Browse verified professionals or live gigs. Invite a Pro to a private brief, or request a gig to start a contract."
+        />
+      </div>
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as "talent" | "gigs")}>
         <TabsList className="w-full sm:w-auto h-10 p-1">
@@ -827,7 +832,7 @@ export function BuyerTalent() {
               inviteSent={inviteSentFor === selectedPro.userId}
             />
           ) : (
-            <div className="grid lg:grid-cols-[260px_1fr] gap-4">
+            <div className="grid lg:grid-cols-[220px_1fr] gap-4">
               <TalentFilters
                 category={filterCategory} setCategory={setFilterCategory}
                 band={filterBand} setBand={setFilterBand}
@@ -842,7 +847,7 @@ export function BuyerTalent() {
                     description="Try a broader category or budget range."
                   />
                 ) : (
-                  <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
                     {filteredPros.map((p) => (
                       <ProfileCard key={p.userId} profile={p} onClick={() => { setSelectedProId(p.userId); setInviteSentFor(null); }} />
                     ))}
@@ -861,7 +866,7 @@ export function BuyerTalent() {
               onRequest={() => navigate("buyer_payment", { gigId: selectedGig.id })}
             />
           ) : (
-            <div className="grid lg:grid-cols-[260px_1fr] gap-4">
+            <div className="grid lg:grid-cols-[220px_1fr] gap-4">
               <TalentFilters
                 category={filterCategory} setCategory={setFilterCategory}
                 band={filterBand} setBand={setFilterBand}
@@ -3102,17 +3107,22 @@ export function BuyerMessages() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Messages"
-        description="Contextual workspace. Scope, fees, and milestones are pinned for reference."
-      >
-        <Select value={selectedContractId} onValueChange={setSelectedContractId}>
-          <SelectTrigger className="w-[260px]"><SelectValue placeholder="Select contract" /></SelectTrigger>
-          <SelectContent>
-            {myContracts.map((c) => <SelectItem key={c.id} value={c.id}>{c.briefTitle} ({c.id})</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </PageHeader>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate("buyer_dashboard")} className="shrink-0">
+          <ChevronLeft className="size-4" /> Dashboard
+        </Button>
+        <PageHeader
+          title="Messages"
+          description="Contextual workspace. Scope, fees, and milestones are pinned for reference."
+        >
+          <Select value={selectedContractId} onValueChange={setSelectedContractId}>
+            <SelectTrigger className="w-[260px]"><SelectValue placeholder="Select contract" /></SelectTrigger>
+            <SelectContent>
+              {myContracts.map((c) => <SelectItem key={c.id} value={c.id}>{c.briefTitle} ({c.id})</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </PageHeader>
+      </div>
 
       <Alert>
         <ShieldAlert className="size-4" />
