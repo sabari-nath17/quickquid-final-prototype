@@ -1274,14 +1274,14 @@ function GigDetailPane({ gig, onBack, onRequest }: { gig: GigDraft; onBack: () =
 // =================================================================
 export function BuyerBriefNew() {
   const {
-    currentUserId, buyerProfiles, upsertBrief, navigate, addAudit,
+    currentUserId, buyerProfiles, upsertBrief, navigate, addAudit, viewParams,
   } = useQQ();
   const { toast } = useToast();
   const profile = buyerProfiles.find((b) => b.userId === currentUserId);
 
   const [title, setTitle] = React.useState("");
   const [category, setCategory] = React.useState(CATEGORIES[0]);
-  const [objective, setObjective] = React.useState("");
+  const [objective, setObjective] = React.useState(viewParams.prefill ?? "");
   const [deliverables, setDeliverables] = React.useState<string[]>([""]);
   const [acceptanceCriteria, setAcceptanceCriteria] = React.useState<string[]>([""]);
   const [exclusions, setExclusions] = React.useState<string[]>([""]);

@@ -994,3 +994,47 @@ The user found that: (1) Akhil's (Pro) side didn't show the conversation message
 - `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
 - agent-browser: Pro → Messages → contract picker → click QQ-0892 → Messages tab auto-selects → shows conversation (excited, kickoff, staging) + send textarea (enabled). Buyer → Messages → shows conversation + send textarea (enabled). Both sides can send messages. No console/runtime errors.
 - VLM confirmed: Pro Messages tab has "chat message bubbles, text input with send button, scope summary on right".
+
+---
+
+## Cron Review Round 19 — Landing Page with Full Copy
+
+### Current project status assessment
+The user provided a complete landing page copy spec with 15 sections: announcement bar, nav, hero with project prompt, problem, how it works, difference table, work showcase, AI, for buyers, for pros, measures, beta pricing, FAQ, final CTA, and footer. The landing page needed to replace the old role-selection screen as the visitor home.
+
+### Completed modifications
+
+**Landing page:**
+1. **`LandingPage` component** (`src/components/qq/screens/visitor/LandingPage.tsx`) — Full landing page implementing all 15 sections from the copy spec:
+   - **Announcement bar**: "Founding beta in Kochi · QuickQuid fee ₹0 during beta"
+   - **Nav**: How it works · For Buyers · For Pros · Explore work · Sign in + "Submit a project" button
+   - **Hero**: "THE EXECUTION MARKETPLACE" eyebrow, "Hiring is only the start. QuickQuid is built for the finish." headline, project prompt input ("What needs to get finished?"), "Make my project Ready" primary button, "Join as a founding Pro" secondary, quick examples (Product UI/UX, Frontend build, etc.), execution strip (ROUGH REQUEST → READY PROJECT → ... → ACCEPTED WORK)
+   - **Problem**: "A great professional can still fail inside a badly prepared project" + comparison cards
+   - **How it works**: 4-step grid (Make Ready → Match proof → Lock agreement → Run to Done) with callout quotes
+   - **The Difference**: 8-row comparison table (typical vs QuickQuid)
+   - **Work Showcase**: Example project card with labels (outcome, proof, planned vs actual, scope changes, acceptance, handoff) + "Explore completed work" button
+   - **AI**: "AI should remove ambiguity—not accountability" + 3-column table (before/during/at delivery)
+   - **For Buyers**: "Stop buying a profile and hoping for an outcome" + benefits list + "Submit a project" button
+   - **For Pros**: "Good professionals deserve good projects" + benefits list + "Apply as a founding Pro" button
+   - **Measures**: "Activity is not the outcome. Accepted work is."
+   - **Beta Pricing**: ₹0 for Buyer and Pro + disclaimer
+   - **FAQ**: 6 expandable questions
+   - **Final CTA**: "Your next project should not begin with a gamble" + primary/secondary buttons
+   - **Footer**: Logo, nav links, "QuickQuid fee ₹0 during beta · No wallet · No automated escrow"
+
+2. **Project prompt → brief creation** — The hero prompt input pre-fills the brief objective field. Typing a prompt and clicking "Make my project Ready" navigates to `buyer_brief_new` with `viewParams.prefill` which initializes the objective textarea. Quick example chips also pre-fill. (`src/components/qq/screens/visitor/LandingPage.tsx`, `src/components/qq/screens/buyer/BuyerScreens.tsx`)
+
+3. **Wired as visitor home** — Replaced `RoleSelectionScreen` with `LandingPage` in the route map for `role_selection` view. The old role-selection screen still exists as a component but is no longer the default visitor view. (`src/components/qq/QuickQuidApp.tsx`)
+
+### Writing guardrails followed
+- Lead with execution ("built for the finish"), not "verified talent" or "AI matching"
+- No escrow, guaranteed delivery, instant matching, or risk-free claims
+- AI described as assistive ("AI assists the workflow. People own the outcome"), not autonomous
+- "₹0 during beta" visible in announcement bar, pricing section, and footer
+- One primary Buyer action throughout: "Make my project Ready"
+- Example project card explicitly labelled "HOW A QUICKQUID PROJECT WORKS — EXAMPLE" with no invented customers
+
+### Verification results
+- `bun run lint`: 0 errors, 0 warnings.
+- `npx tsc --noEmit --skipLibCheck`: 0 errors in `src/`.
+- agent-browser: Landing page loads with correct headline "Hiring is only the start. QuickQuid is built for the finish." All 15 sections verified present (hero, prompt, makeReady, problem, howItWorks, difference, showcase, ai, buyers, pros, measures, pricing, faq, cta, footer). Project prompt fills and navigates to brief creation. Sign in button navigates to auth. No console/runtime errors.

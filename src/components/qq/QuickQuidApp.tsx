@@ -9,6 +9,7 @@ import { CommandPalette, ThemeProvider } from "./shell/CommandPalette";
 import { OnboardingTour } from "./shell/OnboardingTour";
 import { MessagingQuickAccess } from "./shell/MessagingQuickAccess";
 import { RoleSelectionScreen, AuthScreen } from "@/components/qq/screens/visitor/RoleAuthScreens";
+import { LandingPage } from "@/components/qq/screens/visitor/LandingPage";
 import { ReadinessScreen } from "@/components/qq/screens/visitor/ReadinessScreen";
 import { BuyerDashboard, BuyerProfile, BuyerTalent, BuyerBriefNew, BuyerBriefDetail, BuyerContract, BuyerPayment, BuyerMessages } from "@/components/qq/screens/buyer/BuyerScreens";
 import { ProDashboard, ProProfile, ProBriefs, ProProposals, ProContract, ProPayouts, ProGigs, ProGigNew, ProGigDetail } from "@/components/qq/screens/pro/ProScreens";
@@ -18,7 +19,7 @@ import { SupportScreen, PublicProfileScreen, BriefDetailPublic, NotificationsScr
 import type { ViewName } from "@/lib/qq/types";
 
 const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
-  role_selection: RoleSelectionScreen,
+  role_selection: LandingPage,
   auth: AuthScreen,
   readiness: ReadinessScreen,
   buyer_dashboard: BuyerDashboard,
