@@ -17,6 +17,7 @@ Do not replace this with “Bring the brief. Leave with finished work.” The pr
 - LinkedIn, Behance, Dribbble, and portfolio websites are captured as safe public links only. LinkedIn OAuth/API requires a server-side integration, explicit consent, encrypted token storage, token revocation, and provider policy review. Never ask a user for a LinkedIn password.
 - KYC documents and payout values are represented by local filenames/masked values. Production must use a compliant KYC vendor, encrypted object storage, retention rules, access logs, and server-side authorization.
 - Payment and payout states are demonstrations. Never interpret a local “confirmed” state as a bank settlement without a provider webhook and maker-checker authorization.
+- Seeded Pro proof links and Sara’s portfolio fixtures are explicitly marked `isDemo: true`. They exist to exercise the provider/API and Admin review UI only; they are not applicant ownership, employment, ratings, or verification evidence. Production data must replace them with consented, applicant-owned connections.
 
 ## Pro onboarding contract
 
@@ -42,6 +43,7 @@ interface ExternalProfileLink {
   provider: ExternalProfileProvider;
   url: string;
   status?: "self_declared" | "connected" | "reviewed";
+  isDemo?: boolean; // seed-only fixture; never a trust signal
   lastSyncedAt?: string;
 }
 ```

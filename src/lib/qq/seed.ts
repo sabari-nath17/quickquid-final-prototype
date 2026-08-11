@@ -3,6 +3,7 @@ import type {
   PaymentEvidence, Payout, Refund, Dispute, Review, SupportTicket,
   NotificationItem, AuditEvent, KycSubmission, GigDraft, OfflineInstrument,
   TrustSafetyCase, Milestone, PriorityBoost,
+  ExternalProfileLink, ProOnboardingSnapshot,
 } from "./types";
 
 export const SEED_USERS: User[] = [
@@ -18,6 +19,47 @@ export const SEED_USERS: User[] = [
   { id: "OPS-O01", role: "ops_manager", name: "Vikram T (Ops Manager)", email: "vikram@quickquid.example", avatarColor: "#334155", verification: "Staff", verificationStatus: "approved" },
 ];
 
+/**
+ * Synthetic provider fixtures make the profile/API handoff demonstrable without
+ * implying that seeded Pros own these accounts. Production onboarding replaces
+ * these links with applicant-owned, consented connections.
+ */
+export const DEMO_PROOF_LINKS: Record<string, ExternalProfileLink[]> = {
+  "PRO-2088": [
+    { provider: "github", url: "https://github.com/octocat", label: "Demo GitHub source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-akhil", label: "Demo LinkedIn source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "behance", url: "https://www.behance.net/demo-quickquid-akhil", label: "Demo Behance source — replace before production", isDemo: true, status: "self_declared" },
+  ],
+  "PRO-2099": [
+    { provider: "github", url: "https://github.com/github", label: "Demo GitHub source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-priya", label: "Demo LinkedIn source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "website", url: "https://example.com/quickquid-demo/priya", label: "Demo portfolio source — replace before production", isDemo: true, status: "self_declared" },
+  ],
+  "PRO-2101": [
+    { provider: "github", url: "https://github.com/microsoft", label: "Demo GitHub source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-rahul", label: "Demo LinkedIn source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "behance", url: "https://www.behance.net/demo-quickquid-rahul", label: "Demo Behance source — replace before production", isDemo: true, status: "self_declared" },
+  ],
+  "PRO-2102": [
+    { provider: "github", url: "https://github.com/vercel", label: "Demo GitHub source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-sara", label: "Demo LinkedIn source — replace before production", isDemo: true, status: "self_declared" },
+    { provider: "website", url: "https://example.com/quickquid-demo/sara", label: "Demo portfolio source — replace before production", isDemo: true, status: "self_declared" },
+  ],
+};
+
+function demoProfileSnapshot(userId: string, submittedAt: string): ProOnboardingSnapshot | undefined {
+  const profile = SEED_PRO_PROFILES.find((item) => item.userId === userId);
+  if (!profile) return undefined;
+  return {
+    primaryCategory: profile.primaryCategory,
+    secondaryCategory: profile.secondaryCategory,
+    skills: profile.skills,
+    externalLinks: profile.externalLinks ?? [],
+    portfolioItemIds: profile.portfolioItems.map((item) => item.id),
+    submittedAt,
+  };
+}
+
 export const SEED_PRO_PROFILES: ProProfile[] = [
   {
     userId: "PRO-2088",
@@ -31,6 +73,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "Product Design", evidence: "Partner Portal and Ops Console case studies", status: "approved", submittedAt: "2024-09-30T09:00:00Z", reviewedAt: "2024-10-01T20:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Comparable product workflow evidence reviewed." },
       { skill: "UX Research", evidence: "Onboarding Flow Research case study", status: "approved", submittedAt: "2024-09-30T09:00:00Z", reviewedAt: "2024-10-01T20:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Research plan and synthesis evidence reviewed." },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2088"],
     portfolioItems: [
       { id: "PF-1", title: "Partner Portal Case Study", category: "Product Design", description: "Redesigned a partner onboarding portal reducing time-to-activate by 38%.", type: "case_study", url: "https://example.com/case/partner-portal", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/62c63cd0aad8.png", featured: true },
       { id: "PF-2", title: "Ops Console Refresh", category: "Product Design", description: "Operations console for a fintech, focused on queue triage and audit.", type: "case_study", url: "https://example.com/case/ops-console", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/750fe92d211b.jpg" },
@@ -65,6 +108,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "React", evidence: "SaaS Dashboard Kit", status: "approved", submittedAt: "2024-10-05T09:00:00Z", reviewedAt: "2024-10-06T14:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Repository and shipped interface evidence reviewed." },
       { skill: "Next.js", evidence: "Next.js Landing Page case study", status: "approved", submittedAt: "2024-10-05T09:00:00Z", reviewedAt: "2024-10-06T14:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Production build evidence reviewed." },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2099"],
     portfolioItems: [
       { id: "PF-10", title: "SaaS Dashboard Kit", category: "Frontend Engineering", description: "Open-source dashboard kit with 40+ accessible components.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9628ecf06ad9.jpg", featured: true },
       { id: "PF-11", title: "Next.js Landing Page", category: "Frontend Engineering", description: "High-converting landing page with Lighthouse 98+.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/1494eb483574.png" },
@@ -96,6 +140,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
     skillVerifications: [
       { skill: "Brand Identity", evidence: "Fintech Brand System", status: "approved", submittedAt: "2024-10-09T09:00:00Z", reviewedAt: "2024-10-10T11:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Identity system and application evidence reviewed." },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2101"],
     portfolioItems: [
       { id: "PF-20", title: "Fintech Brand System", category: "Brand & Identity", description: "Full identity system for a neo-bank.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/ab448629fbb2.jpg", featured: true },
       { id: "PF-21", title: "Logo Collection", category: "Brand & Identity", description: "Various logo designs for startups.", type: "image", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9c721d2bd294.jpg" },
@@ -128,7 +173,11 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
       { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
     ],
-    portfolioItems: [],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2102"],
+    portfolioItems: [
+      { id: "PF-30", title: "Interview Synthesis Fixture", category: "UX Research", description: "Prototype-only anonymized interview synthesis fixture. Replace with applicant-owned evidence before production.", type: "case_study", featured: true },
+      { id: "PF-31", title: "Usability Test Plan Fixture", category: "UX Research", description: "Prototype-only usability test plan fixture for Admin review-flow demos.", type: "case_study" },
+    ],
     availability: "available_now",
     responseTime: "Under 6 hours",
     preferredProjectSize: "₹25,000 - ₹80,000",
@@ -727,6 +776,8 @@ export const SEED_KYC: KycSubmission[] = [
       { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
       { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2102"],
+    profileSnapshot: demoProfileSnapshot("PRO-2102", "2025-01-16T09:00:00Z"),
     status: "under_review",
     submittedAt: "2025-01-16T09:00:00Z",
   },
@@ -746,6 +797,8 @@ export const SEED_KYC: KycSubmission[] = [
       { skill: "Product Design", evidence: "Partner Portal and Ops Console case studies", status: "approved", submittedAt: "2024-09-30T09:00:00Z", reviewedAt: "2024-10-01T20:00:00Z", reviewedBy: "ADM-S01" },
       { skill: "UX Research", evidence: "Onboarding Flow Research case study", status: "approved", submittedAt: "2024-09-30T09:00:00Z", reviewedAt: "2024-10-01T20:00:00Z", reviewedBy: "ADM-S01" },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2088"],
+    profileSnapshot: demoProfileSnapshot("PRO-2088", "2024-10-01T09:00:00Z"),
     status: "approved",
     submittedAt: "2024-10-01T09:00:00Z",
     resolvedAt: "2024-10-01T20:00:00Z",
@@ -766,6 +819,8 @@ export const SEED_KYC: KycSubmission[] = [
       { skill: "React", evidence: "SaaS Dashboard Kit", status: "approved", submittedAt: "2024-10-05T09:00:00Z", reviewedAt: "2024-10-06T14:00:00Z", reviewedBy: "ADM-S01" },
       { skill: "Next.js", evidence: "Next.js Landing Page case study", status: "approved", submittedAt: "2024-10-05T09:00:00Z", reviewedAt: "2024-10-06T14:00:00Z", reviewedBy: "ADM-S01" },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2099"],
+    profileSnapshot: demoProfileSnapshot("PRO-2099", "2024-10-05T09:00:00Z"),
     status: "approved",
     submittedAt: "2024-10-05T09:00:00Z",
     resolvedAt: "2024-10-06T14:00:00Z",
@@ -785,6 +840,8 @@ export const SEED_KYC: KycSubmission[] = [
     skillVerifications: [
       { skill: "Brand Identity", evidence: "Fintech Brand System", status: "approved", submittedAt: "2024-10-09T09:00:00Z", reviewedAt: "2024-10-10T11:00:00Z", reviewedBy: "ADM-S01" },
     ],
+    externalLinks: DEMO_PROOF_LINKS["PRO-2101"],
+    profileSnapshot: demoProfileSnapshot("PRO-2101", "2024-10-09T09:00:00Z"),
     status: "approved",
     submittedAt: "2024-10-09T09:00:00Z",
     resolvedAt: "2024-10-10T11:00:00Z",

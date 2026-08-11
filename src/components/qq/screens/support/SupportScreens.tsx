@@ -955,13 +955,14 @@ export function PublicProfileScreen() {
                 {(profile.externalLinks ?? []).map((link) => (
                   <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md border border-border p-3 text-sm hover:border-primary/50 hover:bg-muted/30">
                     {link.provider === "github" ? <Github className="size-4" /> : <ExternalLink className="size-4" />}
-                    <span className="min-w-0"><span className="block font-medium">{externalProviderLabel(link.provider)}</span><span className="block truncate text-xs text-muted-foreground">{link.url}</span></span>
+                    <span className="min-w-0"><span className="flex items-center gap-1.5 font-medium">{link.label ?? externalProviderLabel(link.provider)}{link.isDemo && <Badge variant="outline" className="text-[10px]">Demo fixture</Badge>}</span><span className="block truncate text-xs text-muted-foreground">{link.url}</span></span>
                   </a>
                 ))}
               </div>
               {githubLink && (
                 <div className="mt-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium"><Github className="size-4" /> GitHub projects {githubSyncing && <span className="text-xs font-normal text-muted-foreground">Syncing public repositories…</span>}</div>
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium"><Github className="size-4" /> GitHub projects {githubLink.isDemo && <Badge variant="outline" className="text-[10px]">Demo API fixture</Badge>}{githubSyncing && <span className="text-xs font-normal text-muted-foreground">Syncing public repositories…</span>}</div>
+                  {githubLink.isDemo && <p className="mb-2 text-xs text-amber-700 dark:text-amber-300">Synthetic public source for prototype/API demonstration only. Replace with the Pro’s consented GitHub connection before production.</p>}
                   {githubProjects.length > 0 ? (
                     <div className="grid gap-2 sm:grid-cols-2">
                       {githubProjects.map((repo) => <a key={repo.html_url} href={repo.html_url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-3 hover:border-primary/50"><div className="text-sm font-medium">{repo.name}</div><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{repo.description || "Public repository"}</p><div className="mt-2 text-[10px] text-muted-foreground">{repo.language || "Code"} · ★ {repo.stargazers_count ?? 0}</div></a>)}

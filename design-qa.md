@@ -49,6 +49,7 @@ Desktop geometry was checked through both the current-run screenshot and rendere
 - Automated pre-checks are explicitly non-decisive. Identity, skill, payout, risk, moderation, and payment decisions remain permission-gated human actions.
 - Paid Pro routes, gig publishing, proposals, and priority boosts remain unavailable until onboarding and payout readiness are approved. Priority review remains restricted to Finance/Ops and prevents duplicate open boosts.
 - Public GitHub metadata is read-only, public-only, rate-limited in production, and fails closed without blocking unrelated profile work. LinkedIn is stored as a safe public link until a server-side OAuth adapter exists.
+- Every seeded Pro now has a complete profile fixture: category, skills, portfolio, per-skill evidence, GitHub/LinkedIn/portfolio links, and KYC snapshot. Synthetic provider links are visibly marked `Demo fixture` and never count as verification.
 - Current-run evidence: `audit-final/07-admin-pro-onboarding-review.png`.
 
 ## Findings

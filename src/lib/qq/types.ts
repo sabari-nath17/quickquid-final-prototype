@@ -147,6 +147,8 @@ export interface ExternalProfileLink {
   provider: ExternalProfileProvider;
   url: string;
   label?: string;
+  /** Seed-only fixture marker; never grants trust or verification. */
+  isDemo?: boolean;
   status?: "self_declared" | "connected" | "reviewed";
   lastSyncedAt?: string;
 }

@@ -727,7 +727,7 @@ export function ProProfile() {
                   {(profile.externalLinks ?? []).map((link) => (
                     <div key={link.url} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 text-sm font-medium"><Globe className="size-3.5 text-primary" /> {externalProviderLabel(link.provider)} {link.status === "reviewed" && <Badge variant="outline" className="text-[10px]">Admin reviewed</Badge>}</div>
+                        <div className="flex items-center gap-2 text-sm font-medium"><Globe className="size-3.5 text-primary" /> {link.label ?? externalProviderLabel(link.provider)} {link.isDemo && <Badge variant="outline" className="text-[10px]">Demo fixture</Badge>} {link.status === "reviewed" && <Badge variant="outline" className="text-[10px]">Admin reviewed</Badge>}</div>
                         <a href={link.url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-primary hover:underline">{link.url}</a>
                       </div>
                       <Button type="button" size="sm" variant="ghost" onClick={() => removeExternalLink(link.url)} aria-label={`Remove ${externalProviderLabel(link.provider)} link`}><X className="size-3.5" /></Button>
