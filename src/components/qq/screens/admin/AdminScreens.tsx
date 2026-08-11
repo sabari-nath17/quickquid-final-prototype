@@ -622,9 +622,10 @@ export function AdminKyc() {
                 {selected.role === "pro" && (
                   <>
                     <SectionCard title="Pro onboarding snapshot" description="This is the exact category, skills, public proof, and portfolio set submitted for this review. Changes after submission require a new review.">
-                      <div className="grid gap-3 text-sm sm:grid-cols-2">
+                      <div className="grid gap-3 text-sm sm:grid-cols-3">
                         <div><div className="text-xs text-muted-foreground">Primary category</div><div className="font-medium">{selected.profileSnapshot?.primaryCategory ?? proProfiles.find((profile) => profile.userId === selected.userId)?.primaryCategory ?? "Not supplied"}</div></div>
                         <div><div className="text-xs text-muted-foreground">Portfolio items</div><div className="font-medium">{selected.profileSnapshot?.portfolioItemIds.length ?? proProfiles.find((profile) => profile.userId === selected.userId)?.portfolioItems.length ?? 0}</div></div>
+                        <div><div className="text-xs text-muted-foreground">Synced previews</div><div className="font-medium">{selected.profileSnapshot?.externalProfilePreviews?.length ?? proProfiles.find((profile) => profile.userId === selected.userId)?.externalProfilePreviews?.length ?? 0}</div></div>
                       </div>
                       <div className="mt-3"><div className="text-xs text-muted-foreground">Public proof links</div><div className="mt-1 space-y-1">{(selected.externalLinks ?? selected.profileSnapshot?.externalLinks ?? proProfiles.find((profile) => profile.userId === selected.userId)?.externalLinks ?? []).map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="block truncate text-xs text-primary hover:underline">{link.label ?? externalProviderLabel(link.provider)}{link.isDemo ? " · demo fixture" : ""} · {link.url}</a>)}{!(selected.externalLinks ?? selected.profileSnapshot?.externalLinks ?? proProfiles.find((profile) => profile.userId === selected.userId)?.externalLinks ?? []).length && <span className="text-xs text-destructive">No public proof link supplied.</span>}</div></div>
                     </SectionCard>

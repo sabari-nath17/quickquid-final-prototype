@@ -268,6 +268,7 @@ export function KycModal() {
         secondaryCategory: proProfile.secondaryCategory,
         skills: proProfile.skills,
         externalLinks: proProfile.externalLinks ?? [],
+        externalProfilePreviews: proProfile.externalProfilePreviews,
         portfolioItemIds: proProfile.portfolioItems.map((item) => item.id),
         submittedAt,
       } : undefined;

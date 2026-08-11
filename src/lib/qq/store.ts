@@ -262,23 +262,33 @@ const initialState = {
   buyerOnboardingComplete: false,
 };
 
-/** Merge newly added seed fixtures into an older local prototype session without
- * overwriting user-edited fields. New accounts are never matched by this list. */
-function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc">) {
+/** Merge newly added demo fixtures into an older local prototype session. Only
+ * seeded prototype account IDs are matched; new accounts are never touched. */
+function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc" | "users">) {
   const seedByUser = new Map(SEED_PRO_PROFILES.map((profile) => [profile.userId, profile]));
+  const seedUsersById = new Map(SEED_USERS.filter((user) => user.role === "pro").map((user) => [user.id, user]));
+  const seedKycByUser = new Map(SEED_KYC.filter((submission) => submission.role === "pro").map((submission) => [submission.userId, submission]));
   const proProfiles = state.proProfiles.map((profile) => {
     const seed = seedByUser.get(profile.userId);
     if (!seed || profile.onboardingStatus === "not_started") return profile;
     return {
       ...profile,
       externalLinks: profile.externalLinks?.length ? profile.externalLinks : seed.externalLinks,
+      externalProfilePreviews: profile.externalProfilePreviews?.length ? profile.externalProfilePreviews : seed.externalProfilePreviews,
       portfolioItems: profile.portfolioItems.length ? profile.portfolioItems : seed.portfolioItems,
+      onboardingStatus: seed.onboardingStatus ?? profile.onboardingStatus,
+      payoutReadiness: seed.payoutReadiness,
     };
+  });
+  const users = state.users.map((user) => {
+    const seed = seedUsersById.get(user.id);
+    return seed ? { ...user, verification: seed.verification, verificationStatus: seed.verificationStatus, verifiedAt: seed.verifiedAt, verifiedBy: seed.verifiedBy } : user;
   });
   const profileByUser = new Map(proProfiles.map((profile) => [profile.userId, profile]));
   const kyc = state.kyc.map((submission) => {
     const profile = profileByUser.get(submission.userId);
     if (!profile || submission.role !== "pro") return submission;
+    const seedKyc = seedKycByUser.get(submission.userId);
     return {
       ...submission,
       externalLinks: submission.externalLinks ?? profile.externalLinks,
@@ -287,12 +297,15 @@ function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc">) {
         secondaryCategory: profile.secondaryCategory,
         skills: profile.skills,
         externalLinks: profile.externalLinks ?? [],
+        externalProfilePreviews: profile.externalProfilePreviews,
         portfolioItemIds: profile.portfolioItems.map((item) => item.id),
         submittedAt: submission.submittedAt,
       },
+      status: seedKyc?.status ?? submission.status,
+      resolvedAt: seedKyc?.resolvedAt ?? submission.resolvedAt,
     };
   });
-  return { proProfiles, kyc };
+  return { users, proProfiles, kyc };
 }
 
 export const useQQ = create<QQState>()(

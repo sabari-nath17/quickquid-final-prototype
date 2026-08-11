@@ -153,11 +153,24 @@ export interface ExternalProfileLink {
   lastSyncedAt?: string;
 }
 
+export interface ExternalProfilePreview {
+  provider: ExternalProfileProvider;
+  url: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  tags?: string[];
+  stats?: string[];
+  source: "github_api" | "provider_api" | "demo_fixture" | "manual";
+  syncedAt?: string;
+}
+
 export interface ProOnboardingSnapshot {
   primaryCategory: string;
   secondaryCategory?: string;
   skills: string[];
   externalLinks: ExternalProfileLink[];
+  externalProfilePreviews?: ExternalProfilePreview[];
   portfolioItemIds: string[];
   submittedAt: string;
 }
@@ -172,6 +185,7 @@ export interface ProProfile {
   skills: string[];
   skillVerifications?: SkillVerification[];
   externalLinks?: ExternalProfileLink[];
+  externalProfilePreviews?: ExternalProfilePreview[];
   onboardingStatus?: VerificationStatus;
   onboardingSubmittedAt?: string;
   portfolioItems: PortfolioItem[];

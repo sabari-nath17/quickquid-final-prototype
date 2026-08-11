@@ -3,7 +3,7 @@ import type {
   PaymentEvidence, Payout, Refund, Dispute, Review, SupportTicket,
   NotificationItem, AuditEvent, KycSubmission, GigDraft, OfflineInstrument,
   TrustSafetyCase, Milestone, PriorityBoost,
-  ExternalProfileLink, ProOnboardingSnapshot,
+  ExternalProfileLink, ExternalProfilePreview, ProOnboardingSnapshot,
 } from "./types";
 
 export const SEED_USERS: User[] = [
@@ -11,7 +11,7 @@ export const SEED_USERS: User[] = [
   { id: "PRO-2088", role: "pro", name: "Akhil Menon", email: "akhil@example.com", headline: "Product Designer and UX Researcher", avatarColor: "#7C3AED", location: "Bengaluru, India", industry: "Design", verification: "QuickQuid Verified", verificationStatus: "approved", verifiedAt: "2024-10-01T20:00:00Z", verifiedBy: "ADM-S01" },
   { id: "PRO-2099", role: "pro", name: "Priya Nair", email: "priya@example.com", headline: "Frontend Engineer (React/Next.js)", avatarColor: "#0891B2", location: "Kochi, India", industry: "Engineering", verification: "QuickQuid Verified", verificationStatus: "approved", verifiedAt: "2024-10-06T14:00:00Z", verifiedBy: "ADM-S01" },
   { id: "PRO-2101", role: "pro", name: "Rahul Verma", email: "rahul@example.com", headline: "Brand & Identity Designer", avatarColor: "#DB2777", location: "Mumbai, India", industry: "Design", verification: "QuickQuid Verified", verificationStatus: "approved", verifiedAt: "2024-10-10T11:00:00Z", verifiedBy: "ADM-S01" },
-  { id: "PRO-2102", role: "pro", name: "Sara Khan", email: "sara@example.com", headline: "UX Researcher", avatarColor: "#CA8A04", location: "Pune, India", industry: "Research", verification: "Pending review", verificationStatus: "under_review" },
+  { id: "PRO-2102", role: "pro", name: "Sara Khan", email: "sara@example.com", headline: "UX Researcher", avatarColor: "#CA8A04", location: "Pune, India", industry: "Research", verification: "QuickQuid Verified", verificationStatus: "approved", verifiedAt: "2025-01-16T14:00:00Z", verifiedBy: "ADM-S01" },
   { id: "BUY-1050", role: "buyer", name: "Verdant Retail", email: "finance@verdant.example", headline: "Omnichannel retail", avatarColor: "#15803D", location: "Bengaluru, India", industry: "Retail", verification: "QuickQuid Verified", verificationStatus: "approved", verifiedAt: "2024-09-25T13:00:00Z", verifiedBy: "ADM-S01" },
   { id: "ADM-S01", role: "admin_support", name: "Meera S (Support T1)", email: "meera@quickquid.example", avatarColor: "#475569", verification: "Staff", verificationStatus: "approved" },
   { id: "FIN-F01", role: "finance", name: "Arjun K (Finance T2)", email: "arjun@quickquid.example", avatarColor: "#1E40AF", verification: "Staff", verificationStatus: "approved" },
@@ -47,6 +47,27 @@ export const DEMO_PROOF_LINKS: Record<string, ExternalProfileLink[]> = {
   ],
 };
 
+/** Provider-shaped non-GitHub previews for the prototype. LinkedIn/Behance
+ * production sync requires OAuth/API credentials and a server-side adapter. */
+export const DEMO_PROFILE_PREVIEWS: Record<string, ExternalProfilePreview[]> = {
+  "PRO-2088": [
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-akhil", title: "Product design profile (demo sync)", description: "Synthetic LinkedIn preview showing the fields a consented provider adapter can return.", tags: ["Product Design", "UX Research", "Design Systems"], stats: ["Demo source", "Last synced: 2025-01-18"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+    { provider: "behance", url: "https://www.behance.net/demo-quickquid-akhil", title: "Partner portal case study (demo sync)", description: "Synthetic Behance project preview for the public profile card.", tags: ["Case study", "SaaS", "Interaction"], stats: ["Demo source", "Project preview"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+  ],
+  "PRO-2099": [
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-priya", title: "Frontend engineering profile (demo sync)", description: "Synthetic LinkedIn preview for a React and Next.js specialist.", tags: ["React", "Next.js", "Accessibility"], stats: ["Demo source", "Last synced: 2025-01-18"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+    { provider: "website", url: "https://example.com/quickquid-demo/priya", title: "Accessible dashboard kit (demo sync)", description: "Synthetic portfolio-site preview showing the project metadata shape used by the UI.", tags: ["TypeScript", "Tailwind", "Testing"], stats: ["Demo source", "Case study"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+  ],
+  "PRO-2101": [
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-rahul", title: "Brand identity profile (demo sync)", description: "Synthetic LinkedIn preview for a brand and identity designer.", tags: ["Brand Identity", "Typography", "Illustration"], stats: ["Demo source", "Last synced: 2025-01-18"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+    { provider: "behance", url: "https://www.behance.net/demo-quickquid-rahul", title: "Fintech brand system (demo sync)", description: "Synthetic Behance project preview for the public profile card.", tags: ["Brand system", "Logo", "Guidelines"], stats: ["Demo source", "Project preview"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+  ],
+  "PRO-2102": [
+    { provider: "linkedin", url: "https://www.linkedin.com/in/demo-quickquid-sara", title: "UX research profile (demo sync)", description: "Synthetic LinkedIn preview for a mixed-methods researcher.", tags: ["Interviews", "Surveys", "Usability Testing"], stats: ["Demo source", "Last synced: 2025-01-18"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+    { provider: "website", url: "https://example.com/quickquid-demo/sara", title: "Research synthesis fixture (demo sync)", description: "Synthetic portfolio preview for the onboarding and Admin review demonstration.", tags: ["Synthesis", "Journey Mapping"], stats: ["Demo source", "Case study"], source: "demo_fixture", syncedAt: "2025-01-18T09:00:00Z" },
+  ],
+};
+
 function demoProfileSnapshot(userId: string, submittedAt: string): ProOnboardingSnapshot | undefined {
   const profile = SEED_PRO_PROFILES.find((item) => item.userId === userId);
   if (!profile) return undefined;
@@ -55,6 +76,7 @@ function demoProfileSnapshot(userId: string, submittedAt: string): ProOnboarding
     secondaryCategory: profile.secondaryCategory,
     skills: profile.skills,
     externalLinks: profile.externalLinks ?? [],
+    externalProfilePreviews: profile.externalProfilePreviews,
     portfolioItemIds: profile.portfolioItems.map((item) => item.id),
     submittedAt,
   };
@@ -74,6 +96,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "UX Research", evidence: "Onboarding Flow Research case study", status: "approved", submittedAt: "2024-09-30T09:00:00Z", reviewedAt: "2024-10-01T20:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Research plan and synthesis evidence reviewed." },
     ],
     externalLinks: DEMO_PROOF_LINKS["PRO-2088"],
+    externalProfilePreviews: DEMO_PROFILE_PREVIEWS["PRO-2088"],
     portfolioItems: [
       { id: "PF-1", title: "Partner Portal Case Study", category: "Product Design", description: "Redesigned a partner onboarding portal reducing time-to-activate by 38%.", type: "case_study", url: "https://example.com/case/partner-portal", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/62c63cd0aad8.png", featured: true },
       { id: "PF-2", title: "Ops Console Refresh", category: "Product Design", description: "Operations console for a fintech, focused on queue triage and audit.", type: "case_study", url: "https://example.com/case/ops-console", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/750fe92d211b.jpg" },
@@ -109,6 +132,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "Next.js", evidence: "Next.js Landing Page case study", status: "approved", submittedAt: "2024-10-05T09:00:00Z", reviewedAt: "2024-10-06T14:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Production build evidence reviewed." },
     ],
     externalLinks: DEMO_PROOF_LINKS["PRO-2099"],
+    externalProfilePreviews: DEMO_PROFILE_PREVIEWS["PRO-2099"],
     portfolioItems: [
       { id: "PF-10", title: "SaaS Dashboard Kit", category: "Frontend Engineering", description: "Open-source dashboard kit with 40+ accessible components.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9628ecf06ad9.jpg", featured: true },
       { id: "PF-11", title: "Next.js Landing Page", category: "Frontend Engineering", description: "High-converting landing page with Lighthouse 98+.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/1494eb483574.png" },
@@ -141,6 +165,7 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
       { skill: "Brand Identity", evidence: "Fintech Brand System", status: "approved", submittedAt: "2024-10-09T09:00:00Z", reviewedAt: "2024-10-10T11:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Identity system and application evidence reviewed." },
     ],
     externalLinks: DEMO_PROOF_LINKS["PRO-2101"],
+    externalProfilePreviews: DEMO_PROFILE_PREVIEWS["PRO-2101"],
     portfolioItems: [
       { id: "PF-20", title: "Fintech Brand System", category: "Brand & Identity", description: "Full identity system for a neo-bank.", type: "case_study", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/ab448629fbb2.jpg", featured: true },
       { id: "PF-21", title: "Logo Collection", category: "Brand & Identity", description: "Various logo designs for startups.", type: "image", imageUrl: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9c721d2bd294.jpg" },
@@ -170,10 +195,11 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
     primaryCategory: "UX Research",
     skills: ["User Interviews", "Surveys", "Usability Testing", "Synthesis", "Journey Mapping"],
     skillVerifications: [
-      { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
-      { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
+      { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "approved", submittedAt: "2025-01-16T09:00:00Z", reviewedAt: "2025-01-16T14:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Prototype fixture approved for demo browsing." },
+      { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "approved", submittedAt: "2025-01-16T09:00:00Z", reviewedAt: "2025-01-16T14:00:00Z", reviewedBy: "ADM-S01", reviewerNote: "Prototype fixture approved for demo browsing." },
     ],
     externalLinks: DEMO_PROOF_LINKS["PRO-2102"],
+    externalProfilePreviews: DEMO_PROFILE_PREVIEWS["PRO-2102"],
     portfolioItems: [
       { id: "PF-30", title: "Interview Synthesis Fixture", category: "UX Research", description: "Prototype-only anonymized interview synthesis fixture. Replace with applicant-owned evidence before production.", type: "case_study", featured: true },
       { id: "PF-31", title: "Usability Test Plan Fixture", category: "UX Research", description: "Prototype-only usability test plan fixture for Admin review-flow demos.", type: "case_study" },
@@ -189,8 +215,8 @@ export const SEED_PRO_PROFILES: ProProfile[] = [
     completedProjects: 6,
     rating: 4.6,
     responseTimeHours: 6,
-    payoutReadiness: "under_review",
-    onboardingStatus: "under_review",
+    payoutReadiness: "approved",
+    onboardingStatus: "approved",
     onboardingSubmittedAt: "2025-01-16T09:00:00Z",
     feeFrom: 25000,
   },
@@ -773,13 +799,14 @@ export const SEED_KYC: KycSubmission[] = [
     ifscMasked: "HDFC••••",
     beneficiaryName: "Sara Khan",
     skillVerifications: [
-      { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
-      { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "under_review", submittedAt: "2025-01-16T09:00:00Z" },
+      { skill: "User Interviews", evidence: "Interview guide and anonymized synthesis sample", status: "approved", submittedAt: "2025-01-16T09:00:00Z", reviewedAt: "2025-01-16T14:00:00Z", reviewedBy: "ADM-S01" },
+      { skill: "Usability Testing", evidence: "Moderated test plan and findings sample", status: "approved", submittedAt: "2025-01-16T09:00:00Z", reviewedAt: "2025-01-16T14:00:00Z", reviewedBy: "ADM-S01" },
     ],
     externalLinks: DEMO_PROOF_LINKS["PRO-2102"],
     profileSnapshot: demoProfileSnapshot("PRO-2102", "2025-01-16T09:00:00Z"),
-    status: "under_review",
+    status: "approved",
     submittedAt: "2025-01-16T09:00:00Z",
+    resolvedAt: "2025-01-16T14:00:00Z",
   },
   {
     id: "KYC-2202",

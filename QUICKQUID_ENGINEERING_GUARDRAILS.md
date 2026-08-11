@@ -18,6 +18,7 @@ Do not replace this with “Bring the brief. Leave with finished work.” The pr
 - KYC documents and payout values are represented by local filenames/masked values. Production must use a compliant KYC vendor, encrypted object storage, retention rules, access logs, and server-side authorization.
 - Payment and payout states are demonstrations. Never interpret a local “confirmed” state as a bank settlement without a provider webhook and maker-checker authorization.
 - Seeded Pro proof links and Sara’s portfolio fixtures are explicitly marked `isDemo: true`. They exist to exercise the provider/API and Admin review UI only; they are not applicant ownership, employment, ratings, or verification evidence. Production data must replace them with consented, applicant-owned connections.
+- Seeded prototype Pros intentionally bypass readiness and open as approved demo accounts. New accounts still follow readiness/KYC gating. Do not copy the bypass into production onboarding.
 
 ## Pro onboarding contract
 
@@ -46,11 +47,23 @@ interface ExternalProfileLink {
   isDemo?: boolean; // seed-only fixture; never a trust signal
   lastSyncedAt?: string;
 }
+
+interface ExternalProfilePreview {
+  provider: ExternalProfileProvider;
+  url: string;
+  title: string;
+  description?: string;
+  tags?: string[];
+  stats?: string[];
+  source: "github_api" | "provider_api" | "demo_fixture" | "manual";
+  syncedAt?: string;
+}
 ```
 
 - Normalize and allow only `http(s)` URLs; reject phone, messaging, payment, and circumvention links.
 - GitHub public repositories may be read through a rate-limited server-side adapter in production. The current prototype uses the public REST endpoint only when a GitHub profile URL is present, displays no private repositories, and shows an empty state on errors.
 - LinkedIn is a link until OAuth is implemented. The production adapter must request the smallest permitted scopes, store tokens encrypted, support disconnect/revoke, cache only permitted fields, and show the sync timestamp.
+- The public profile may render provider previews from `ExternalProfilePreview`. GitHub profile/repository data can be read from the public API; LinkedIn/Behance previews in this prototype are fixtures because their production APIs require OAuth/API credentials. Never infer ownership from a URL alone.
 - Do not invent project counts, ratings, clients, employers, repository ownership, or “verified” claims from a URL alone. A provider connection proves only that the provider returned the data; Admin verification remains a separate decision.
 
 ## Gig lifecycle and priority placement

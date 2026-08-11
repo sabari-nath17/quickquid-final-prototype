@@ -50,6 +50,7 @@ Desktop geometry was checked through both the current-run screenshot and rendere
 - Paid Pro routes, gig publishing, proposals, and priority boosts remain unavailable until onboarding and payout readiness are approved. Priority review remains restricted to Finance/Ops and prevents duplicate open boosts.
 - Public GitHub metadata is read-only, public-only, rate-limited in production, and fails closed without blocking unrelated profile work. LinkedIn is stored as a safe public link until a server-side OAuth adapter exists.
 - Every seeded Pro now has a complete profile fixture: category, skills, portfolio, per-skill evidence, GitHub/LinkedIn/portfolio links, and KYC snapshot. Synthetic provider links are visibly marked `Demo fixture` and never count as verification.
+- Seeded prototype Pros open directly into their dashboards; their public profile display shows GitHub account metadata, up to six public repositories, and provider-shaped LinkedIn/Behance/portfolio sync previews. New accounts remain gated by readiness.
 - Current-run evidence: `audit-final/07-admin-pro-onboarding-review.png`.
 
 ## Findings

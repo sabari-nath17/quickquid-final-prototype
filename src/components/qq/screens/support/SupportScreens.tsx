@@ -701,24 +701,31 @@ export function PublicProfileScreen() {
 
   const [reportOpen, setReportOpen] = React.useState(false);
   const [githubProjects, setGithubProjects] = React.useState<{ name: string; html_url: string; description?: string; language?: string; stargazers_count?: number }[]>([]);
+  const [githubProfile, setGithubProfile] = React.useState<{ login: string; name?: string; avatar_url?: string; bio?: string; public_repos?: number; followers?: number; html_url?: string } | null>(null);
   const [githubSyncing, setGithubSyncing] = React.useState(false);
   const githubLink = profile?.externalLinks?.find((link) => link.provider === "github");
+  const syncedPreviews = profile?.externalProfilePreviews ?? [];
 
   React.useEffect(() => {
     const handle = githubLink ? externalProfileHandle(githubLink) : null;
     if (!handle || typeof window === "undefined") {
       setGithubProjects([]);
+      setGithubProfile(null);
       setGithubSyncing(false);
       return;
     }
     let cancelled = false;
     setGithubSyncing(true);
-    fetch(`https://api.github.com/users/${encodeURIComponent(handle)}/repos?sort=updated&per_page=6`, { headers: { Accept: "application/vnd.github+json" } })
-      .then((response) => response.ok ? response.json() : [])
-      .then((repos) => {
-        if (!cancelled && Array.isArray(repos)) setGithubProjects(repos.filter((repo) => repo && typeof repo.name === "string").map((repo) => ({ name: repo.name, html_url: repo.html_url, description: repo.description, language: repo.language, stargazers_count: repo.stargazers_count })).slice(0, 6));
+    Promise.all([
+      fetch(`https://api.github.com/users/${encodeURIComponent(handle)}`, { headers: { Accept: "application/vnd.github+json" } }).then((response) => response.ok ? response.json() : null),
+      fetch(`https://api.github.com/users/${encodeURIComponent(handle)}/repos?sort=updated&per_page=6`, { headers: { Accept: "application/vnd.github+json" } }).then((response) => response.ok ? response.json() : []),
+    ])
+      .then(([githubUser, repos]) => {
+        if (cancelled) return;
+        setGithubProfile(githubUser && typeof githubUser.login === "string" ? githubUser : null);
+        if (Array.isArray(repos)) setGithubProjects(repos.filter((repo) => repo && typeof repo.name === "string").map((repo) => ({ name: repo.name, html_url: repo.html_url, description: repo.description, language: repo.language, stargazers_count: repo.stargazers_count })).slice(0, 6));
       })
-      .catch(() => { if (!cancelled) setGithubProjects([]); })
+      .catch(() => { if (!cancelled) { setGithubProjects([]); setGithubProfile(null); } })
       .finally(() => { if (!cancelled) setGithubSyncing(false); });
     return () => { cancelled = true; };
   }, [githubLink?.url]);
@@ -963,6 +970,7 @@ export function PublicProfileScreen() {
                 <div className="mt-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-medium"><Github className="size-4" /> GitHub projects {githubLink.isDemo && <Badge variant="outline" className="text-[10px]">Demo API fixture</Badge>}{githubSyncing && <span className="text-xs font-normal text-muted-foreground">Syncing public repositories…</span>}</div>
                   {githubLink.isDemo && <p className="mb-2 text-xs text-amber-700 dark:text-amber-300">Synthetic public source for prototype/API demonstration only. Replace with the Pro’s consented GitHub connection before production.</p>}
+                  {githubProfile && <div className="mb-3 flex items-start gap-3 rounded-md border border-border bg-muted/20 p-3"><Avatar className="size-10"><AvatarFallback>{initials(githubProfile.name || githubProfile.login)}</AvatarFallback></Avatar><div className="min-w-0 flex-1"><div className="font-medium">{githubProfile.name || githubProfile.login}</div><div className="text-xs text-muted-foreground">@{githubProfile.login}{githubProfile.bio ? ` · ${githubProfile.bio}` : ""}</div><div className="mt-1 text-[10px] text-muted-foreground">{githubProfile.public_repos ?? 0} public repos · {githubProfile.followers ?? 0} followers</div></div></div>}
                   {githubProjects.length > 0 ? (
                     <div className="grid gap-2 sm:grid-cols-2">
                       {githubProjects.map((repo) => <a key={repo.html_url} href={repo.html_url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-3 hover:border-primary/50"><div className="text-sm font-medium">{repo.name}</div><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{repo.description || "Public repository"}</p><div className="mt-2 text-[10px] text-muted-foreground">{repo.language || "Code"} · ★ {repo.stargazers_count ?? 0}</div></a>)}
@@ -970,6 +978,7 @@ export function PublicProfileScreen() {
                   ) : !githubSyncing ? <p className="text-xs text-muted-foreground">No public repositories were returned. The link remains available for Admin review; private repositories are never requested.</p> : null}
                 </div>
               )}
+              {syncedPreviews.length > 0 && <div className="mt-5 border-t border-border pt-4"><div className="mb-2 flex items-center gap-2 text-sm font-medium"><ExternalLink className="size-4" /> Other provider sync previews</div><p className="mb-3 text-xs text-muted-foreground">LinkedIn, Behance, Dribbble, and portfolio metadata are shown from the profile’s provider-shaped sync record. Production adapters must replace demo fixtures with consented API responses.</p><div className="grid gap-2 sm:grid-cols-2">{syncedPreviews.map((preview) => <a key={`${preview.provider}-${preview.url}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-3 hover:border-primary/50"><div className="flex items-center justify-between gap-2"><span className="text-xs font-medium">{externalProviderLabel(preview.provider)}</span>{preview.source === "demo_fixture" && <Badge variant="outline" className="text-[10px]">Demo sync fixture</Badge>}</div><div className="mt-1 text-sm font-medium">{preview.title}</div>{preview.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{preview.description}</p>}{preview.tags && <div className="mt-2 flex flex-wrap gap-1">{preview.tags.map((tag) => <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>)}</div>}{preview.stats && <div className="mt-2 text-[10px] text-muted-foreground">{preview.stats.join(" · ")}</div>}</a>)}</div></div>}
             </SectionCard>
           )}
 

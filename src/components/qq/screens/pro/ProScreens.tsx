@@ -1000,6 +1000,8 @@ export function ProProfile() {
                   </div>
                 </section>
 
+                {(profile.externalLinks?.length ?? 0) > 0 && <section><h3 className="text-sm font-semibold mb-1">Connected proof & synced previews</h3><div className="grid gap-2 sm:grid-cols-2">{(profile.externalLinks ?? []).map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-2.5 text-xs hover:border-primary/50"><div className="font-medium">{link.label ?? externalProviderLabel(link.provider)} {link.isDemo && <Badge variant="outline" className="ml-1 text-[9px]">Demo</Badge>}</div><div className="mt-0.5 truncate text-muted-foreground">{link.url}</div></a>)}</div>{(profile.externalProfilePreviews ?? []).length > 0 && <div className="mt-2 grid gap-2 sm:grid-cols-2">{(profile.externalProfilePreviews ?? []).map((preview) => <a key={`${preview.provider}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="rounded-md border border-dashed border-border p-2.5 text-xs hover:border-primary/50"><div className="flex items-center justify-between gap-2"><span className="font-medium">{externalProviderLabel(preview.provider)}</span><span className="text-[10px] text-muted-foreground">{preview.source === "demo_fixture" ? "Demo sync" : "Synced"}</span></div><div className="mt-1 font-medium">{preview.title}</div><div className="mt-0.5 line-clamp-2 text-muted-foreground">{preview.description}</div></a>)}</div>}</section>}
+
                 <section>
                   <h3 className="text-sm font-semibold mb-1">Selected work</h3>
                   {profile.portfolioItems.length === 0 ? (
