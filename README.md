@@ -19,7 +19,7 @@ QuickQuid is an execution marketplace for selected digital projects. This reposi
 - Landing prompt → Project Readiness → authentication/onboarding handoff using the existing guest readiness draft.
 - Role-aware in-app navigation history and accessible Back controls across visitor, Buyer, Pro, readiness, support, and Admin surfaces.
 - Buyer workflows for profiles, talent discovery, briefs, contracts, milestone payments, delivery, messages, reviews, and support.
-- Pro workflows for profiles, skill evidence, briefs, proposals, contracts, gigs, payout readiness, delivery, and reviews. Seeded prototype Pros open directly into their dashboards and public profiles include live public GitHub profile/repository metadata plus provider-shaped LinkedIn, Behance, and portfolio sync previews. Every seeded Pro includes a complete profile fixture, public-proof links, portfolio references, and reviewable skill evidence; provider links marked `Demo fixture` are synthetic and must be replaced before production.
+- Pro workflows for profiles, skill evidence, briefs, proposals, contracts, gigs, payout readiness, delivery, and reviews. Seeded prototype Pros open directly into their dashboards and public profiles include live public GitHub profile/repository metadata (avatar, bio, stars, forks, topics, license, and recent update time) plus provider-shaped LinkedIn, Behance, and portfolio sync previews. Every seeded Pro includes a complete profile fixture, public-proof links, portfolio references, and reviewable skill evidence; provider links marked `Demo fixture` are synthetic and must be replaced before production.
 - Pro onboarding captures the selected category, every selected skill's evidence, public GitHub/LinkedIn/portfolio proof links, and a review snapshot for Admin. Public Pro profiles can show safe links and read-only public GitHub repository metadata when the provider API responds.
 - Admin operations for KYC, client enrollment, per-skill verification, payments, payouts, refunds, disputes, Trust & Safety, moderation, and audit trails.
 - QuickQuid Verified state for approved clients and for Pros with approved identity plus at least one Admin-approved skill. The badge tooltip reads `QuickQuid Verified`.
@@ -31,6 +31,7 @@ QuickQuid is an execution marketplace for selected digital projects. This reposi
 - The QuickQuid platform fee is temporarily ₹0 during beta. Payment-provider charges and taxes may still apply.
 - No live-job counters, customer testimonials, ratings claims, artificial deadlines, or fake marketplace activity are presented on the landing page.
 - Data is realistic seeded prototype data stored locally in the browser. No production backend, payment, identity-provider, or database integration is included in this repository.
+- GitHub’s public REST sync is intentionally limited to public profile/repository metadata. LinkedIn identity/photo, experience, and certifications require the member’s consent plus approved LinkedIn products/scopes; Behance requires Adobe/Behance API credentials. See the [provider capability matrix](QUICKQUID_ENGINEERING_GUARDRAILS.md#provider-capability-matrix-researched-august-2026) before implementing production adapters.
 
 ## Demo access
 

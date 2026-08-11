@@ -66,6 +66,19 @@ interface ExternalProfilePreview {
 - The public profile may render provider previews from `ExternalProfilePreview`. GitHub profile/repository data can be read from the public API; LinkedIn/Behance previews in this prototype are fixtures because their production APIs require OAuth/API credentials. Never infer ownership from a URL alone.
 - Do not invent project counts, ratings, clients, employers, repository ownership, or “verified” claims from a URL alone. A provider connection proves only that the provider returned the data; Admin verification remains a separate decision.
 
+### Provider capability matrix (researched August 2026)
+
+| Source | Safe data QuickQuid can display | What production needs | Prototype behavior |
+| --- | --- | --- | --- |
+| GitHub public REST | Public avatar, display name/login, bio, profile URL, public-repository count, followers, repository name/description, primary language, stars, forks, topics, license, and `pushed_at` | Rate-limited server adapter, cache, consented connection when associating data with an applicant, and a refresh/disconnect audit | Fetches the public profile and six recently updated public repositories in the browser; never requests private repositories. |
+| GitHub contribution calendar | Contribution calendar and contribution totals | Authenticated GraphQL connection; the calendar is not available from the small public REST sync | Do not draw a contribution heatmap or convert repository activity into a contribution count. |
+| LinkedIn | With Sign In with LinkedIn/OpenID Connect, the consenting member’s identity fields and profile-picture URL; some approved LinkedIn products can expose additional current-position/education fields | LinkedIn app approval, 3-legged OAuth, least-privilege scopes, encrypted token vault, consent/revocation, retention policy, and server-side sync | Shows a provider-shaped preview fixture only. A pasted LinkedIn URL is never treated as a fetched profile. |
+| LinkedIn experience/certifications | Not generally available for arbitrary public profiles. Profile/Certification APIs are restricted to approved developers/products and the authenticated member’s permissions | Explicit product approval and member consent; store only permitted fields and show source/timestamp | Keep as self-declared/manual fields until an approved adapter exists; never scrape LinkedIn HTML. |
+| Behance | Provider project/profile metadata and preview media when the user authorizes an Adobe/Behance integration | Adobe Developer credentials/API access, OAuth where user-owned data is read, token handling, rate limits, and media/copyright review | Shows provider-shaped demo previews only; no anonymous browser scrape. |
+| Portfolio website | Self-declared link; production may extract limited Open Graph title/image/description through a server fetch | SSRF protection, allow-listing, timeouts, content-type/size limits, malware/media checks, copyright and cache policy | Renders supplied portfolio items and safe preview fixtures; does not scrape arbitrary pages in the browser. |
+
+Provider-sourced media must carry its source and `syncedAt` timestamp. A profile picture is an identity-display asset, not proof of identity, employment, skill, or ownership. Preview cards must preserve the provider link and provide a truthful empty/error state when a provider rate-limits, revokes consent, or returns incomplete data.
+
 ## Gig lifecycle and priority placement
 
 ### Gig states
