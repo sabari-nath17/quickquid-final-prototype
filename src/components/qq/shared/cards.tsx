@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Star, MapPin, Clock, ShieldCheck, Briefcase, FileText, ExternalLink,
-  CheckCircle2, Circle, Send, Eye, MessageSquare,
+  CheckCircle2, Circle, Send, Eye, MessageSquare, ArrowRight,
 } from "lucide-react";
 import { StatusBadge, statusMeta } from "./StatusBadge";
 import { QuickQuidVerifiedBadge } from ".";
@@ -28,7 +28,18 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
   const verifiedCount = verificationBadges.length;
   const quickQuidVerified = profile.payoutReadiness === "approved" && (profile.skillVerifications?.some((item) => item.status === "approved") ?? verifiedCount > 0);
   return (
-    <Card className={cn("p-4 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer text-left w-full h-full", onClick && "hover:border-primary/40")} onClick={onClick}>
+    <Card
+      className={cn("p-4 transition-all text-left w-full h-full", onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      } : undefined}
+    >
       <div className="flex items-start gap-3">
         <Avatar className="size-12 rounded-md shrink-0" style={{ backgroundColor: profile.userId === "PRO-2088" ? "#7C3AED" : profile.userId === "PRO-2099" ? "#0891B2" : profile.userId === "PRO-2101" ? "#DB2777" : "#CA8A04" }}>
           <AvatarFallback className="rounded-md text-white font-medium">{initials(profile.displayName)}</AvatarFallback>
@@ -65,6 +76,11 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
         <span className="text-muted-foreground">From <span className="font-bold text-foreground">{formatINR(profile.feeFrom ?? 0)}</span></span>
         <span className="text-muted-foreground">{profile.completedProjects} projects</span>
       </div>
+      {onClick && (
+        <div className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+          Review proof <ArrowRight className="size-3.5" />
+        </div>
+      )}
     </Card>
   );
 }

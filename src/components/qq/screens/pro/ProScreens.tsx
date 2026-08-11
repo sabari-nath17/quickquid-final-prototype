@@ -33,7 +33,7 @@ import {
   Plus, Pencil, Pause, Copy, Archive, MessageSquare, Star, Sparkles,
   ExternalLink, ChevronRight, ChevronLeft, Loader2, AlertCircle, Banknote,
   Lock, Flag, History, Gavel, Award, X, Save, EyeOff, Inbox, Tag, Globe,
-  Calendar, UserCog, BellOff, FileWarning, ListChecks, RefreshCw, Filter,
+  Calendar, UserCog, BellOff, FileWarning, ListChecks, RefreshCw, Filter, Search,
 } from "lucide-react";
 import {
   PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline, useNavigationGuard, QuickQuidVerifiedBadge,
@@ -608,6 +608,7 @@ export function ProProfile() {
   const featured = profile.portfolioItems.find((p) => p.featured);
   const linkedInIdentityPreview = profile.externalProfilePreviews?.find((preview) => preview.provider === "linkedin" && preview.kind === "identity" && preview.imageUrl);
   const publicAvatarSrc = linkedInIdentityPreview?.imageUrl?.startsWith("/") ? assetPath(linkedInIdentityPreview.imageUrl) : linkedInIdentityPreview?.imageUrl;
+  const publicProofCount = profile.externalLinks?.length ?? 0;
 
   return (
     <div className="space-y-6">
@@ -620,28 +621,45 @@ export function ProProfile() {
           description="Complete your profile so the right people can evaluate you quickly. Only information marked Public appears in discovery."
           status={<StatusBadge tone={profile.publicVisibility ? "success" : "paused"} icon>{profile.publicVisibility ? "Public" : "Hidden"}</StatusBadge>}
         >
-          <Button variant="outline" onClick={saveDraft}><Save className="size-4" /> Save draft</Button>
-          <Button
-            onClick={() => {
-              const ready = !!profile.headline.trim() && !!profile.bio.trim() && !!profile.primaryCategory && profile.skills.length > 0 && profile.portfolioItems.length > 0 && (profile.externalLinks?.length ?? 0) > 0;
-              if (!ready) {
-                toast({ title: "Complete Pro onboarding first", description: "Add your headline, bio, category, skills, portfolio item, and at least one public proof link before submitting for Admin review.", variant: "destructive" });
-                return;
-              }
-              setKycModal(true);
-            }}
-            disabled={profile.onboardingStatus === "under_review" || profile.onboardingStatus === "approved"}
-          >
-            <ShieldCheck className="size-4" /> {profile.onboardingStatus === "approved" ? "Onboarding approved" : profile.onboardingStatus === "under_review" ? "Admin review pending" : "Submit onboarding"}
-          </Button>
-          {profile.publicVisibility ? (
-            <Button variant="outline" onClick={unpublish}>Unpublish</Button>
-          ) : (
-            <Button onClick={publish}>Publish</Button>
-          )}
-          <Button variant="ghost" onClick={() => navigate("support")}><Flag className="size-4" /> Report</Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button variant="outline" onClick={() => setTab("preview")}><Eye className="size-4" /> View Buyer preview</Button>
+            <Button variant="outline" onClick={saveDraft}><Save className="size-4" /> Save draft</Button>
+            <Button
+              onClick={() => {
+                const ready = !!profile.headline.trim() && !!profile.bio.trim() && !!profile.primaryCategory && profile.skills.length > 0 && profile.portfolioItems.length > 0 && (profile.externalLinks?.length ?? 0) > 0;
+                if (!ready) {
+                  toast({ title: "Complete Pro onboarding first", description: "Add your headline, bio, category, skills, portfolio item, and at least one public proof link before submitting for Admin review.", variant: "destructive" });
+                  return;
+                }
+                setKycModal(true);
+              }}
+              disabled={profile.onboardingStatus === "under_review" || profile.onboardingStatus === "approved"}
+            >
+              <ShieldCheck className="size-4" /> {profile.onboardingStatus === "approved" ? "Onboarding approved" : profile.onboardingStatus === "under_review" ? "Admin review pending" : "Submit onboarding"}
+            </Button>
+            {profile.publicVisibility ? (
+              <Button variant="ghost" size="sm" onClick={unpublish}>Unpublish</Button>
+            ) : (
+              <Button size="sm" onClick={publish}>Publish</Button>
+            )}
+          </div>
         </PageHeader>
       </div>
+
+      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">Buyer-facing profile</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight">Make the strongest evidence easy to assess</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Buyers see your public identity, selected work, and proof sources—not private payout, verification, or risk information.</p>
+          </div>
+          <div className="grid grid-cols-3 divide-x divide-border rounded-md border border-border bg-background text-center text-sm">
+            <div className="px-3 py-2"><div className="font-semibold tabular-nums">{profile.portfolioItems.length}</div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Work samples</div></div>
+            <div className="px-3 py-2"><div className="font-semibold tabular-nums">{publicProofCount}</div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Proof sources</div></div>
+            <div className="px-3 py-2"><div className="font-semibold tabular-nums">{profile.skills.length}</div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Skills</div></div>
+          </div>
+        </div>
+      </Card>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList>
@@ -1068,18 +1086,31 @@ export function ProBriefs() {
   const [filterBand, setFilterBand] = React.useState<string>("all");
   const [filterAvail, setFilterAvail] = React.useState<string>("all");
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [sortOrder, setSortOrder] = React.useState<"best_fit" | "newest" | "highest_budget">("best_fit");
 
   const payoutReady = profile?.payoutReadiness === "approved";
 
   const myAppliedBriefIds = new Set(proposals.filter((p) => p.proId === currentUserId).map((p) => p.briefId));
 
   const filtered = briefs.filter((b) => {
+    const search = searchTerm.trim().toLowerCase();
+    if (search && ![b.title, b.objective, b.category, b.buyerName, ...b.deliverables].join(" ").toLowerCase().includes(search)) return false;
     if (b.status === "archived") return false;
     if (filterCategory !== "all" && b.category !== filterCategory) return false;
     if (filterBand !== "all" && budgetBand(b.budget) !== filterBand) return false;
     if (filterAvail === "open" && b.visibility !== "open") return false;
     if (filterAvail === "private" && b.visibility !== "private") return false;
     return true;
+  });
+  const fitScore = (brief: Brief) => {
+    if (!profile) return 0;
+    return Number(brief.category === profile.primaryCategory) * 2 + Number(brief.category === profile.secondaryCategory) + Number(profile.skills.some((skill) => `${brief.title} ${brief.objective} ${brief.deliverables.join(" ")}`.toLowerCase().includes(skill.toLowerCase())));
+  };
+  const sortedBriefs = [...filtered].sort((a, b) => {
+    if (sortOrder === "highest_budget") return b.budget - a.budget;
+    if (sortOrder === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return fitScore(b) - fitScore(a) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const selected = briefs.find((b) => b.id === selectedId);
@@ -1109,7 +1140,7 @@ export function ProBriefs() {
         <PageHeader
           title="Briefs"
           description="Open briefs from Buyers. We surface budget, timeline, and exclusions up front so you can decide quickly."
-          status={<StatusBadge tone="info" icon>{filtered.length} brief{filtered.length === 1 ? "" : "s"}</StatusBadge>}
+          status={<StatusBadge tone="info" icon>{sortedBriefs.length} brief{sortedBriefs.length === 1 ? "" : "s"}</StatusBadge>}
         />
       </div>
 
@@ -1124,8 +1155,25 @@ export function ProBriefs() {
         />
       )}
 
-      <Card className="p-3">
-        <div className="flex flex-wrap items-center gap-2">
+      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} className="h-11 pl-9" placeholder="Search by outcome, category, or Buyer" aria-label="Search briefs" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="brief-sort" className="shrink-0 text-xs text-muted-foreground">Sort</Label>
+            <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as typeof sortOrder)}>
+              <SelectTrigger id="brief-sort" className="h-10 w-[172px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="best_fit">Best category fit</SelectItem>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="highest_budget">Highest budget</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-primary/10 pt-3">
           <Filter className="size-4 text-muted-foreground" />
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-[160px] h-8"><SelectValue placeholder="Category" /></SelectTrigger>
@@ -1149,13 +1197,14 @@ export function ProBriefs() {
               <SelectItem value="private">Private</SelectItem>
             </SelectContent>
           </Select>
-          {(filterCategory !== "all" || filterBand !== "all" || filterAvail !== "all") && (
-            <Button variant="ghost" size="sm" onClick={() => { setFilterCategory("all"); setFilterBand("all"); setFilterAvail("all"); }}>Reset</Button>
+          {(filterCategory !== "all" || filterBand !== "all" || filterAvail !== "all" || searchTerm) && (
+            <Button variant="ghost" size="sm" onClick={() => { setFilterCategory("all"); setFilterBand("all"); setFilterAvail("all"); setSearchTerm(""); }}>Reset</Button>
           )}
         </div>
+        {profile && <p className="mt-3 text-xs text-muted-foreground">Best category fit uses your declared <span className="font-medium text-foreground">{profile.primaryCategory}</span>{profile.secondaryCategory ? ` and ${profile.secondaryCategory}` : ""}; it does not imply a match or an approval.</p>}
       </Card>
 
-      {filtered.length === 0 ? (
+      {sortedBriefs.length === 0 ? (
         <EmptyState
           title="No briefs match your filters"
           description="Try widening the category or budget band. New briefs are posted frequently."
@@ -1164,14 +1213,16 @@ export function ProBriefs() {
         />
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
-          {filtered.map((b) => (
-            <BriefCard
-              key={b.id}
-              brief={b}
-              onOpen={() => setSelectedId(b.id)}
-              onApply={() => applyToBrief(b)}
-              showApply={payoutReady && !myAppliedBriefIds.has(b.id)}
-            />
+          {sortedBriefs.map((b) => (
+            <div key={b.id} className="relative">
+              {sortOrder === "best_fit" && fitScore(b) > 0 && <Badge className="absolute left-3 top-3 z-10 border border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">Category-aligned</Badge>}
+              <BriefCard
+                brief={b}
+                onOpen={() => setSelectedId(b.id)}
+                onApply={() => applyToBrief(b)}
+                showApply={payoutReady && !myAppliedBriefIds.has(b.id)}
+              />
+            </div>
           ))}
         </div>
       )}

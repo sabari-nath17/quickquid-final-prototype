@@ -84,6 +84,11 @@ function avatarColor(seed?: string) {
   return colors[seed] ?? "#475569";
 }
 
+function responseTimeHours(value: string) {
+  const amount = Number(value.match(/\d+/)?.[0] ?? Number.POSITIVE_INFINITY);
+  return value.toLowerCase().includes("day") ? amount * 24 : amount;
+}
+
 function StickyCtaBar({ children }: { children: React.ReactNode }) {
   return (
     <div className="sticky bottom-14 md:bottom-0 z-20 -mx-4 sm:mx-0 border-t border-border bg-background/95 backdrop-blur px-4 sm:px-6 py-3">
@@ -784,10 +789,14 @@ export function BuyerTalent() {
   const [filterAvailability, setFilterAvailability] = React.useState<string>("all");
   const [filterEvidence, setFilterEvidence] = React.useState<string>("all");
   const [priorityOnly, setPriorityOnly] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [talentSort, setTalentSort] = React.useState<"recommended" | "fastest" | "lowest_fee">("recommended");
 
   const visiblePros = proProfiles.filter((p) => p.publicVisibility);
 
   const filteredPros = visiblePros.filter((p) => {
+    const search = searchTerm.trim().toLowerCase();
+    if (search && ![p.displayName, p.headline, p.primaryCategory, p.secondaryCategory ?? "", ...p.skills].join(" ").toLowerCase().includes(search)) return false;
     if (filterCategory !== "all" && p.primaryCategory !== filterCategory) return false;
     if (filterAvailability === "available" && p.availability !== "available_now") return false;
     if (filterAvailability === "paused" && p.availability !== "paused") return false;
@@ -802,9 +811,17 @@ export function BuyerTalent() {
     }
     return true;
   });
+  const sortedPros = [...filteredPros].sort((a, b) => {
+    if (talentSort === "lowest_fee") return (a.feeFrom ?? 0) - (b.feeFrom ?? 0);
+    if (talentSort === "fastest") return responseTimeHours(a.responseTime) - responseTimeHours(b.responseTime);
+    const availabilityScore = (profile: ProProfile) => profile.availability === "available_now" ? 1 : 0;
+    return availabilityScore(b) - availabilityScore(a) || b.rating - a.rating || b.completedProjects - a.completedProjects;
+  });
 
   const liveGigs = gigs.filter((g) => g.status === "approved_live");
   const filteredGigs = liveGigs.filter((g) => {
+    const search = searchTerm.trim().toLowerCase();
+    if (search && ![g.title, g.shortDescription, g.category, g.proName].join(" ").toLowerCase().includes(search)) return false;
     if (filterCategory !== "all" && g.category !== filterCategory) return false;
     if (filterBand !== "all") {
       const f = g.proFee;
@@ -867,6 +884,36 @@ export function BuyerTalent() {
         />
       </div>
 
+      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="h-11 pl-9"
+              placeholder={mode === "talent" ? "Search by skill, category, or professional" : "Search by service, category, or Pro"}
+              aria-label={mode === "talent" ? "Search professionals" : "Search gigs"}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2" aria-label="Suggested categories">
+            {CATEGORIES.slice(0, 4).map((category) => (
+              <Button
+                key={category}
+                type="button"
+                variant={filterCategory === category ? "secondary" : "outline"}
+                size="sm"
+                className="min-h-9"
+                onClick={() => setFilterCategory(filterCategory === category ? "all" : category)}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">Start with a capability, then compare QuickQuid-reviewed proof, availability, and commercial fit before inviting.</p>
+      </Card>
+
       <Tabs value={mode} onValueChange={(v) => setMode(v as "talent" | "gigs")}>
         <TabsList className="w-full sm:w-auto h-10 p-1">
           <TabsTrigger value="talent" className="gap-1.5 text-sm font-medium"><Users className="size-4" /> Talent</TabsTrigger>
@@ -890,8 +937,22 @@ export function BuyerTalent() {
                 availability={filterAvailability} setAvailability={setFilterAvailability}
                 evidence={filterEvidence} setEvidence={setFilterEvidence}
               />
-              <div>
-                {filteredPros.length === 0 ? (
+              <div className="min-w-0">
+                <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground"><span className="font-medium text-foreground">{sortedPros.length}</span> professional{sortedPros.length === 1 ? "" : "s"} matching your criteria</p>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="talent-sort" className="text-xs text-muted-foreground">Sort</Label>
+                    <Select value={talentSort} onValueChange={(value) => setTalentSort(value as typeof talentSort)}>
+                      <SelectTrigger id="talent-sort" className="h-9 w-[164px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recommended">Recommended</SelectItem>
+                        <SelectItem value="fastest">Fastest response</SelectItem>
+                        <SelectItem value="lowest_fee">Lowest starting fee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {sortedPros.length === 0 ? (
                   <EmptyState
                     icon={Users}
                     title="No matches yet"
@@ -899,7 +960,7 @@ export function BuyerTalent() {
                   />
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-                    {filteredPros.map((p) => (
+                    {sortedPros.map((p) => (
                       <ProfileCard key={p.userId} profile={p} onClick={() => { setSelectedProId(p.userId); setInviteSentFor(null); }} />
                     ))}
                   </div>
@@ -1068,53 +1129,55 @@ function TalentFilters({
   hideAvailability?: boolean;
 }) {
   return (
-    <Card className="p-4 h-fit lg:sticky lg:top-20 space-y-4">
+    <Card className="h-fit space-y-4 p-4 lg:sticky lg:top-20">
       <div className="flex items-center gap-2 text-sm font-medium">
         <SlidersHorizontal className="size-4" /> Filters
       </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs">Category</Label>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
-            {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs">Budget band</Label>
-        <Select value={band} onValueChange={setBand}>
-          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any budget</SelectItem>
-            {BUDGET_BANDS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-      {!hideAvailability && (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         <div className="space-y-1.5">
-          <Label className="text-xs">Availability</Label>
-          <Select value={availability} onValueChange={setAvailability}>
+          <Label className="text-xs">Category</Label>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Any</SelectItem>
-              <SelectItem value="available">Available now</SelectItem>
-              <SelectItem value="paused">Paused</SelectItem>
+              <SelectItem value="all">All categories</SelectItem>
+              {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-      )}
-      <div className="space-y-1.5">
-        <Label className="text-xs">Evidence type</Label>
-        <Select value={evidence} onValueChange={setEvidence}>
-          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any evidence</SelectItem>
-            <SelectItem value="identity">Identity reviewed</SelectItem>
-            <SelectItem value="reviewed">Portfolio reviewed</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Budget band</Label>
+          <Select value={band} onValueChange={setBand}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any budget</SelectItem>
+              {BUDGET_BANDS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        {!hideAvailability && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Availability</Label>
+            <Select value={availability} onValueChange={setAvailability}>
+              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any</SelectItem>
+                <SelectItem value="available">Available now</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Evidence type</Label>
+          <Select value={evidence} onValueChange={setEvidence}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any evidence</SelectItem>
+              <SelectItem value="identity">Identity reviewed</SelectItem>
+              <SelectItem value="reviewed">Portfolio reviewed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <Button variant="ghost" size="sm" className="w-full" onClick={() => {
         setCategory("all"); setBand("all"); setAvailability("all"); setEvidence("all");
