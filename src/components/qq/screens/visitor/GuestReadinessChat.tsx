@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { assetPath } from "@/lib/asset-path";
 import { useQQ } from "@/lib/qq/store";
+import { BackButton } from "@/components/qq/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-  ArrowLeft, CheckCircle2, Circle, AlertCircle, ChevronRight, RotateCcw,
+  CheckCircle2, Circle, AlertCircle, ChevronRight, RotateCcw,
   Info, ShieldCheck, Clock, Target,
 } from "lucide-react";
 import type { GuestReadinessDraft, ReadinessCategory } from "@/lib/qq/types";
@@ -79,7 +81,7 @@ export function GuestReadinessChat() {
   // Initialize from guest draft or create new
   React.useEffect(() => {
     if (!guestDraft) {
-      navigate("role_selection");
+      navigate("role_selection", undefined, { replace: true });
       return;
     }
     rebuildConversation(guestDraft);
@@ -166,7 +168,7 @@ export function GuestReadinessChat() {
     if (!confirm("Start over? This will clear your current readiness draft.")) return;
     sessionStorage.removeItem("qq_guest_readiness_draft");
     setGuestDraft(null);
-    navigate("role_selection");
+    navigate("role_selection", undefined, { replace: true });
   }
 
   if (!guestDraft) return null;
@@ -182,8 +184,8 @@ export function GuestReadinessChat() {
       {/* Top bar */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("role_selection")} className="flex items-center gap-2">
-            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-7 w-auto" />
+          <button onClick={() => navigate("role_selection", undefined, { replace: true })} className="flex items-center gap-2">
+            <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-7 w-auto" />
             <span className="font-semibold text-sm hidden sm:inline">QuickQuid</span>
           </button>
           <Separator />
@@ -192,7 +194,7 @@ export function GuestReadinessChat() {
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-[10px]"><Clock className="size-2.5" /> Guest session</Badge>
           <Button variant="ghost" size="sm" onClick={startOver}><RotateCcw className="size-3.5" /> Start over</Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate("role_selection")}><ArrowLeft className="size-3.5" /> Exit</Button>
+          <BackButton label="Back" />
         </div>
       </header>
 

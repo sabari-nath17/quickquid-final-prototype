@@ -1,522 +1,483 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 import { useQQ } from "@/lib/qq/store";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import type { GuestReadinessDraft } from "@/lib/qq/types";
+import { assetPath } from "@/lib/asset-path";
+import styles from "./LandingPage.module.css";
 import {
-  ArrowRight, CheckCircle2, Zap, Target, ShieldCheck, FileCheck, GitBranch,
-  Clock, AlertTriangle, Sparkles, TrendingUp, Users, Briefcase, Search,
-  Lock, Eye, Layers, ChevronDown, Rocket, MessageSquare,
-} from "lucide-react";
+  ArrowRight,
+  ArrowUpRight,
+  Briefcase,
+  CaretLeft,
+  CaretRight,
+  Check,
+  CheckCircle,
+  ClockCountdown,
+  Lightning,
+  ListChecks,
+  PaperPlaneTilt,
+  SealCheck,
+  ShieldCheck,
+  Sparkle,
+  Target,
+  UsersThree,
+} from "@phosphor-icons/react";
+
+const cx = (...names: Array<string | false | null | undefined>) =>
+  names
+    .filter(Boolean)
+    .flatMap((name) => String(name).split(" "))
+    .map((name) => styles[name] ?? name)
+    .join(" ");
+
+const promptIdeas = [
+  "Design a product launch page",
+  "Build a mobile onboarding flow",
+  "Automate a back-office workflow",
+];
+
+const tracks = [
+  {
+    id: "beta",
+    tone: "coral",
+    kicker: "FOUNDING BETA",
+    title: "₹0 QuickQuid fee during beta",
+    body: "Selected digital projects only. Payment-provider charges and taxes may still apply.",
+    meta: ["Buyers ₹0", "Pros ₹0"],
+  },
+  {
+    id: "design",
+    image: assetPath("/assets/beta-track-product-design.png"),
+    kicker: "PRODUCT DESIGN",
+    title: "Turn a rough idea into a shippable product flow.",
+    body: "UX strategy · UI systems · Prototypes",
+    meta: ["Proof-matched", "Capacity-checked"],
+  },
+  {
+    id: "frontend",
+    image: assetPath("/assets/beta-track-frontend.png"),
+    kicker: "FRONTEND BUILD",
+    title: "Move from approved design to a working interface.",
+    body: "React · Web apps · Responsive builds",
+    meta: ["Scope locked", "Handoff included"],
+  },
+  {
+    id: "ai",
+    image: assetPath("/assets/beta-track-ai-ops.png"),
+    kicker: "AI + AUTOMATION",
+    title: "Build a workflow your team can actually operate.",
+    body: "Internal tools · AI workflows · Integrations",
+    meta: ["Human reviewed", "Evidence-backed"],
+  },
+];
+
+const workflow = [
+  {
+    number: "01",
+    short: "Make it Ready",
+    title: "Turn the rough request into a project people can price.",
+    body: "QuickQuid checks the outcome, inputs, budget, timeline, decision-maker and definition of done before matching begins.",
+    result: "You stop paying for ambiguity.",
+    icon: ListChecks,
+  },
+  {
+    number: "02",
+    short: "Match the proof",
+    title: "See evidence from comparable work—not keyword soup.",
+    body: "The match is explained through relevant proof and current capacity, so a polished profile cannot hide a weak fit.",
+    result: "You compare fit, not theatre.",
+    icon: Target,
+  },
+  {
+    number: "03",
+    short: "Lock the Pact",
+    title: "Put scope, responsibilities and response windows in one record.",
+    body: "Buyer and Pro agree on deliverables, inputs, checkpoints, revision limits, AI-use rules and acceptance criteria.",
+    result: "Everyone works from the same deal.",
+    icon: ShieldCheck,
+  },
+  {
+    number: "04",
+    short: "Control delivery",
+    title: "Catch drift while it is still cheap to fix.",
+    body: "Early proof confirms direction. Material blockers and scope changes are recorded before they reshape the work.",
+    result: "No invisible scope creep.",
+    icon: ClockCountdown,
+  },
+  {
+    number: "05",
+    short: "Accept the work",
+    title: "Close against the agreed definition of done.",
+    body: "Final files, evidence, approved changes and handoff items live together, ready for a human acceptance decision.",
+    result: "Finished means accepted—not uploaded.",
+    icon: SealCheck,
+  },
+];
+
+
+
+function Logo() {
+  return (
+    <a className={cx("logo")} href="#top" aria-label="QuickQuid home">
+      <span className={cx("logo-mark")}>
+        <Image src={assetPath("/quickquid-logo.svg")} alt="" width={28} height={28} priority />
+      </span>
+      <span>QuickQuid</span>
+    </a>
+  );
+}
+
+function Pill({ children, onClick, selected = false }: { children: React.ReactNode; onClick: () => void; selected?: boolean }) {
+  return (
+    <button className={cx("idea-pill", selected && "selected")} onClick={onClick} type="button">
+      <Sparkle size={15} weight="fill" aria-hidden="true" />
+      {children}
+    </button>
+  );
+}
+
+function TrackCard({ track, onChoose }: { track: (typeof tracks)[number]; onChoose: (track: (typeof tracks)[number]) => void }) {
+  return (
+    <article className={cx("track-card", track.tone ?? "image-card")}>
+      {track.image && (
+        <>
+          <Image
+            src={track.image}
+            alt=""
+            fill
+            sizes="(max-width: 760px) 82vw, (max-width: 1000px) 46vw, 30vw"
+            className={cx("track-card-image")}
+          />
+          <div className={cx("image-shade")} aria-hidden="true" />
+        </>
+      )}
+      <div className={cx("track-card-content")}>
+        <div className={cx("track-topline")}>
+          <span>{track.kicker}</span>
+          <button onClick={() => onChoose(track)} aria-label={`Use ${track.kicker} as project starting point`} type="button">
+            <ArrowUpRight size={19} />
+          </button>
+        </div>
+        <h3>{track.title}</h3>
+        <p>{track.body}</p>
+        <div className={cx("track-meta")}>
+          {track.meta.map((item) => <span key={item}>{item}</span>)}
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export function LandingPage() {
-  const { navigate, signInAs, setGuestDraft } = useQQ();
-  const [prompt, setPrompt] = React.useState("");
+  const { navigate, setGuestDraft } = useQQ();
+  const promptRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const carouselRef = React.useRef<HTMLDivElement | null>(null);
+  const [prompt, setPrompt] = React.useState(() => {
+    if (typeof window === "undefined") return "";
+    try { return sessionStorage.getItem("qq_guest_project_prompt") ?? ""; } catch { return ""; }
+  });
   const [emptyError, setEmptyError] = React.useState(false);
+  const [activeStep, setActiveStep] = React.useState(0);
 
-  function makeReady() {
-    if (!prompt.trim()) {
+  React.useEffect(() => {
+    try {
+      if (prompt.trim()) sessionStorage.setItem("qq_guest_project_prompt", prompt);
+      else sessionStorage.removeItem("qq_guest_project_prompt");
+    } catch {
+      // Session storage is optional in private browsing.
+    }
+  }, [prompt]);
+
+  const focusComposer = React.useCallback(() => {
+    promptRef.current?.focus();
+  }, []);
+
+  const openAuth = React.useCallback((authMode: "signin" | "create", roleIntent?: "buyer" | "pro") => {
+    navigate("auth", { authMode, roleIntent });
+  }, [navigate]);
+
+  const startReadiness = React.useCallback((request = prompt) => {
+    const originalRequest = request.trim();
+    if (!originalRequest) {
       setEmptyError(true);
+      focusComposer();
       return;
     }
-    setEmptyError(false);
-    // Create guest draft and open readiness chat — NOT brief creation
-    const draft = {
-      originalRequest: prompt.trim(),
+
+    const draft: GuestReadinessDraft = {
+      originalRequest,
       workingTitle: "",
-      category: "OTHER" as const,
+      category: "OTHER",
       outcome: "",
-      deliverables: [] as string[],
-      exclusions: [] as string[],
+      deliverables: [],
+      exclusions: [],
       inputs: [],
       budgetBand: "",
       targetDate: "",
       deadlineReason: "",
       decisionMaker: "",
       feedbackWindow: "",
-      acceptanceCriteria: [] as string[],
-      completedAreas: [] as string[],
+      acceptanceCriteria: [],
+      completedAreas: [],
       conversationStep: 0,
-      status: "IN_PROGRESS" as const,
+      status: "IN_PROGRESS",
     };
+
+    setEmptyError(false);
+    try {
+      sessionStorage.setItem("qq_guest_readiness_draft", JSON.stringify(draft));
+      sessionStorage.setItem("qq_guest_project_prompt", originalRequest);
+    } catch {
+      // The Zustand state still carries the draft if storage is unavailable.
+    }
     setGuestDraft(draft);
-    try { sessionStorage.setItem("qq_guest_readiness_draft", JSON.stringify(draft)); } catch { /* ignore */ }
     navigate("guest_readiness_chat");
-  }
+  }, [focusComposer, navigate, prompt, setGuestDraft]);
+
+  const fillPrompt = (value: string) => {
+    setPrompt(value);
+    setEmptyError(false);
+    window.requestAnimationFrame(focusComposer);
+  };
+
+  const chooseTrack = (track: (typeof tracks)[number]) => {
+    if (track.id === "beta") {
+      focusComposer();
+      return;
+    }
+
+    const starter = {
+      design: "Design a clear, conversion-ready product experience for our next launch.",
+      frontend: "Build a responsive frontend from our approved product designs.",
+      ai: "Automate a repeatable internal workflow with a usable handoff for our team.",
+    }[track.id];
+
+    if (starter) fillPrompt(starter);
+    window.scrollTo({ top: 70, behavior: "smooth" });
+  };
+
+  const scrollTracks = (direction: number) => {
+    carouselRef.current?.scrollBy({ left: direction * 380, behavior: "smooth" });
+  };
+
+  const ActiveIcon = workflow[activeStep].icon;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Announcement bar */}
-      <div className="bg-foreground text-background text-center text-xs py-1.5 px-4">
-        Founding beta in Kochi · QuickQuid fee ₹0 during beta
+    <main id="top" className={cx("root")}>
+      <div className={cx("announcement")}>
+        <div>
+          <span className={cx("announcement-pulse")} aria-hidden="true" />
+          <span>Founding beta in Kochi</span>
+          <span className={cx("announcement-separator")} />
+          <span className={cx("announcement-copy-secondary")}>QuickQuid fee ₹0 during beta</span>
+        </div>
+        <button onClick={() => openAuth("create", "pro")} type="button">Join the founding cohort <ArrowRight size={14} /></button>
       </div>
 
-      {/* Nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
-            <span className="font-semibold">QuickQuid</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#how" className="hover:text-foreground transition-colors">How it works</a>
-            <a href="#buyers" className="hover:text-foreground transition-colors">For Buyers</a>
-            <a href="#pros" className="hover:text-foreground transition-colors">For Pros</a>
-            <a href="#showcase" className="hover:text-foreground transition-colors">Explore work</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("auth")}>Sign in</Button>
-            <Button size="sm" onClick={makeReady}>Submit a project</Button>
-          </div>
+      <header className={cx("site-header")}>
+        <Logo />
+        <nav aria-label="Main navigation">
+          <a href="#how-it-works">How it works</a>
+          <a href="#buyers">For Buyers</a>
+          <a href="#pros">For Pros</a>
+          <a href="#beta-tracks">Explore work</a>
+        </nav>
+        <div className={cx("header-actions")}>
+          <button className={cx("login-button")} type="button" onClick={() => openAuth("create")}>Sign in</button>
+          <button className={cx("nav-cta")} type="button" onClick={focusComposer}>
+            Submit a project
+          </button>
         </div>
       </header>
 
-      <main className="flex-1">
-        {/* Hero — split layout: thesis left, sample execution record right */}
-        <section className="relative overflow-hidden border-b border-border">
-          <div className="mx-auto max-w-6xl px-4 py-12 sm:py-20">
-            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-center">
-              {/* Left: thesis + prompt */}
-              <div>
-                <Badge variant="outline" className="mb-4 text-[10px] tracking-widest uppercase text-muted-foreground border-border">THE EXECUTION MARKETPLACE</Badge>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.15]">
-                  Most marketplaces help you hire.<br />
-                  <span className="text-muted-foreground">QuickQuid helps the work get finished.</span>
-                </h1>
-                <p className="mt-5 text-base text-muted-foreground max-w-lg leading-relaxed">
-                  Start with a project that is ready to execute. See why a Pro fits, confirm real capacity, lock the scope and accept delivery against a clear definition of done.
-                </p>
+      <section className={cx("hero")} aria-labelledby="hero-title">
+        <div className={cx("hero-kicker")}><Lightning size={16} weight="fill" /> THE EXECUTION MARKETPLACE</div>
+        <h1 id="hero-title">Most marketplaces help you hire.<br /><span>QuickQuid helps the work get finished.</span></h1>
+        <p className={cx("hero-copy")}>
+          QuickQuid prepares the project, matches comparable proof and keeps scope, delivery and acceptance inside one accountable record.
+        </p>
 
-                {/* Project prompt */}
-                <div className="mt-6">
-                  <label htmlFor="project-prompt" className="block text-left text-sm font-medium mb-1.5">What needs to get finished?</label>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                      id="project-prompt"
-                      value={prompt}
-                      onChange={(e) => { setPrompt(e.target.value); setEmptyError(false); }}
-                      placeholder="Example: Design and build a responsive launch page before 28 February."
-                      className="flex-1 h-12"
-                      aria-invalid={emptyError}
-                      onKeyDown={(e) => { if (e.key === "Enter") makeReady(); }}
-                    />
-                    <Button size="lg" onClick={makeReady} className="h-12 px-6 whitespace-nowrap">Check project readiness <ArrowRight className="size-4" /></Button>
-                  </div>
-                  {emptyError && (
-                    <p className="mt-1.5 text-xs text-destructive" role="alert">Describe the outcome you need before we check readiness.</p>
-                  )}
-                  <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                    <Button variant="link" size="sm" className="px-0 text-muted-foreground" onClick={() => signInAs("PRO-2088")}>Join as a founding Pro →</Button>
-                    <p className="text-xs text-muted-foreground">Private beta for selected digital projects</p>
-                  </div>
-                </div>
-
-                {/* Quick examples */}
-                <div className="mt-5 flex flex-wrap items-center gap-2">
-                  {["Product UI/UX", "Frontend build", "Mobile feature", "Backend workflow", "AI/ML implementation"].map((ex) => (
-                    <button
-                      key={ex}
-                      onClick={() => { setPrompt(ex); makeReady(); }}
-                      className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                    >
-                      {ex}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: sample execution record */}
-              <div className="relative">
-                <Card className="p-5 elev-2 border-border bg-card">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sample project record</div>
-                    <Badge className="bg-[#0B8F63] text-white text-[10px]">In delivery</Badge>
-                  </div>
-
-                  {/* Execution Spine */}
-                  <div className="relative pl-8 space-y-3">
-                    <div className="spine-line" />
-                    {[
-                      { label: "Ready", detail: "7/7 requirements confirmed", tone: "success" },
-                      { label: "Proof Match", detail: "2 comparable portal projects", tone: "success" },
-                      { label: "Capacity", detail: "18 hours/week confirmed", tone: "success" },
-                      { label: "Commit Date", detail: "28 Feb · forecast", tone: "info" },
-                      { label: "Demo escrow", detail: "Q₹25,000 locked", tone: "info" },
-                      { label: "Delivery", detail: "1 of 3 milestones accepted", tone: "warning" },
-                    ].map((event) => (
-                      <div key={event.label} className="relative flex items-start gap-3">
-                        <div className={cn("spine-node", event.tone === "success" && "bg-[#0B8F63] text-white", event.tone === "info" && "bg-[#4E62D8] text-white", event.tone === "warning" && "bg-[#B46D0A] text-white")}>
-                          {event.tone === "success" ? "✓" : event.tone === "info" ? "→" : "!"}
-                        </div>
-                        <div className="flex-1 min-w-0 pt-0.5">
-                          <div className="text-sm font-medium">{event.label}</div>
-                          <div className="text-xs text-muted-foreground font-mono">{event.detail}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-border">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Pro</span>
-                      <span className="font-medium">Akhil Menon</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">QuickQuid fee</span>
-                      <span className="font-medium font-mono">₹0</span>
-                    </div>
-                  </div>
-                </Card>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground italic">Illustrative project record · No real customer or payment claim</p>
-              </div>
-            </div>
-
-            {/* Execution strip — full width below */}
-            <div className="mt-12 rounded-lg border border-border bg-card p-3 overflow-x-auto">
-              <div className="flex items-center gap-2 text-xs font-medium whitespace-nowrap justify-center">
-                <span className="text-muted-foreground">ROUGH REQUEST</span>
-                <ArrowRight className="size-3 text-muted-foreground" />
-                <span className="text-foreground">READY PROJECT</span>
-                <ArrowRight className="size-3 text-muted-foreground" />
-                <span className="text-foreground">PROOF + CAPACITY MATCH</span>
-                <ArrowRight className="size-3 text-muted-foreground" />
-                <span className="text-foreground">CONTROLLED DELIVERY</span>
-                <ArrowRight className="size-3 text-muted-foreground" />
-                <span className="text-[#0B8F63] font-semibold">ACCEPTED WORK</span>
-              </div>
-            </div>
+        <div className={cx("prompt-shell")}>
+          <label htmlFor="project-prompt">What needs to get finished?</label>
+          <textarea
+            ref={promptRef}
+            id="project-prompt"
+            value={prompt}
+            onChange={(event) => { setPrompt(event.target.value); setEmptyError(false); }}
+            placeholder="Example: Design and build a responsive landing page for our product launch."
+            rows={2}
+            aria-invalid={emptyError}
+            aria-describedby={emptyError ? "project-prompt-error" : undefined}
+          />
+          <div className={cx("prompt-footer")}>
+            <span><ShieldCheck size={16} weight="fill" /> Selected digital projects · private beta</span>
+            <button onClick={() => startReadiness()} type="button" className={cx("prompt-submit")}>
+              Make my project Ready <ArrowRight size={18} weight="bold" />
+            </button>
           </div>
-        </section>
+          {emptyError && <p id="project-prompt-error" className={cx("prompt-error")} role="alert">Describe the outcome you need before we make the project Ready.</p>}
+        </div>
 
-        {/* Problem */}
-        <section className="border-b border-border py-16 px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">A great professional can still fail inside a badly prepared project.</h2>
-            <p className="mt-4 text-muted-foreground text-center max-w-2xl mx-auto">
-              Unclear inputs. Moving scope. Hidden dependencies. Overloaded talent. Slow feedback. A delivery that looks complete until the handoff begins.
-            </p>
-            <p className="mt-2 text-muted-foreground text-center max-w-2xl mx-auto">
-              Most hiring journeys focus on finding a person. QuickQuid also prepares and controls the work around them.
-            </p>
+        <div className={cx("prompt-ideas")} aria-label="Project examples">
+          {promptIdeas.map((idea) => <Pill key={idea} onClick={() => fillPrompt(idea)} selected={prompt === idea}>{idea}</Pill>)}
+        </div>
+      </section>
 
-            <div className="mt-10 grid md:grid-cols-2 gap-6">
-              <Card className="p-5">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Most marketplaces ask:</div>
-                <p className="text-lg font-medium">Who can do this?</p>
-              </Card>
-              <Card className="p-5 border-primary/30">
-                <div className="text-xs font-semibold uppercase tracking-wide text-primary mb-2">QuickQuid also asks:</div>
-                <ul className="space-y-1.5 text-sm">
-                  {[
-                    "Is the project ready to begin?",
-                    "Has this Pro delivered a comparable outcome?",
-                    "Do they have the capacity to commit?",
-                    "What does each side owe—and by when?",
-                    "What happens when scope or dependencies change?",
-                    "What exactly must be true before the work is accepted?",
-                  ].map((q) => (
-                    <li key={q} className="flex items-start gap-2">
-                      <CheckCircle2 className="size-3.5 mt-0.5 text-emerald-600 shrink-0" />
-                      <span>{q}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            </div>
+      <section className={cx("tracks-section")} id="beta-tracks" aria-labelledby="tracks-title">
+        <div className={cx("section-heading", "compact")}>
+          <div>
+            <span className={cx("eyebrow")}>FOUNDING BETA TRACKS</span>
+            <h2 id="tracks-title">Start where the demand is clearest.</h2>
           </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how" className="border-b border-border py-16 px-4 bg-muted/20">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">How QuickQuid Works</h2>
-            <p className="mt-2 text-muted-foreground text-center">The match is one step. Execution is the product.</p>
-
-            <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { num: "1", icon: Target, title: "Make the project Ready", body: "Before matching starts, QuickQuid checks the outcome, required inputs, budget, timeline, decision-maker, feedback window and acceptance criteria.", callout: "If the work is not ready, it does not enter matching." },
-                { num: "2", icon: Search, title: "Match proof and capacity", body: "See why a Pro fits the exact type of project—not just a list of skills. Relevant work evidence is reviewed and current capacity is checked before a commitment is made.", callout: "A strong profile is not the same as a strong fit." },
-                { num: "3", icon: FileCheck, title: "Lock the working agreement", body: "The Buyer and Pro agree on deliverables, responsibilities, input dates, checkpoints, response windows, AI-use rules and what counts as done. The delivery forecast is calculated from those commitments.", callout: "Everyone works from the same agreement." },
-                { num: "4", icon: CheckCircle2, title: "Run the work to Done", body: "The first proof confirms direction early. Scope changes are recorded before they affect the work. Material delays have an owner and forecast impact. Final delivery includes the agreed files, evidence and handoff items.", callout: "Acceptance is based on the agreement—not memory, chat history or guesswork." },
-              ].map((step) => (
-                <Card key={step.num} className="p-5 flex flex-col">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">{step.num}</div>
-                    <step.icon className="size-4 text-muted-foreground" />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{step.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed flex-1">{step.body}</p>
-                  <div className="mt-3 rounded-md bg-primary/5 border border-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary">
-                    {step.callout}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* The Difference */}
-        <section className="border-b border-border py-16 px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">The Difference</h2>
-            <p className="mt-2 text-muted-foreground text-center">Freelancing where the project is accountable—not just the professional.</p>
-
-            <div className="mt-8 overflow-x-auto">
-              <table className="w-full text-sm border border-border rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-muted/50 border-b border-border">
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Typical informal hiring journey</th>
-                    <th className="text-left px-4 py-3 font-medium text-primary">QuickQuid execution journey</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {[
-                    ["Browse profiles and ratings", "Start with a Ready project"],
-                    ["Match broad skills", "Match comparable proof"],
-                    ["Assume availability", "Confirm weekly capacity"],
-                    ["Agree details across chat", "Accept one shared Pact"],
-                    ["Treat the deadline as a promise", "Use a dependency-aware Commit Date"],
-                    ["Absorb changes informally", "Approve a Change Card"],
-                    ["Debate who caused a delay", "Record the delay and its owner"],
-                    ["Decide what \"done\" means at the end", "Agree the Definition of Done upfront"],
-                  ].map(([typical, quickquid]) => (
-                    <tr key={typical} className="hover:bg-muted/30">
-                      <td className="px-4 py-2.5 text-muted-foreground">{typical}</td>
-                      <td className="px-4 py-2.5 font-medium">{quickquid}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* Work Showcase */}
-        <section id="showcase" className="border-b border-border py-16 px-4 bg-muted/20">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">See the work. Then see how it was delivered.</h2>
-            <p className="mt-4 text-muted-foreground text-center max-w-2xl mx-auto">
-              A portfolio shows what the result looked like. A QuickQuid project record also shows the brief, the agreed scope, delivery evidence, approved changes and whether the outcome was accepted.
-            </p>
-
-            {/* Example project card */}
-            <Card className="mt-8 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className="text-[10px]">HOW A QUICKQUID PROJECT WORKS — EXAMPLE</Badge>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Outcome</div>
-                  <div className="font-medium">Partner onboarding portal — design + handoff</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Relevant proof</div>
-                  <div className="font-medium">Partner Portal Case Study · Ops Console Refresh</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Planned vs. actual delivery</div>
-                  <div className="font-medium">8 weeks planned · 7.5 weeks actual</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Approved scope changes</div>
-                  <div className="font-medium">1 change (added dark mode tokens)</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Acceptance result</div>
-                  <div className="font-medium text-emerald-600">Accepted on first pass</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Handoff evidence</div>
-                  <div className="font-medium">Figma file · Design tokens JSON · Handoff docs</div>
-                </div>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground italic">Until real beta projects are completed, this is an illustrative example. No invented customers, ratings, earnings or outcome claims.</p>
-            </Card>
-
-            <div className="mt-6 text-center">
-              <Button variant="outline" onClick={() => navigate("buyer_talent")}>Explore completed work <ArrowRight className="size-4" /></Button>
-            </div>
-          </div>
-        </section>
-
-        {/* AI */}
-        <section className="border-b border-border py-16 px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">AI should remove ambiguity—not accountability.</h2>
-            <p className="mt-4 text-muted-foreground text-center max-w-2xl mx-auto">
-              AI can help strengthen a rough brief, surface missing inputs, suggest clearer acceptance criteria and organize project updates. It does not independently hire a Pro, approve a scope change, accept delivery or decide a dispute.
-            </p>
-            <p className="mt-2 text-center font-medium">The rule is simple: AI assists the workflow. People own the outcome.</p>
-
-            <div className="mt-8 grid md:grid-cols-3 gap-4">
-              {[
-                { phase: "Before the project", icon: Target, items: ["Improve brief clarity", "Surface missing inputs", "Suggest acceptance criteria"] },
-                { phase: "During the project", icon: GitBranch, items: ["Summarize approved changes", "Highlight unresolved blockers", "Keep decisions easy to follow"] },
-                { phase: "At delivery", icon: CheckCircle2, items: ["Check that required evidence is present", "Compare the handoff with agreed criteria", "Prepare the record for human review"] },
-              ].map((col) => (
-                <Card key={col.phase} className="p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <col.icon className="size-4 text-primary" />
-                    <h3 className="font-semibold text-sm">{col.phase}</h3>
-                  </div>
-                  <ul className="space-y-1.5 text-sm">
-                    {col.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2">
-                        <CheckCircle2 className="size-3.5 mt-0.5 text-emerald-600 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* For Buyers */}
-        <section id="buyers" className="border-b border-border py-16 px-4 bg-muted/20">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">For Buyers</h2>
-            <p className="mt-2 text-muted-foreground text-center">Stop buying a profile and hoping for an outcome.</p>
-            <p className="mt-4 text-muted-foreground text-center max-w-2xl mx-auto">
-              Start with a project that is ready to execute. Understand why a Pro fits, know whether they have capacity, see what is blocking progress and review delivery against criteria agreed before the work began.
-            </p>
-            <ul className="mt-6 grid sm:grid-cols-2 gap-2 max-w-2xl mx-auto">
-              {["Clearer brief before hiring", "Evidence behind the match", "Shared responsibilities and response windows", "Visible scope changes and delays", "Delivery files and acceptance evidence in one place"].map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm">
-                  <CheckCircle2 className="size-4 mt-0.5 text-emerald-600 shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 text-center">
-              <Button onClick={makeReady}>Submit a project <ArrowRight className="size-4" /></Button>
-            </div>
-          </div>
-        </section>
-
-        {/* For Pros */}
-        <section id="pros" className="border-b border-border py-16 px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center">For Pros</h2>
-            <p className="mt-2 text-muted-foreground text-center">Good professionals deserve good projects.</p>
-            <p className="mt-4 text-muted-foreground text-center max-w-2xl mx-auto">
-              QuickQuid is designed to protect focused work: clearer briefs, realistic commitments, named Buyer responsibilities, documented changes and a delivery process that recognizes the complete handoff—not just the final upload.
-            </p>
-            <ul className="mt-6 grid sm:grid-cols-2 gap-2 max-w-2xl mx-auto">
-              {["Know what is expected before accepting", "Commit against real capacity", "Get feedback within agreed windows", "Keep new requests out of the active scope until approved", "Build an execution record from accepted work"].map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm">
-                  <CheckCircle2 className="size-4 mt-0.5 text-emerald-600 shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 text-center">
-              <Button variant="outline" onClick={() => signInAs("PRO-2088")}>Apply as a founding Pro <ArrowRight className="size-4" /></Button>
-            </div>
-          </div>
-        </section>
-
-        {/* What QuickQuid Measures */}
-        <section className="border-b border-border py-12 px-4 bg-muted/20">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">What QuickQuid Measures</h2>
-            <p className="mt-2 text-muted-foreground">Activity is not the outcome. Accepted work is.</p>
-            <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
-              QuickQuid is designed to learn from paid projects, accepted completion, first-pass acceptance, planned versus actual time, delays by cause, disputes and repeat engagement. These measures will be published only after real beta projects produce enough evidence.
-            </p>
-          </div>
-        </section>
-
-        {/* Beta Pricing */}
-        <section className="border-b border-border py-12 px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center">Beta Pricing</h2>
-            <p className="mt-2 text-muted-foreground text-center">QuickQuid fee: ₹0 during the founding beta.</p>
-            <div className="mt-6 grid sm:grid-cols-2 gap-4 max-w-md mx-auto">
-              <Card className="p-5 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Buyer</div>
-                <div className="text-2xl font-bold">₹0</div>
-                <div className="text-xs text-muted-foreground mt-1">QuickQuid fee</div>
-              </Card>
-              <Card className="p-5 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Pro</div>
-                <div className="text-2xl font-bold">₹0</div>
-                <div className="text-xs text-muted-foreground mt-1">QuickQuid fee</div>
-              </Card>
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground text-center max-w-md mx-auto">
-              Payment-provider charges and applicable taxes may still apply. Founding-beta pricing is temporary and may change after the beta.
-            </p>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="border-b border-border py-16 px-4 bg-muted/20">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-center mb-8">FAQ</h2>
-            <div className="space-y-4">
-              {[
-                { q: "What kinds of projects can I submit?", a: "The private beta accepts selected digital projects across UI/UX, frontend, backend, mobile and AI/ML. Every request is reviewed for fit and readiness before matching." },
-                { q: "How is a Pro selected?", a: "QuickQuid considers evidence from comparable work, project fit and current capacity. A generic skills list or profile rating is not enough on its own." },
-                { q: "Is the delivery date guaranteed?", a: "No. The Commit Date is a forecast based on readiness, capacity, dependencies and agreed response windows. When something material changes, the forecast and reason are updated." },
-                { q: "What happens if the scope changes?", a: "The new request is recorded before work continues. The Buyer and Pro agree whether it changes the price, changes the delivery forecast or moves to a later milestone." },
-                { q: "How does QuickQuid use AI?", a: "AI may assist with clarity, summaries and completeness checks. People remain responsible for matching, commitments, approvals, acceptance, disputes and safety decisions." },
-                { q: "What does the ₹0 fee mean?", a: "QuickQuid charges neither the Buyer nor the Pro a platform fee during the founding beta. Payment-provider charges and taxes may apply. This is beta pricing, not a permanent promise." },
-              ].map((faq) => (
-                <details key={faq.q} className="group rounded-lg border border-border bg-card overflow-hidden">
-                  <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer font-medium text-sm hover:bg-muted/30 transition-colors">
-                    {faq.q}
-                    <ChevronDown className="size-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0" />
-                  </summary>
-                  <div className="px-4 pb-3 text-sm text-muted-foreground">{faq.a}</div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-20 px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Your next project should not begin with a gamble.</h2>
-            <p className="mt-4 text-muted-foreground text-lg">
-              Make it Ready. Match the proof. Run the work with a shared record. Accept what was actually agreed.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button size="lg" onClick={makeReady} className="h-12 px-8">Check project readiness <ArrowRight className="size-4" /></Button>
-              <Button size="lg" variant="outline" onClick={() => signInAs("PRO-2088")} className="h-12 px-8">Join as a founding Pro</Button>
-            </div>
-            <p className="mt-6 text-sm text-muted-foreground">QuickQuid — built for the work after the match.</p>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-card py-6 px-4">
-        <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-6 w-auto" />
-            <span className="font-medium">QuickQuid</span>
-            <span>· Founding beta in Kochi</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="#how" className="hover:text-foreground">How it works</a>
-            <a href="#buyers" className="hover:text-foreground">For Buyers</a>
-            <a href="#pros" className="hover:text-foreground">For Pros</a>
-            <button onClick={() => navigate("support")} className="hover:text-foreground">Support</button>
-            <button onClick={() => navigate("auth")} className="hover:text-foreground">Sign in</button>
+          <div className={cx("carousel-actions")}>
+            <button onClick={() => scrollTracks(-1)} aria-label="View previous beta tracks" type="button"><CaretLeft size={20} /></button>
+            <button onClick={() => scrollTracks(1)} aria-label="View next beta tracks" type="button"><CaretRight size={20} /></button>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl mt-3 text-center text-[10px] text-muted-foreground">
-          QuickQuid fee ₹0 during beta · Payments via integrated payment system · Payment-provider charges and taxes may apply
+        <div className={cx("tracks-carousel")} ref={carouselRef}>
+          {tracks.map((track) => <TrackCard track={track} key={track.id} onChoose={chooseTrack} />)}
+        </div>
+        <p className={cx("tracks-note")}><CheckCircle size={16} weight="fill" /> Categories shown are beta focus areas—not invented live jobs or customer claims.</p>
+      </section>
+
+      <section className={cx("execution-strip")} aria-label="QuickQuid execution path">
+        <span>YOUR REQUEST</span>
+        {workflow.map((step, index) => (
+          <div key={step.number}>
+            <ArrowRight size={15} />
+            <button type="button" onClick={() => { setActiveStep(index); document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" }); }}>
+              {step.short}
+            </button>
+          </div>
+        ))}
+      </section>
+
+      <section className={cx("difference-section")} aria-labelledby="difference-title">
+        <div className={cx("difference-copy")}>
+          <span className={cx("eyebrow", "light")}>WHY QUICKQUID</span>
+          <h2 id="difference-title">Hiring is one click.<br />Execution is the product.</h2>
+          <p>A great professional can still fail inside a badly prepared project. QuickQuid builds the operating rails around the work—not another infinite profile directory.</p>
+          <button className={cx("inverse-button")} onClick={focusComposer} type="button">
+            Start with a Ready project <ArrowUpRight size={18} />
+          </button>
+        </div>
+        <div className={cx("difference-grid")}>
+          <article>
+            <span className={cx("difference-icon", "coral")}><Target size={21} weight="fill" /></span>
+            <h3>Proof over profile polish</h3>
+            <p>Understand why the evidence fits this exact outcome.</p>
+          </article>
+          <article>
+            <span className={cx("difference-icon", "blue")}><ClockCountdown size={21} weight="fill" /></span>
+            <h3>Capacity over optimism</h3>
+            <p>Commit against real availability and dependencies.</p>
+          </article>
+          <article>
+            <span className={cx("difference-icon", "mint")}><ShieldCheck size={21} weight="fill" /></span>
+            <h3>One Pact over scattered chat</h3>
+            <p>Scope, roles, response windows and changes stay visible.</p>
+          </article>
+          <article>
+            <span className={cx("difference-icon", "gold")}><SealCheck size={21} weight="fill" /></span>
+            <h3>Acceptance over upload</h3>
+            <p>Close the project against the definition of done.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className={cx("workflow-section")} id="how-it-works" aria-labelledby="workflow-title">
+        <div className={cx("section-heading")}>
+          <div>
+            <span className={cx("eyebrow")}>HOW QUICKQUID WORKS</span>
+            <h2 id="workflow-title">The match is one step.<br />The finish is five.</h2>
+          </div>
+          <p>Tap each stage. The workflow is designed to keep uncertainty expensive for the system—not for the buyer or Pro.</p>
+        </div>
+
+        <div className={cx("workflow-layout")}>
+          <div className={cx("workflow-tabs")} role="tablist" aria-label="Execution workflow stages">
+            {workflow.map((step, index) => (
+              <button
+                key={step.number}
+                type="button"
+                role="tab"
+                aria-selected={activeStep === index}
+                className={cx(activeStep === index && "active")}
+                onClick={() => setActiveStep(index)}
+              >
+                <span>{step.number}</span>
+                {step.short}
+                {activeStep === index && <ArrowRight size={17} />}
+              </button>
+            ))}
+          </div>
+          <article className={cx("workflow-detail")} role="tabpanel">
+            <div className={cx("workflow-icon")}><ActiveIcon size={28} weight="fill" /></div>
+            <span className={cx("step-label")}>STAGE {workflow[activeStep].number}</span>
+            <h3>{workflow[activeStep].title}</h3>
+            <p>{workflow[activeStep].body}</p>
+            <div className={cx("workflow-result")}><CheckCircle size={20} weight="fill" />{workflow[activeStep].result}</div>
+          </article>
+        </div>
+      </section>
+
+      <section className={cx("audience-section")}>
+        <article className={cx("audience-card", "buyer")} id="buyers">
+          <div className={cx("audience-number")}>01</div>
+          <Briefcase size={28} weight="fill" />
+          <span className={cx("eyebrow")}>FOR BUYERS</span>
+          <h2>Stop buying a profile and hoping for an outcome.</h2>
+          <ul>
+            <li><Check size={17} weight="bold" /> Clearer brief before hiring</li>
+            <li><Check size={17} weight="bold" /> Evidence behind the match</li>
+            <li><Check size={17} weight="bold" /> Visible scope changes and delays</li>
+          </ul>
+          <button className={cx("primary-button")} onClick={focusComposer} type="button">
+            Submit a project <ArrowRight size={17} />
+          </button>
+        </article>
+        <article className={cx("audience-card", "pro")} id="pros">
+          <div className={cx("audience-number")}>02</div>
+          <UsersThree size={28} weight="fill" />
+          <span className={cx("eyebrow", "light")}>FOR PROFESSIONALS</span>
+          <h2>Good professionals deserve good projects.</h2>
+          <ul>
+            <li><Check size={17} weight="bold" /> Know what is expected before accepting</li>
+            <li><Check size={17} weight="bold" /> Commit against real capacity</li>
+            <li><Check size={17} weight="bold" /> Keep new requests out until approved</li>
+          </ul>
+          <button className={cx("inverse-button")} onClick={() => openAuth("create", "pro")} type="button">
+            Join as a founding Pro <ArrowRight size={17} />
+          </button>
+        </article>
+      </section>
+
+      <section className={cx("beta-cta")} aria-labelledby="cta-title">
+        <div className={cx("cta-stamp")}><Lightning size={25} weight="fill" /> ₹0</div>
+        <div>
+          <span className={cx("eyebrow")}>FOUNDING BETA</span>
+          <h2 id="cta-title">Your next project should not begin with a gamble.</h2>
+          <p>Make it Ready. Match the proof. Run the work against one shared record.</p>
+        </div>
+        <div className={cx("cta-actions")}>
+          <button className={cx("primary-button", "large")} onClick={focusComposer} type="button">
+            Make my project Ready <PaperPlaneTilt size={18} weight="fill" />
+          </button>
+          <button className={cx("text-button")} onClick={() => openAuth("create", "pro")} type="button">Join as a founding Pro</button>
+        </div>
+      </section>
+
+      <footer>
+        <Logo />
+        <p>Built for the work after the match.<br /><span>Private-beta prototype · India</span></p>
+        <div>
+          <a href="#how-it-works">How it works</a>
+          <button type="button" onClick={() => openAuth("create", "pro")}>For Pros</button>
+          <a href="#top">Back to top</a>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }

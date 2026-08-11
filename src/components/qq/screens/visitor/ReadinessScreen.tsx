@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ReadinessChecklist, PageHeader, SectionCard, MaskedField } from "@/components/qq/shared";
@@ -18,12 +17,17 @@ import { CheckCircle2, Clock, AlertTriangle, XCircle, FileText, Wallet, ShieldCh
 import type { KycSubmission } from "@/lib/qq/types";
 
 export function ReadinessScreen() {
-  const { currentRole, currentUserId, proProfiles, buyerProfiles, kyc, navigate, setKycModal, updateKyc, addAudit } = useQQ();
+  const { currentRole, currentUserId, proProfiles, buyerProfiles, kyc, navigate, setKycModal, addAudit } = useQQ();
   const isPro = currentRole === "pro";
-  const isBuyer = currentRole === "buyer";
   const proProfile = proProfiles.find((p) => p.userId === currentUserId);
   const buyerProfile = buyerProfiles.find((b) => b.userId === currentUserId);
   const myKyc = kyc.find((k) => k.userId === currentUserId);
+
+  React.useEffect(() => {
+    if (currentRole === "visitor") navigate("role_selection", undefined, { replace: true });
+  }, [currentRole, navigate]);
+
+  if (currentRole === "visitor") return null;
 
   const proItems = [
     { label: "Account created", done: !!currentUserId },
@@ -39,6 +43,7 @@ export function ReadinessScreen() {
     { label: "Account created", done: !!currentUserId },
     { label: "Profile ready for briefs", done: !!buyerProfile?.companyDescription },
     { label: "Organization / billing details", done: !!buyerProfile?.orgDetails, note: "Required before funding a milestone. Billing address and GSTIN stay private." },
+    { label: "Client verification", done: myKyc?.status === "approved", note: myKyc?.status === "under_review" ? "Authorized signatory and organization evidence are under Admin review." : "A verified client badge is shown only after Admin approval." },
     { label: "Payment instructions acknowledged", done: !!buyerProfile?.orgDetails, note: "Manual payment via UTR/transaction reference." },
     { label: "Create a brief", done: false, note: "Start with a clear brief or find a professional directly." },
   ];
@@ -46,7 +51,7 @@ export function ReadinessScreen() {
   const items = isPro ? proItems : buyerItems;
   const done = items.filter((i) => i.done).length;
   const pct = Math.round((done / items.length) * 100);
-  const blocked = isPro ? proProfile?.payoutReadiness !== "approved" : !buyerProfile?.orgDetails;
+  const blocked = isPro ? proProfile?.payoutReadiness !== "approved" : !buyerProfile?.orgDetails || myKyc?.status !== "approved";
 
   return (
     <div className="space-y-6">
@@ -63,7 +68,9 @@ export function ReadinessScreen() {
             <div className="mt-4 flex flex-wrap gap-2">
               {isPro ? (
                 <>
-                  {!proProfile?.payoutReadiness || proProfile.payoutReadiness !== "approved" ? (
+                  {!proProfile?.skills.length ? (
+                    <Button onClick={() => navigate("pro_profile")}><ShieldCheck className="size-4" /> Add skills before verification</Button>
+                  ) : !proProfile?.payoutReadiness || proProfile.payoutReadiness !== "approved" ? (
                     <Button onClick={() => setKycModal(true)}><ShieldCheck className="size-4" /> Add verification & payout details</Button>
                   ) : (
                     <Button onClick={() => navigate("pro_profile")}>Edit profile</Button>
@@ -74,6 +81,7 @@ export function ReadinessScreen() {
               ) : (
                 <>
                   <Button onClick={() => navigate("buyer_profile")}>Complete profile</Button>
+                  {myKyc?.status !== "approved" && <Button variant="outline" onClick={() => setKycModal(true)}><ShieldCheck className="size-4" /> Verify client account</Button>}
                   <Button variant="outline" onClick={() => navigate("buyer_brief_new")}>Create a brief</Button>
                   <Button variant="outline" onClick={() => navigate("buyer_talent")}>Search talent</Button>
                 </>
@@ -81,7 +89,7 @@ export function ReadinessScreen() {
             </div>
           </SectionCard>
 
-          {isPro && myKyc && (
+          {myKyc && (
             <SectionCard title="Verification status">
               <KycStatusCard kyc={myKyc} onResubmit={() => setKycModal(true)} />
             </SectionCard>
@@ -118,17 +126,15 @@ export function ReadinessScreen() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="size-4 mt-0.5 text-amber-600" />
                 <div className="text-sm">
-                  <div className="font-medium text-amber-800 dark:text-amber-300">{isPro ? "Payout readiness required" : "Billing details required"}</div>
-                  <p className="text-amber-700 dark:text-amber-400 mt-1">{isPro ? "Add payout details before applying for paid-work proposals. QuickQuid needs approved payout details before you can submit." : "Add organization/billing details before funding an accepted milestone."}</p>
-                  <Button size="sm" className="mt-2" onClick={() => isPro ? setKycModal(true) : navigate("buyer_profile")}>{isPro ? "Add payout details" : "Add billing details"}</Button>
+                  <div className="font-medium text-amber-800 dark:text-amber-300">{isPro ? "Payout readiness required" : "Client readiness required"}</div>
+                  <p className="text-amber-700 dark:text-amber-400 mt-1">{isPro ? "Add payout details and skill evidence before applying for paid-work proposals." : "Add organization/billing details and submit authorized-signatory evidence before funding an accepted milestone."}</p>
+                  <Button size="sm" className="mt-2" onClick={() => setKycModal(true)}>{isPro ? "Add verification details" : "Verify client account"}</Button>
                 </div>
               </div>
             </Card>
           )}
         </div>
       </div>
-
-      <KycModal />
     </div>
   );
 }
@@ -141,7 +147,7 @@ function KycStatusCard({ kyc, onResubmit }: { kyc: KycSubmission; onResubmit: ()
         <CheckCircle2 className="size-5 text-emerald-600 mt-0.5" />
         <div>
           <div className="font-medium">Verification approved</div>
-          <p className="text-sm text-muted-foreground">Your identity and payout details are verified. You can submit paid-work proposals.</p>
+          <p className="text-sm text-muted-foreground">{kyc.role === "pro" ? "Your identity, skill evidence, and payout details are approved." : "Your authorized signatory and organization details are approved. Your client account now shows QuickQuid Verified."}</p>
         </div>
       </div>
     );
@@ -152,7 +158,7 @@ function KycStatusCard({ kyc, onResubmit }: { kyc: KycSubmission; onResubmit: ()
         <Clock className="size-5 text-amber-600 mt-0.5" />
         <div>
           <div className="font-medium">Under Admin review</div>
-          <p className="text-sm text-muted-foreground">Your verification is under Admin review. Typical review target: 24 hours.</p>
+          <p className="text-sm text-muted-foreground">Your {kyc.role === "pro" ? "identity and skill evidence" : "client and organization evidence"} is under Admin review. Typical review target: 24 hours.</p>
           {kyc.riskFlag && (
             <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
               <AlertCircle className="size-3 inline mr-1" /> Risk signal: {kyc.riskFlag.signal}. This is a signal, not a decision.
@@ -181,7 +187,7 @@ function KycStatusCard({ kyc, onResubmit }: { kyc: KycSubmission; onResubmit: ()
 }
 
 export function KycModal() {
-  const { kycModalOpen, setKycModal, currentUserId, users, kyc, updateKyc, updateProProfile, proProfiles, addAudit } = useQQ();
+  const { kycModalOpen, setKycModal, currentUserId, users, kyc, updateKyc, updateProProfile, updateBuyerProfile, updateUserVerification, proProfiles, buyerProfiles, addAudit } = useQQ();
   const { toast } = useToast();
   const [step, setStep] = React.useState(0);
   const [pan, setPan] = React.useState("");
@@ -190,13 +196,28 @@ export function KycModal() {
   const [beneficiary, setBeneficiary] = React.useState("");
   const [bankName, setBankName] = React.useState("");
   const [docName, setDocName] = React.useState("");
+  const [skillEvidenceName, setSkillEvidenceName] = React.useState("");
+  const [organizationName, setOrganizationName] = React.useState("");
+  const [organizationEvidenceName, setOrganizationEvidenceName] = React.useState("");
+  const [billingAddress, setBillingAddress] = React.useState("");
+  const [billingContact, setBillingContact] = React.useState("");
+  const [gstin, setGstin] = React.useState("");
   const [consent, setConsent] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
 
   const user = users.find((u) => u.id === currentUserId);
   const existing = kyc.find((k) => k.userId === currentUserId);
   const proProfile = proProfiles.find((p) => p.userId === currentUserId);
-  const steps = ["Identity", "Professional details", "Payout details"];
+  const buyerProfile = buyerProfiles.find((p) => p.userId === currentUserId);
+  const isPro = user?.role === "pro";
+  const steps = isPro ? ["Identity", "Skills & evidence", "Payout details"] : ["Signatory", "Organization", "Billing details"];
+  const stepReady = step === 0
+    ? !!(docName || existing?.identityDocName) && (pan.trim().length === 10 || !!existing?.panMasked)
+    : step === 1
+      ? isPro
+        ? !!proProfile?.skills.length && !!(skillEvidenceName || existing?.skillVerifications?.some((item) => item.evidence))
+        : !!organizationName.trim() && !!(organizationEvidenceName || existing?.organizationEvidenceName)
+      : !!beneficiary.trim() && !!(account.trim() || existing?.accountNumberMasked) && !!(ifsc.trim() || existing?.ifscMasked) && !!bankName.trim() && (isPro || (!!billingAddress.trim() && !!billingContact.trim())) && consent;
 
   React.useEffect(() => {
     if (kycModalOpen) {
@@ -207,33 +228,63 @@ export function KycModal() {
       if (proProfile?.payoutDetails?.bankName) {
         setBankName(proProfile.payoutDetails.bankName);
       }
+      setOrganizationName(existing?.organizationName ?? buyerProfile?.orgDetails?.companyName ?? buyerProfile?.displayName ?? "");
+      setOrganizationEvidenceName(existing?.organizationEvidenceName ?? "");
+      setBillingAddress(buyerProfile?.orgDetails?.billingAddress ?? "");
+      setBillingContact(buyerProfile?.orgDetails?.billingContact ?? user?.email ?? "");
+      setGstin(buyerProfile?.orgDetails?.gstin ?? "");
     }
-  }, [kycModalOpen]);
+  }, [kycModalOpen, existing, proProfile, buyerProfile, user]);
 
   function submit() {
-    if (!user || !consent) { toast({ title: "Please provide consent", variant: "destructive" }); return; }
+    if (!user || !stepReady) { toast({ title: "Complete the required verification fields", variant: "destructive" }); return; }
     setSubmitting(true);
     setTimeout(() => {
       const id = existing?.id ?? genId("KYC");
+      const submittedAt = new Date().toISOString();
+      const skillVerifications = isPro ? (proProfile?.skills.slice(0, 4) ?? []).map((skill) => ({
+        skill,
+        evidence: skillEvidenceName || "Portfolio and profile evidence",
+        status: "under_review" as const,
+        submittedAt,
+      })) : undefined;
       const sub: KycSubmission = {
         id,
         userId: user.id,
         userName: user.name,
         role: user.role,
-        identityDocName: docName || "id_document.jpg",
+        verificationType: isPro ? "professional" : "client",
+        identityDocName: docName || existing?.identityDocName || "",
         identityDocStatus: "uploaded",
-        panMasked: maskPan(pan || "ABCDE1234F"),
-        accountNumberMasked: maskAccount(account || "1234567890"),
-        ifscMasked: maskIfsc(ifsc || "HDFC0001234"),
+        panMasked: pan ? maskPan(pan) : existing?.panMasked ?? "",
+        accountNumberMasked: account ? maskAccount(account) : existing?.accountNumberMasked ?? "",
+        ifscMasked: ifsc ? maskIfsc(ifsc) : existing?.ifscMasked ?? "",
         beneficiaryName: beneficiary || user.name,
+        organizationName: isPro ? undefined : organizationName || buyerProfile?.displayName || user.name,
+        organizationEvidenceName: isPro ? undefined : organizationEvidenceName || existing?.organizationEvidenceName,
+        skillVerifications,
         status: "under_review",
-        submittedAt: new Date().toISOString(),
+        submittedAt,
       };
       updateKyc(id, sub);
-      if (user.role === "pro") {
-        updateProProfile(user.id, { payoutReadiness: "under_review", payoutDetails: { beneficiaryName: beneficiary || user.name, accountNumberMasked: maskAccount(account || "1234567890"), ifscMasked: maskIfsc(ifsc || "HDFC0001234"), bankName: bankName || "HDFC Bank" } });
+      updateUserVerification(user.id, "under_review");
+      if (isPro) {
+        updateProProfile(user.id, {
+          payoutReadiness: "under_review",
+          skillVerifications,
+          payoutDetails: { beneficiaryName: beneficiary || user.name, accountNumberMasked: account ? maskAccount(account) : existing?.accountNumberMasked ?? "", ifscMasked: ifsc ? maskIfsc(ifsc) : existing?.ifscMasked ?? "", bankName },
+        });
+      } else {
+        updateBuyerProfile(user.id, {
+          orgDetails: {
+            companyName: organizationName || buyerProfile?.displayName || user.name,
+            billingAddress: billingAddress || "Billing address pending confirmation",
+            billingContact: billingContact || user.email,
+            gstin: gstin || undefined,
+          },
+        });
       }
-      addAudit({ adminId: user.id, adminRole: user.role, action: "KYC submitted", entity: "KYC", entityId: id, newStatus: "under_review" });
+      addAudit({ adminId: user.id, adminRole: user.role, action: isPro ? "Professional verification submitted" : "Client verification submitted", entity: "KYC", entityId: id, newStatus: "under_review" });
       setSubmitting(false);
       setKycModal(false);
       toast({ title: "Verification submitted", description: "Under Admin review. Typical target: 24 hours." });
@@ -244,8 +295,8 @@ export function KycModal() {
     <Dialog open={kycModalOpen} onOpenChange={setKycModal}>
       <DialogContent className="max-w-[560px] max-h-[720px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Verification & payout details</DialogTitle>
-          <DialogDescription>Three steps: identity, professional details, payout. All sensitive data is masked by default.</DialogDescription>
+          <DialogTitle>{isPro ? "Professional verification" : "Client verification"}</DialogTitle>
+          <DialogDescription>{isPro ? "Submit identity, skill evidence, and payout details for Admin review." : "Submit authorized-signatory, organization, and billing details for Admin review."} Sensitive data stays masked.</DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center gap-2">
@@ -273,32 +324,41 @@ export function KycModal() {
         )}
         {step === 1 && (
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="prof">Professional headline</Label>
-              <Input id="prof" defaultValue={user?.headline ?? ""} placeholder="e.g. Product Designer and UX Researcher" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cat">Primary category</Label>
-              <Select defaultValue="Product Design">
-                <SelectTrigger id="cat"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Product Design">Product Design</SelectItem>
-                  <SelectItem value="Web Development">Web Development</SelectItem>
-                  <SelectItem value="UX Research">UX Research</SelectItem>
-                  <SelectItem value="Frontend Engineering">Frontend Engineering</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="bio">Short bio (min 100 chars)</Label>
-              <Textarea id="bio" rows={3} placeholder="Describe your expertise…" />
-            </div>
+            {isPro ? (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="prof">Professional headline</Label>
+                  <Input id="prof" defaultValue={user?.headline ?? ""} placeholder="e.g. Product Designer and UX Researcher" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Skills submitted for verification</Label>
+                  <div className="flex flex-wrap gap-1.5">{(proProfile?.skills.slice(0, 4) ?? []).map((skill) => <span key={skill} className="rounded-md border border-border bg-muted/40 px-2 py-1 text-xs">{skill}</span>)}</div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Skill evidence</Label>
+                  <EvidenceDropzone label="Upload case study, work sample, or repository evidence" accept="PDF, JPG, PNG, ZIP · max 25MB" onUploaded={(file) => setSkillEvidenceName(file.name)} />
+                  <p className="text-xs text-muted-foreground">Admin reviews each submitted skill separately. One approved skill plus approved identity unlocks the QuickQuid Verified tick.</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="org-name">Legal organization name</Label>
+                  <Input id="org-name" value={organizationName} onChange={(event) => setOrganizationName(event.target.value)} placeholder="Company or individual legal name" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Organization evidence</Label>
+                  <EvidenceDropzone label="Upload incorporation, GST, or business registration" accept="PDF, JPG, PNG · max 10MB" onUploaded={(file) => setOrganizationEvidenceName(file.name)} />
+                  <p className="text-xs text-muted-foreground">This document is reviewed privately and never shown on the public buyer profile.</p>
+                </div>
+              </>
+            )}
           </div>
         )}
         {step === 2 && (
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="ben">Beneficiary name</Label>
+              <Label htmlFor="ben">{isPro ? "Beneficiary name" : "Account holder / legal entity"}</Label>
               <Input id="ben" value={beneficiary} onChange={(e) => setBeneficiary(e.target.value)} placeholder="As per bank record" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -315,9 +375,21 @@ export function KycModal() {
               <Label htmlFor="bank">Bank name</Label>
               <Input id="bank" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="HDFC Bank" />
             </div>
+            {!isPro && (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="billing-address">Billing address</Label>
+                  <Textarea id="billing-address" value={billingAddress} onChange={(event) => setBillingAddress(event.target.value)} rows={2} placeholder="Registered billing address" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label htmlFor="billing-contact">Billing contact</Label><Input id="billing-contact" value={billingContact} onChange={(event) => setBillingContact(event.target.value)} placeholder="finance@company.com" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="gstin">GSTIN (optional)</Label><Input id="gstin" value={gstin} onChange={(event) => setGstin(event.target.value)} placeholder="22AAAAA0000A1Z5" /></div>
+                </div>
+              </>
+            )}
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
-              <span>I consent to QuickQuid verifying these details and storing them masked for payout processing. I understand payout is processed manually in v0.1.</span>
+              <span>I consent to QuickQuid verifying these details and storing sensitive values masked. {isPro ? "I understand payout is processed manually in v0.1." : "I confirm I am authorized to enroll this client account."}</span>
             </label>
           </div>
         )}
@@ -327,9 +399,9 @@ export function KycModal() {
           <div className="flex gap-2">
             {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)}>Back</Button>}
             {step < 2 ? (
-              <Button onClick={() => setStep(step + 1)}>Continue</Button>
+              <Button onClick={() => setStep(step + 1)} disabled={!stepReady}>Continue</Button>
             ) : (
-              <Button onClick={submit} disabled={submitting}>{submitting ? "Submitting…" : "Submit for review"}</Button>
+              <Button onClick={submit} disabled={submitting || !stepReady}>{submitting ? "Submitting…" : "Submit for review"}</Button>
             )}
           </div>
         </DialogFooter>

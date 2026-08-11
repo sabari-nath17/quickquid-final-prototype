@@ -36,7 +36,7 @@ import {
   Calendar, UserCog, BellOff, FileWarning, ListChecks, RefreshCw, Filter,
 } from "lucide-react";
 import {
-  PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline,
+  PageHeader, EmptyState, SectionCard, MaskedField, QQProgress, ActivityTimeline, useNavigationGuard, QuickQuidVerifiedBadge,
 } from "@/components/qq/shared";
 import { VaultDeliverable, type VaultFile, type VaultState } from "@/components/qq/shared/VaultDeliverable";
 import { DeliveryVault } from "@/components/qq/shared/DeliveryVault";
@@ -901,7 +901,10 @@ export function ProProfile() {
                     <AvatarFallback className="rounded-md text-white font-semibold text-lg">{initials(profile.displayName)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-semibold">{profile.displayName}</h2>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-xl font-semibold">{profile.displayName}</h2>
+                      {profile.payoutReadiness === "approved" && profile.skillVerifications?.some((item) => item.status === "approved") && <QuickQuidVerifiedBadge />}
+                    </div>
                     <p className="text-sm text-muted-foreground">{profile.headline}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <StatusBadge tone={profile.availability === "available_now" ? "success" : "paused"} icon={false}>{profile.availability === "available_now" ? "Available now" : "Paused"}</StatusBadge>
@@ -3026,7 +3029,7 @@ const GIG_COVER_COLORS = ["#7C3AED", "#0891B2", "#DB2777", "#CA8A04", "#0F766E",
 const PACKAGE_NAMES = ["Basic", "Standard", "Premium"];
 
 export function ProGigNew() {
-  const { currentUserId, users, viewParams, gigs, upsertGig, navigate, addAudit } = useQQ();
+  const { currentUserId, users, viewParams, gigs, upsertGig, navigate, goBack, addAudit } = useQQ();
   const { toast } = useToast();
   const user = users.find((u) => u.id === currentUserId);
   const editing = viewParams.gigId ? gigs.find((g) => g.id === viewParams.gigId) : undefined;
@@ -3055,6 +3058,9 @@ export function ProGigNew() {
   const [availability, setAvailability] = React.useState(editing?.availability ?? true);
   const [maxConcurrent, setMaxConcurrent] = React.useState(editing?.maxConcurrentOrders ?? 2);
   const [submitting, setSubmitting] = React.useState(false);
+
+  const dirty = !!title || !!shortDesc || !!detailedDesc || tags.length > 0 || included.length > 0 || exclusions.length > 0 || buyerReqs.length > 0 || evidence.length > 0 || proFee !== 25000 || deliveryTimeline !== "10 days";
+  useNavigationGuard(dirty, "This gig has unsaved changes. Leave without saving?");
 
   function addTag() {
     const v = tagDraft.trim().replace(/^#/, "");
@@ -3125,7 +3131,7 @@ export function ProGigNew() {
   function back() {
     const idx = GIG_STEPS.indexOf(step);
     if (idx > 0) setStep(GIG_STEPS[idx - 1]);
-    else navigate("pro_gigs");
+    else goBack();
   }
   function next() {
     const idx = GIG_STEPS.indexOf(step);
@@ -3134,7 +3140,7 @@ export function ProGigNew() {
 
   return (
     <div className="space-y-6">
-      <button onClick={() => navigate("pro_gigs")} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <button onClick={goBack} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronLeft className="size-4" /> Back to gigs
       </button>
 

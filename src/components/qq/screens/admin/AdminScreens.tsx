@@ -409,7 +409,7 @@ export function AdminOperations() {
 export function AdminKyc() {
   const {
     kyc, currentRole, currentUserId, audit,
-    updateKyc, updateProProfile, addAudit, navigate,
+    updateKyc, updateProProfile, updateUserVerification, reviewSkillVerification, proProfiles, addAudit, navigate,
   } = useQQ();
   const { toast } = useToast();
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -435,9 +435,19 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "approved", resolvedAt: new Date().toISOString() });
-    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "approved" });
+    if (selected.role === "pro") {
+      const currentProfile = proProfiles.find((profile) => profile.userId === selected.userId);
+      updateProProfile(selected.userId, {
+        payoutReadiness: "approved",
+        payoutDetails: currentProfile?.payoutDetails ?? { beneficiaryName: selected.beneficiaryName, accountNumberMasked: selected.accountNumberMasked, ifscMasked: selected.ifscMasked, bankName: "Verified bank account" },
+      });
+      const hasApprovedSkill = proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
+      updateUserVerification(selected.userId, hasApprovedSkill ? "approved" : "under_review", currentUserId ?? undefined);
+    } else {
+      updateUserVerification(selected.userId, "approved", currentUserId ?? undefined);
+    }
     logAudit("KYC approved", selected.id, oldStatus, "approved", "Identity & payout details verified");
-    toast({ title: "KYC approved", description: `${selected.userName} can now submit paid-work proposals.` });
+    toast({ title: "Verification approved", description: selected.role === "pro" ? `${selected.userName} has approved identity. QuickQuid Verified appears after at least one skill is approved.` : `${selected.userName} now carries the QuickQuid Verified client tick.` });
     setSelectedId(null);
   }
 
@@ -445,6 +455,8 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "rejected", rejectionReason: reason, resolvedAt: new Date().toISOString(), identityDocStatus: "rejected" });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected" });
+    updateUserVerification(selected.userId, "rejected", currentUserId ?? undefined);
     logAudit("KYC rejected", selected.id, oldStatus, "rejected", reason);
     toast({ title: "KYC rejected", description: reason, variant: "destructive" });
   }
@@ -453,6 +465,7 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "under_review" });
+    updateUserVerification(selected.userId, "under_review");
     logAudit("KYC escalated to Risk", selected.id, oldStatus, "under_review", reason);
     toast({ title: "Escalated to Risk T3", description: "Risk team will investigate." });
   }
@@ -461,6 +474,8 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "pending_reverification" });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "pending_reverification" });
+    updateUserVerification(selected.userId, "under_review");
     logAudit("KYC more info requested", selected.id, oldStatus, "pending_reverification", reason);
     toast({ title: "More info requested", description: "User notified to resubmit." });
   }
@@ -470,6 +485,23 @@ export function AdminKyc() {
     setRevealedFields((s) => ({ ...s, [field]: true }));
     logAudit(`Masked reveal: ${field}`, selected.id, undefined, undefined, reason, true);
     toast({ title: "Field revealed", description: "Reveal recorded in audit log." });
+  }
+
+  function reviewSkill(skill: string, status: "approved" | "rejected") {
+    if (!selected) return;
+    const note = status === "approved" ? "Submitted evidence demonstrates the claimed skill." : "Submitted evidence is not sufficient for this skill.";
+    reviewSkillVerification(selected.userId, skill, status, note);
+    updateKyc(selected.id, {
+      skillVerifications: (selected.skillVerifications ?? []).map((item) => item.skill === skill ? {
+        ...item,
+        status,
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: currentUserId ?? "QuickQuid Admin",
+        reviewerNote: note,
+      } : item),
+    });
+    logAudit(`Skill verification ${status}`, selected.id, "under_review", status, `${skill}: ${note}`);
+    toast({ title: status === "approved" ? `${skill} verified` : `${skill} not verified`, description: status === "approved" ? "The skill now carries an Admin-reviewed mark." : "The Pro can resubmit stronger evidence." });
   }
 
   const kycColumns: QueueColumn<KycSubmission>[] = [
@@ -486,14 +518,14 @@ export function AdminKyc() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="KYC review"
-        description="Identity & payout verification queue. PAN, account, IFSC masked by default — reveal requires authorized role + reason + audit event."
+        title="KYC & verification review"
+        description="Review Pro identity, skill evidence, payout readiness, and Buyer client enrollment. Sensitive fields stay masked; every decision is audited."
         status={<Badge variant="outline"><RolePill role={currentRole} /></Badge>}
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList className="flex flex-wrap h-auto">
-          <TabsTrigger value="queue">KYC queue</TabsTrigger>
+          <TabsTrigger value="queue">Verification queue</TabsTrigger>
           <TabsTrigger value="risk">Risk flag view (01.6)</TabsTrigger>
           <TabsTrigger value="deletion">Account deletion (12.11)</TabsTrigger>
           <TabsTrigger value="export">Data export (12.12)</TabsTrigger>
@@ -573,7 +605,42 @@ export function AdminKyc() {
                   </div>
                 </SectionCard>
 
-                <SectionCard title="Payout details (masked)" description="Reveal requires an authorized role and a reason. Each reveal is audited.">
+                {selected.role === "buyer" && (
+                  <SectionCard title="Client organization" description="Approval grants the client account a QuickQuid Verified tick.">
+                    <div className="grid gap-3 text-sm sm:grid-cols-2">
+                      <div><div className="text-xs text-muted-foreground">Legal name</div><div className="font-medium">{selected.organizationName ?? selected.userName}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Organization evidence</div><div className="font-medium">{selected.organizationEvidenceName ?? "Not supplied"}</div></div>
+                    </div>
+                  </SectionCard>
+                )}
+
+                {selected.role === "pro" && (
+                  <SectionCard title="Skill verification" description="Review skills individually. The account earns QuickQuid Verified only after identity and at least one skill are approved.">
+                    <div className="space-y-2">
+                      {(selected.skillVerifications ?? proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications ?? []).map((skill) => (
+                        <div key={skill.skill} className="rounded-lg border border-border p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-medium text-sm">{skill.skill}</div>
+                              <div className="mt-0.5 text-xs text-muted-foreground">Evidence: {skill.evidence}</div>
+                              {skill.reviewerNote && <div className="mt-1 text-xs text-muted-foreground">Reviewer note: {skill.reviewerNote}</div>}
+                            </div>
+                            <StatusBadge tone={statusMeta(skill.status).tone}>{statusMeta(skill.status).label}</StatusBadge>
+                          </div>
+                          {canProcessKyc(currentRole) && skill.status !== "approved" && (
+                            <div className="mt-3 flex gap-2">
+                              <Button size="sm" onClick={() => reviewSkill(skill.skill, "approved")}><BadgeCheck className="size-3.5" /> Verify skill</Button>
+                              <Button size="sm" variant="outline" onClick={() => reviewSkill(skill.skill, "rejected")}><XCircle className="size-3.5" /> Reject evidence</Button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {(selected.skillVerifications ?? []).length === 0 && <p className="text-sm text-muted-foreground">No skill evidence was submitted.</p>}
+                    </div>
+                  </SectionCard>
+                )}
+
+                <SectionCard title={selected.role === "pro" ? "Payout details (masked)" : "Billing account details (masked)"} description="Reveal requires an authorized role and a reason. Each reveal is audited.">
                   <div className="grid sm:grid-cols-2 gap-3">
                     <MaskedField
                       label="Beneficiary name"
@@ -676,7 +743,7 @@ export function AdminKyc() {
 }
 
 function RiskFlagView() {
-  const { kyc, audit, currentRole, currentUserId, updateKyc, updateProProfile, addAudit } = useQQ();
+  const { kyc, audit, currentRole, currentUserId, updateKyc, updateProProfile, updateUserVerification, proProfiles, addAudit } = useQQ();
   const { toast } = useToast();
   const flagged = kyc.filter((k) => k.riskFlag);
   const [selectedId, setSelectedId] = React.useState<string | null>(flagged[0]?.id ?? null);
@@ -708,6 +775,8 @@ function RiskFlagView() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "rejected", rejectionReason: reason, resolvedAt: new Date().toISOString() });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected" });
+    updateUserVerification(selected.userId, "rejected", currentUserId ?? undefined);
     logAudit("Risk: KYC rejected", selected.id, oldStatus, "rejected", reason);
     toast({ title: "KYC rejected", variant: "destructive" });
   }
@@ -715,7 +784,17 @@ function RiskFlagView() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "approved", resolvedAt: new Date().toISOString() });
-    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "approved" });
+    if (selected.role === "pro") {
+      const currentProfile = proProfiles.find((profile) => profile.userId === selected.userId);
+      updateProProfile(selected.userId, {
+        payoutReadiness: "approved",
+        payoutDetails: currentProfile?.payoutDetails ?? { beneficiaryName: selected.beneficiaryName, accountNumberMasked: selected.accountNumberMasked, ifscMasked: selected.ifscMasked, bankName: "Verified bank account" },
+      });
+      const hasApprovedSkill = proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
+      updateUserVerification(selected.userId, hasApprovedSkill ? "approved" : "under_review", currentUserId ?? undefined);
+    } else {
+      updateUserVerification(selected.userId, "approved", currentUserId ?? undefined);
+    }
     logAudit("Risk: KYC approved with rationale", selected.id, oldStatus, "approved", reason);
     toast({ title: "Approved with documented rationale" });
   }

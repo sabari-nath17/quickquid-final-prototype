@@ -11,6 +11,8 @@ import {
   CheckCircle2, Circle, Send, Eye, MessageSquare,
 } from "lucide-react";
 import { StatusBadge, statusMeta } from "./StatusBadge";
+import { QuickQuidVerifiedBadge } from ".";
+import { useQQ } from "@/lib/qq/store";
 import { FeeBreakdown } from "./FeeBreakdown";
 import { formatINR, timeAgo, budgetBand } from "@/lib/qq/format";
 import type { ProProfile, Brief, Proposal, GigDraft, Contract, PaymentEvidence, Milestone } from "@/lib/qq/types";
@@ -24,6 +26,7 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
   const verificationBadges = profile.trustSignals.filter((t) => t.includes("reviewed") || t.includes("Identity") || t.includes("Portfolio"));
   const otherSignals = profile.trustSignals.filter((t) => !verificationBadges.includes(t));
   const verifiedCount = verificationBadges.length;
+  const quickQuidVerified = profile.payoutReadiness === "approved" && (profile.skillVerifications?.some((item) => item.status === "approved") ?? verifiedCount > 0);
   return (
     <Card className={cn("p-4 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer text-left w-full h-full", onClick && "hover:border-primary/40")} onClick={onClick}>
       <div className="flex items-start gap-3">
@@ -32,7 +35,10 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-semibold truncate">{profile.displayName}</h3>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="font-semibold truncate">{profile.displayName}</h3>
+              {quickQuidVerified && <QuickQuidVerifiedBadge compact />}
+            </div>
             <StatusBadge tone={status.tone} icon={false}>{status.label}</StatusBadge>
           </div>
           <p className="text-sm text-muted-foreground truncate">{profile.headline}</p>
@@ -65,6 +71,7 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
 
 export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true }: { brief: Brief; onOpen?: () => void; onApply?: () => void; onSave?: () => void; showApply?: boolean }) {
   const m = statusMeta(brief.status);
+  const buyerVerified = useQQ((state) => state.users.some((user) => user.id === brief.buyerId && user.verificationStatus === "approved"));
   return (
     <Card className="p-4 hover:shadow-md transition-all flex flex-col gap-3 text-left h-full">
       <div className="flex items-start justify-between gap-2">
@@ -74,7 +81,7 @@ export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true }: 
           </button>
           <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">{brief.category}</Badge>
-            <span className="inline-flex items-center gap-1"><MapPin className="size-3" />{brief.buyerName}</span>
+            <span className="inline-flex items-center gap-1"><MapPin className="size-3" />{brief.buyerName}{buyerVerified && <QuickQuidVerifiedBadge compact />}</span>
             <span>· {timeAgo(brief.createdAt)}</span>
           </div>
         </div>

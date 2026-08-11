@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sora, Source_Sans_3, IBM_Plex_Mono } from "next/font/google";
+import { Manrope, Sora, Source_Sans_3, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -24,6 +24,13 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "QuickQuid — The execution marketplace",
   description: "Most marketplaces help you hire. QuickQuid helps the work get finished. Start with a Ready project, match proof, lock the scope, accept delivery.",
@@ -39,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sora.variable} ${sourceSans.variable} ${plexMono.variable} antialiased bg-background text-foreground`}
+        className={`${sora.variable} ${sourceSans.variable} ${plexMono.variable} ${manrope.variable} antialiased bg-background text-foreground`}
       >
         {children}
         <Toaster />

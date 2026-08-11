@@ -126,6 +126,18 @@ export interface User {
   industry?: string;
   verification: string;
   verificationStatus: VerificationStatus;
+  verifiedAt?: string;
+  verifiedBy?: string;
+}
+
+export interface SkillVerification {
+  skill: string;
+  evidence: string;
+  status: VerificationStatus;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewerNote?: string;
 }
 
 export interface ProProfile {
@@ -136,6 +148,7 @@ export interface ProProfile {
   primaryCategory: string;
   secondaryCategory?: string;
   skills: string[];
+  skillVerifications?: SkillVerification[];
   portfolioItems: PortfolioItem[];
   availability: Availability;
   responseTime: string;
@@ -431,12 +444,16 @@ export interface KycSubmission {
   userId: string;
   userName: string;
   role: Role;
+  verificationType?: "professional" | "client";
   identityDocName: string;
   identityDocStatus: "uploaded" | "rejected";
   panMasked: string;
   accountNumberMasked: string;
   ifscMasked: string;
   beneficiaryName: string;
+  organizationName?: string;
+  organizationEvidenceName?: string;
+  skillVerifications?: SkillVerification[];
   status: VerificationStatus;
   submittedAt: string;
   resolvedAt?: string;
@@ -586,6 +603,8 @@ export interface GuestReadinessDraft {
 }
 
 export interface ViewParams {
+  authMode?: "signin" | "create";
+  roleIntent?: "buyer" | "pro";
   [key: string]: string | undefined;
 }
 

@@ -4,9 +4,53 @@ import * as React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Inbox, RefreshCw, Loader2, Eye, EyeOff, Clock, Info, CheckCircle2, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Inbox, RefreshCw, Loader2, Eye, EyeOff, Clock, Info, CheckCircle2, ShieldAlert, BadgeCheck } from "lucide-react";
 import { timeAgo } from "@/lib/qq/format";
 import { StatusBadge } from "./StatusBadge";
+import { ArrowLeft } from "lucide-react";
+import { useQQ } from "@/lib/qq/store";
+
+export function BackButton({ label = "Back", className }: { label?: string; className?: string }) {
+  const { goBack } = useQQ();
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className={cn("w-fit gap-1.5 px-2", className)}
+      onClick={goBack}
+      aria-label={label}
+    >
+      <ArrowLeft className="size-3.5" aria-hidden="true" />
+      <span>{label}</span>
+    </Button>
+  );
+}
+
+export function QuickQuidVerifiedBadge({ compact = false, className }: { compact?: boolean; className?: string }) {
+  return (
+    <span
+      className={cn("inline-flex shrink-0 items-center gap-1 rounded-full border border-[#276EF1]/25 bg-[#276EF1]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#1F5CC2] dark:text-[#8AB4FF]", className)}
+      title="QuickQuid Verified"
+      aria-label="QuickQuid Verified"
+    >
+      <BadgeCheck className="size-3.5" aria-hidden="true" />
+      {!compact && <span>QuickQuid Verified</span>}
+    </span>
+  );
+}
+
+export function useNavigationGuard(shouldBlock: boolean, message = "You have unsaved changes. Leave this page?") {
+  const setNavigationGuard = useQQ((s) => s.setNavigationGuard);
+  React.useEffect(() => {
+    if (!shouldBlock) {
+      setNavigationGuard(null);
+      return;
+    }
+    setNavigationGuard(() => window.confirm(message));
+    return () => setNavigationGuard(null);
+  }, [shouldBlock, message, setNavigationGuard]);
+}
 
 export function PageHeader({
   title,

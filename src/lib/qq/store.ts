@@ -42,6 +42,26 @@ export interface ScopeChange {
   at: string;
 }
 
+export interface NavigationEntry {
+  view: ViewName;
+  params: ViewParams;
+}
+
+export interface NavigationOptions {
+  replace?: boolean;
+}
+
+function sameRoute(a: NavigationEntry, b: NavigationEntry) {
+  return a.view === b.view && JSON.stringify(a.params) === JSON.stringify(b.params);
+}
+
+function roleHome(role: Role): ViewName {
+  if (role === "buyer") return "buyer_dashboard";
+  if (role === "pro") return "pro_dashboard";
+  if (role === "admin_support" || role === "finance" || role === "risk" || role === "ops_manager") return "admin_operations";
+  return "role_selection";
+}
+
 interface QQState {
   hydrated: boolean;
   // session
@@ -49,6 +69,9 @@ interface QQState {
   currentUserId: string | null;
   view: ViewName;
   viewParams: ViewParams;
+  navigationStack: NavigationEntry[];
+  canGoBack: boolean;
+  navigationGuard: (() => boolean) | null;
   // data
   users: User[];
   proProfiles: ProProfile[];
@@ -83,7 +106,10 @@ interface QQState {
   setHydrated: () => void;
   switchRole: (role: Role) => void;
   signInAs: (userId: string) => void;
-  navigate: (view: ViewName, params?: ViewParams) => void;
+  createAccount: (email: string, role: "buyer" | "pro") => string;
+  navigate: (view: ViewName, params?: ViewParams, options?: NavigationOptions) => void;
+  goBack: () => void;
+  setNavigationGuard: (guard: (() => boolean) | null) => void;
   setNotificationDrawer: (open: boolean) => void;
   setSupportWidget: (open: boolean) => void;
   setMobileSidebar: (open: boolean) => void;
@@ -114,6 +140,8 @@ interface QQState {
   markAllRead: () => void;
   addAudit: (e: Omit<AuditEvent, "id" | "timestamp">) => void;
   updateKyc: (id: string, patch: Partial<KycSubmission>) => void;
+  updateUserVerification: (userId: string, status: VerificationStatus, verifiedBy?: string) => void;
+  reviewSkillVerification: (userId: string, skill: string, status: "approved" | "rejected", reviewerNote?: string) => void;
   upsertGig: (g: GigDraft) => void;
   updateGig: (id: string, patch: Partial<GigDraft>) => void;
   priorityBoosts: PriorityBoost[];
@@ -144,6 +172,9 @@ const initialState = {
   currentUserId: null as string | null,
   view: "role_selection" as ViewName,
   viewParams: {} as ViewParams,
+  navigationStack: [] as NavigationEntry[],
+  canGoBack: false,
+  navigationGuard: null as (() => boolean) | null,
   users: SEED_USERS,
   proProfiles: SEED_PRO_PROFILES,
   buyerProfiles: SEED_BUYER_PROFILES,
@@ -245,6 +276,8 @@ export const useQQ = create<QQState>()(
           currentUserId: user?.id ?? null,
           view: role === "visitor" ? "role_selection" : role === "buyer" ? "buyer_dashboard" : role === "pro" ? "pro_dashboard" : role === "admin_support" ? "admin_operations" : role === "finance" ? "admin_payouts" : role === "risk" ? "admin_trust" : role === "ops_manager" ? "admin_operations" : "role_selection",
           viewParams: {},
+          navigationStack: [],
+          canGoBack: false,
         });
       },
       signInAs: (userId) => {
@@ -256,12 +289,83 @@ export const useQQ = create<QQState>()(
           currentUserId: userId,
           view: role === "buyer" ? "buyer_dashboard" : role === "pro" ? "pro_dashboard" : role === "admin_support" ? "admin_operations" : role === "finance" ? "admin_payouts" : role === "risk" ? "admin_trust" : role === "ops_manager" ? "admin_operations" : "readiness",
           viewParams: {},
+          navigationStack: [],
+          canGoBack: false,
         });
       },
-      navigate: (view, params) => {
-        set({ view, viewParams: params ?? {}, mobileSidebarOpen: false });
+      createAccount: (email, role) => {
+        const id = genId(role === "buyer" ? "BUY" : "PRO");
+        const displayName = email.split("@")[0].split(/[._-]/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ") || (role === "buyer" ? "New Buyer" : "New Pro");
+        const user: User = {
+          id,
+          role,
+          name: displayName,
+          email: email.trim().toLowerCase(),
+          headline: role === "buyer" ? "New client account" : "New professional account",
+          avatarColor: role === "buyer" ? "#0F766E" : "#4E62D8",
+          verification: "Verification not started",
+          verificationStatus: "not_started",
+        };
+        set((state) => ({
+          users: [user, ...state.users],
+          buyerProfiles: role === "buyer" ? [{
+            userId: id,
+            displayName,
+            companyDescription: "",
+            industry: "",
+            hiringCategories: [],
+            publicVisibility: false,
+          }, ...state.buyerProfiles] : state.buyerProfiles,
+          proProfiles: role === "pro" ? [{
+            userId: id,
+            displayName,
+            headline: "",
+            bio: "",
+            primaryCategory: "",
+            skills: [],
+            skillVerifications: [],
+            portfolioItems: [],
+            availability: "paused",
+            responseTime: "Not set",
+            preferredProjectSize: "Not set",
+            preferredTimeline: "Not set",
+            languages: ["English"],
+            timeZone: "IST (UTC+5:30)",
+            publicVisibility: false,
+            trustSignals: [],
+            completedProjects: 0,
+            rating: 0,
+            responseTimeHours: 0,
+            payoutReadiness: "not_started",
+          }, ...state.proProfiles] : state.proProfiles,
+          currentRole: role,
+          currentUserId: id,
+          view: "readiness",
+          viewParams: {},
+          navigationStack: [],
+          canGoBack: false,
+        }));
+        return id;
+      },
+      navigate: (view, params, options) => {
+        const current = { view: get().view, params: get().viewParams };
+        const next = { view, params: params ?? {} };
+        if (sameRoute(current, next)) return;
+        const stack = options?.replace ? get().navigationStack : [...get().navigationStack, current];
+        set({ view, viewParams: next.params, navigationStack: stack.slice(-50), canGoBack: stack.length > 0, mobileSidebarOpen: false });
         if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
       },
+      goBack: () => {
+        const state = get();
+        if (state.navigationGuard && !state.navigationGuard()) return;
+        const stack = [...state.navigationStack];
+        const previous = stack.pop();
+        const fallback = roleHome(state.currentRole);
+        const target = previous ?? { view: fallback, params: {} };
+        set({ view: target.view, viewParams: target.params, navigationStack: stack, canGoBack: stack.length > 0, mobileSidebarOpen: false });
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+      },
+      setNavigationGuard: (guard) => set({ navigationGuard: guard }),
       setNotificationDrawer: (open) => set({ notificationDrawerOpen: open }),
       setSupportWidget: (open) => set({ supportWidgetOpen: open }),
       setMobileSidebar: (open) => set({ mobileSidebarOpen: open }),
@@ -298,7 +402,54 @@ export const useQQ = create<QQState>()(
       markNotificationRead: (id) => set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
       markAllRead: () => set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
       addAudit: (e) => set((s) => ({ audit: [{ ...e, id: genId("A"), timestamp: new Date().toISOString() }, ...s.audit] })),
-      updateKyc: (id, patch) => set((s) => ({ kyc: s.kyc.map((k) => (k.id === id ? { ...k, ...patch } : k)) })),
+      updateKyc: (id, patch) => set((s) => {
+        const existing = s.kyc.find((submission) => submission.id === id);
+        return { kyc: existing ? s.kyc.map((submission) => submission.id === id ? { ...submission, ...patch } : submission) : [{ id, ...patch } as KycSubmission, ...s.kyc] };
+      }),
+      updateUserVerification: (userId, status, verifiedBy) => set((s) => ({
+        users: s.users.map((user) => user.id === userId ? {
+          ...user,
+          verificationStatus: status,
+          verification: status === "approved" ? "QuickQuid Verified" : status === "rejected" ? "Verification rejected" : "Verification under review",
+          verifiedAt: status === "approved" ? new Date().toISOString() : undefined,
+          verifiedBy: status === "approved" ? verifiedBy : undefined,
+        } : user),
+      })),
+      reviewSkillVerification: (userId, skill, status, reviewerNote) => set((s) => {
+        const reviewedAt = new Date().toISOString();
+        const reviewer = s.currentUserId ?? "QuickQuid Admin";
+        const proProfiles = s.proProfiles.map((profile) => {
+          if (profile.userId !== userId) return profile;
+          const existing = profile.skillVerifications ?? profile.skills.map((item) => ({
+            skill: item,
+            evidence: "Portfolio and profile evidence",
+            status: "under_review" as VerificationStatus,
+            submittedAt: new Date().toISOString(),
+          }));
+          return {
+            ...profile,
+            skillVerifications: existing.map((item) => item.skill === skill ? {
+              ...item,
+              status,
+              reviewedAt,
+              reviewedBy: reviewer,
+              reviewerNote,
+            } : item),
+          };
+        });
+        const approvedSkill = proProfiles.find((profile) => profile.userId === userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
+        const approvedIdentity = s.kyc.some((submission) => submission.userId === userId && submission.status === "approved");
+        return {
+          proProfiles,
+          users: s.users.map((user) => user.id === userId ? {
+            ...user,
+            verificationStatus: approvedSkill && approvedIdentity ? "approved" : user.verificationStatus,
+            verification: approvedSkill && approvedIdentity ? "QuickQuid Verified" : user.verification,
+            verifiedAt: approvedSkill && approvedIdentity ? reviewedAt : user.verifiedAt,
+            verifiedBy: approvedSkill && approvedIdentity ? reviewer : user.verifiedBy,
+          } : user),
+        };
+      }),
       upsertGig: (g) => set((s) => {
         const idx = s.gigs.findIndex((x) => x.id === g.id);
         return { gigs: idx >= 0 ? s.gigs.map((x) => (x.id === g.id ? g : x)) : [g, ...s.gigs] };

@@ -32,6 +32,8 @@ import {
   EmptyState,
   SectionCard,
   ErrorState,
+  BackButton,
+  QuickQuidVerifiedBadge,
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
@@ -126,6 +128,7 @@ export function SupportScreen() {
     addTicketMessage,
     updateTicket,
     navigate,
+    currentRole,
   } = useQQ();
   const { toast } = useToast();
 
@@ -239,6 +242,7 @@ export function SupportScreen() {
           ) : undefined
         }
       >
+        {currentRole === "visitor" && <BackButton label="Back" />}
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="size-4" /> Open a new ticket
         </Button>
@@ -682,6 +686,7 @@ export function PublicProfileScreen() {
     contracts,
     currentRole,
     navigate,
+    goBack,
     updateTrustCase,
     currentUserId,
   } = useQQ();
@@ -699,7 +704,7 @@ export function PublicProfileScreen() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(currentRole === "buyer" ? "buyer_talent" : "buyer_dashboard")}
+          onClick={goBack}
         >
           <ArrowLeft className="size-4" /> Back
         </Button>
@@ -765,9 +770,7 @@ export function PublicProfileScreen() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() =>
-          navigate(currentRole === "buyer" ? "buyer_talent" : "buyer_dashboard")
-        }
+        onClick={goBack}
         className="-ml-2"
       >
         <ArrowLeft className="size-4" /> Back to talent
@@ -790,9 +793,10 @@ export function PublicProfileScreen() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">
-                      {profile.displayName}
-                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h1 className="text-2xl font-semibold tracking-tight">{profile.displayName}</h1>
+                      {user.verificationStatus === "approved" && <QuickQuidVerifiedBadge />}
+                    </div>
                     <p className="text-muted-foreground">{profile.headline}</p>
                     <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                       <span className="inline-flex items-center gap-1">
@@ -907,11 +911,15 @@ export function PublicProfileScreen() {
           {profile.skills.length > 0 && (
             <SectionCard title="Skills">
               <div className="flex flex-wrap gap-2">
-                {profile.skills.map((s) => (
-                  <Badge key={s} variant="secondary" className="text-sm">
-                    {s}
-                  </Badge>
-                ))}
+                {profile.skills.map((s) => {
+                  const approved = profile.skillVerifications?.some((item) => item.skill === s && item.status === "approved");
+                  return (
+                    <Badge key={s} variant="secondary" className="text-sm gap-1" title={approved ? `${s} · QuickQuid skill verified` : undefined}>
+                      {approved && <CheckCircle2 className="size-3 text-[#276EF1]" aria-hidden="true" />}
+                      {s}
+                    </Badge>
+                  );
+                })}
               </div>
             </SectionCard>
           )}
@@ -1293,12 +1301,15 @@ export function BriefDetailPublic() {
     briefs,
     currentRole,
     currentUserId,
+    users,
     navigate,
+    goBack,
   } = useQQ();
   const { toast } = useToast();
 
   const briefId = viewParams.briefId ?? "BRF-0892";
   const brief = briefs.find((b) => b.id === briefId);
+  const buyerVerified = users.some((user) => user.id === brief?.buyerId && user.verificationStatus === "approved");
 
   if (!brief) {
     return (
@@ -1306,9 +1317,7 @@ export function BriefDetailPublic() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() =>
-            navigate(currentRole === "pro" ? "pro_briefs" : "buyer_dashboard")
-          }
+          onClick={goBack}
         >
           <ArrowLeft className="size-4" /> Back
         </Button>
@@ -1355,9 +1364,7 @@ export function BriefDetailPublic() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() =>
-          navigate(currentRole === "pro" ? "pro_briefs" : "buyer_dashboard")
-        }
+        onClick={goBack}
         className="-ml-2"
       >
         <ArrowLeft className="size-4" /> Back to briefs
@@ -1386,6 +1393,7 @@ export function BriefDetailPublic() {
                   <span className="font-medium text-foreground">
                     {brief.buyerName}
                   </span>{" "}
+                  {buyerVerified && <QuickQuidVerifiedBadge compact className="align-middle" />} {" "}
                   · {timeAgo(brief.createdAt)} · {brief.applicants ?? 0}{" "}
                   applicant{(brief.applicants ?? 0) === 1 ? "" : "s"}
                 </p>
@@ -1728,6 +1736,7 @@ export function NotificationsScreen() {
   const {
     notifications,
     currentUserId,
+    currentRole,
     navigate,
     markNotificationRead,
     markAllRead,
@@ -1773,6 +1782,7 @@ export function NotificationsScreen() {
           )
         }
       >
+        {currentRole === "visitor" && <BackButton label="Back" />}
         {myNotifs.length > 0 && (
           <Button variant="outline" onClick={markAllRead}>
             <CheckCircle2 className="size-4" /> Mark all read

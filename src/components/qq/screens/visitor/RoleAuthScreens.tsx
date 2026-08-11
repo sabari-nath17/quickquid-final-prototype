@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { BackButton, useNavigationGuard } from "@/components/qq/shared";
 import { Briefcase, User, Mail, Linkedin, Chrome, ArrowRight, ArrowLeft, Loader2, ShieldCheck, CheckCircle2, AlertCircle, Eye } from "lucide-react";
 import { useState } from "react";
 import type { Role } from "@/lib/qq/types";
+import { assetPath } from "@/lib/asset-path";
 
 export function RoleSelectionScreen() {
   const { signInAs, navigate, consent, setConsent } = useQQ();
@@ -34,7 +36,7 @@ export function RoleSelectionScreen() {
         setOauthError(true);
         return;
       }
-      navigate("auth");
+      navigate("auth", { authMode: "create", roleIntent: intent ?? undefined });
     }, 1100);
   }
 
@@ -42,7 +44,7 @@ export function RoleSelectionScreen() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/40">
       <header className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-border bg-background/80 backdrop-blur">
         <div className="flex items-center gap-2">
-          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
+          <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-8 w-auto" />
           <span className="font-semibold">QuickQuid</span>
           <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">the execution marketplace</span>
         </div>
@@ -118,7 +120,7 @@ export function RoleSelectionScreen() {
                 <Separator className="flex-1" />
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); navigate("auth"); }} className="space-y-3">
+              <form onSubmit={(e) => { e.preventDefault(); navigate("auth", { authMode: "create", roleIntent: intent }); }} className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" placeholder="you@company.com" required />
@@ -238,13 +240,14 @@ function TrustStat({ icon, label, sub }: { icon: React.ReactNode; label: string;
 }
 
 export function AuthScreen() {
-  const { navigate, signInAs } = useQQ();
+  const { navigate, signInAs, createAccount, viewParams, users } = useQQ();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
-  const [mode, setMode] = useState<"signin" | "create">("create");
+  const [mode, setMode] = useState<"signin" | "create">(viewParams.authMode ?? "create");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [intent, setIntent] = useState<"buyer" | "pro" | null>(null);
+  const [intent, setIntent] = useState<"buyer" | "pro" | null>(viewParams.roleIntent ?? null);
+  useNavigationGuard(!!email, "You have entered an email address. Leave this sign-in flow?");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -253,28 +256,41 @@ export function AuthScreen() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      if (mode === "signin") {
+        const normalized = email.trim().toLowerCase();
+        const match = users.find((user) => user.email?.toLowerCase() === normalized && (user.role === "buyer" || user.role === "pro") && (!intent || user.role === intent));
+        if (match) {
+          signInAs(match.id);
+          return;
+        }
+        setError("For this prototype, use one of the demo accounts below to enter the product.");
+        return;
+      }
       if (email.toLowerCase() === "ops@northstarlabs.example") {
         setMode("signin");
         setError("This email is already in use. Sign in instead, or use the demo accounts.");
         return;
       }
-      toast({ title: "Account created", description: `Welcome to QuickQuid. Complete your ${intent === "buyer" ? "Buyer" : "Pro"} profile to get started.` });
-      navigate("readiness");
+      const role = intent ?? "buyer";
+      createAccount(email, role);
+      toast({ title: "Account created", description: `Welcome to QuickQuid. Complete your ${role === "buyer" ? "Buyer" : "Pro"} profile and verification to get started.` });
     }, 900);
   }
+
+  const showRoleSelection = !intent && mode === "create";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="flex h-16 items-center px-4 sm:px-6 border-b border-border">
         <div className="flex items-center gap-2">
-          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
+          <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-8 w-auto" />
           <span className="font-semibold">QuickQuid</span>
         </div>
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={() => navigate("role_selection")}><ArrowLeft className="size-4" /> Back to home</Button>
+        <BackButton label="Back to home" className="ml-auto" />
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
-        {!intent ? (
+        {showRoleSelection ? (
           <div className="w-full max-w-2xl space-y-6">
             <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold tracking-tight">What are you here to do?</h1>
@@ -329,7 +345,9 @@ export function AuthScreen() {
           <Card className="w-full max-w-md p-6 space-y-4 elev-2">
             <div className="space-y-1">
               <h1 className="text-xl font-bold">{mode === "create" ? `Create your ${intent === "buyer" ? "Buyer" : "Pro"} account` : "Sign in"}</h1>
-              <p className="text-sm text-muted-foreground">Continue with email. We'll set up your profile next.</p>
+              <p className="text-sm text-muted-foreground">
+                {mode === "create" ? "Continue with email. We'll set up your profile next." : "Continue with email to access your QuickQuid account."}
+              </p>
             </div>
             <form onSubmit={submit} className="space-y-3">
               <div className="space-y-1.5">
@@ -355,16 +373,21 @@ export function AuthScreen() {
                     <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1042")}>Northstar Labs</Button>
                     <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1050")}>Verdant Retail</Button>
                   </>
-                ) : (
+                ) : intent === "pro" ? (
                   <>
                     <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2088")}>Akhil Menon</Button>
                     <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2099")}>Priya Nair</Button>
                     <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2101")}>Rahul Verma</Button>
                   </>
+                ) : (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("BUY-1042")}>Northstar Labs</Button>
+                    <Button variant="outline" size="sm" onClick={() => signInAs("PRO-2088")}>Akhil Menon</Button>
+                  </>
                 )}
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setIntent(null)}><ArrowLeft className="size-3.5" /> Back to role selection</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setIntent(null); setMode("create"); }}><ArrowLeft className="size-3.5" /> Back to role selection</Button>
           </Card>
         )}
       </main>

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import type { Role, ViewName } from "@/lib/qq/types";
 import { useToast } from "@/hooks/use-toast";
+import { BackButton, QuickQuidVerifiedBadge } from "@/components/qq/shared";
+import { assetPath } from "@/lib/asset-path";
 
 interface NavItem { label: string; view: ViewName; icon: React.ComponentType<{ className?: string }>; }
 
@@ -88,7 +90,7 @@ const ROLE_LABELS: Record<Role, string> = {
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
+      <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-8 w-auto" />
       <div className="leading-tight">
         <div className="font-semibold text-sm">QuickQuid</div>
         <div className="text-[10px] text-muted-foreground">the execution marketplace</div>
@@ -202,6 +204,7 @@ function RoleSwitcher() {
     { role: "risk" as Role, userId: "RSK-R01" },
     { role: "ops_manager" as Role, userId: "OPS-O01" },
   ];
+  const activeUser = users.find((user) => user.id === currentUserId);
   return (
     <div className="border-t border-border p-3">
       <div className="rounded-md border border-border bg-muted/30 p-2">
@@ -216,7 +219,7 @@ function RoleSwitcher() {
           <div className="flex items-center gap-2 min-w-0">
             <Avatar className="size-6 rounded"><AvatarFallback className="rounded bg-primary/10 text-primary text-[10px]">{currentUserId?.slice(0, 2).toUpperCase() ?? "V"}</AvatarFallback></Avatar>
             <div className="min-w-0">
-              <div className="text-xs font-medium truncate">{users.find((u) => u.id === currentUserId)?.name ?? "Visitor"}</div>
+              <div className="flex items-center gap-1"><span className="text-xs font-medium truncate">{activeUser?.name ?? "Visitor"}</span>{activeUser?.verificationStatus === "approved" && (activeUser.role === "buyer" || activeUser.role === "pro") && <QuickQuidVerifiedBadge compact />}</div>
               <div className="text-[10px] text-muted-foreground">{ROLE_LABELS[currentRole]}</div>
             </div>
           </div>
@@ -235,6 +238,7 @@ function RoleSwitcher() {
                 >
                   <Avatar className="size-5 rounded"><AvatarFallback className="rounded bg-muted text-[9px]">{user.name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
                   <span className="truncate">{user.name}</span>
+                  {user.verificationStatus === "approved" && (user.role === "buyer" || user.role === "pro") && <QuickQuidVerifiedBadge compact />}
                   <span className="ml-auto text-[10px] text-muted-foreground">{ROLE_LABELS[u.role]}</span>
                 </button>
               );
@@ -250,12 +254,14 @@ function RoleSwitcher() {
 }
 
 export function Header() {
-  const { setNotificationDrawer, notifications, currentUserId, currentRole, navigate, setMobileSidebar, setSupportWidget, toggleTheme, theme, setCommandOpen } = useQQ();
+  const { setNotificationDrawer, notifications, currentUserId, currentRole, view, navigate, setMobileSidebar, setSupportWidget, toggleTheme, theme, setCommandOpen } = useQQ();
   const unread = notifications.filter((n) => !n.read && n.userId === currentUserId).length;
   const showSearch = currentRole !== "visitor";
+  const roleHome = currentRole === "buyer" ? "buyer_dashboard" : currentRole === "pro" ? "pro_dashboard" : "admin_operations";
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-4">
       <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileSidebar(true)}><Menu className="size-5" /></Button>
+      {view !== roleHome && <BackButton label="Back" className="shrink-0" />}
       {showSearch && (
         <button
           onClick={() => setCommandOpen(true)}

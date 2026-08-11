@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { assetPath } from "@/lib/asset-path";
 import { useQQ } from "@/lib/qq/store";
+import { BackButton, useNavigationGuard } from "@/components/qq/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,17 +19,25 @@ export function ReadinessSummary() {
   const [authMode, setAuthMode] = React.useState<"create" | "signin">("create");
   const [onboarding, setOnboarding] = React.useState({ fullName: "", company: "", title: "", businessType: "Startup", city: "Kochi", terms: false });
 
-  if (!guestDraft) {
-    navigate("role_selection");
-    return null;
-  }
+  React.useEffect(() => {
+    if (!guestDraft) navigate("role_selection", undefined, { replace: true });
+  }, [guestDraft, navigate]);
+
+  const hasEdits = mode === "auth"
+    ? !!email
+    : mode === "onboarding"
+      ? !!onboarding.fullName || !!onboarding.company || !!onboarding.title || onboarding.city !== "Kochi" || onboarding.terms
+      : false;
+  useNavigationGuard(hasEdits, "You have unsaved account details. Leave this step?");
+
+  if (!guestDraft) return null;
 
   function startAuth() { setMode("auth"); }
   function startOver() {
     if (!confirm("Start over? This will clear your readiness draft.")) return;
     sessionStorage.removeItem("qq_guest_readiness_draft");
     setGuestDraft(null);
-    navigate("role_selection");
+    navigate("role_selection", undefined, { replace: true });
   }
 
   function handleAuth() {
@@ -138,6 +148,7 @@ export function ReadinessSummary() {
           <Button className="w-full h-11" onClick={handleOnboarding} disabled={!onboarding.fullName || !onboarding.company || !onboarding.terms}>
             Save profile and restore project
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setMode("auth")}><ArrowLeft className="size-3.5" /> Back to account step</Button>
         </Card>
       </div>
     );
@@ -148,14 +159,17 @@ export function ReadinessSummary() {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("guest_readiness_chat")} className="flex items-center gap-2">
-            <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-7 w-auto" />
+          <div className="flex items-center gap-2">
+            <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-7 w-auto" />
             <span className="font-semibold text-sm">QuickQuid</span>
-          </button>
+          </div>
           <div className="h-4 w-px bg-border" />
           <span className="text-sm font-medium">Prepared project summary</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={startOver}><RotateCcw className="size-3.5" /> Start over</Button>
+        <div className="flex items-center gap-1">
+          <BackButton label="Back" />
+          <Button variant="ghost" size="sm" onClick={startOver}><RotateCcw className="size-3.5" /> Start over</Button>
+        </div>
       </header>
 
       <div className="mx-auto max-w-2xl w-full px-4 py-8 space-y-6">

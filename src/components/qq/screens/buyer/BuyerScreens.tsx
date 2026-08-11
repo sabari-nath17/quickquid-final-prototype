@@ -34,7 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow, ActivityTimeline, AlertBanner,
+  PageHeader, EmptyState, SectionCard, QQProgress, MaskedField, AuditRow, ActivityTimeline, AlertBanner, useNavigationGuard, QuickQuidVerifiedBadge,
 } from "@/components/qq/shared";
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
@@ -384,10 +384,11 @@ function QuickStats({ stats }: { stats: { label: string; value: number; icon: Re
 // =================================================================
 export function BuyerProfile() {
   const {
-    currentUserId, buyerProfiles, updateBuyerProfile, addAudit, navigate,
+    currentUserId, users, buyerProfiles, updateBuyerProfile, addAudit, navigate,
   } = useQQ();
   const { toast } = useToast();
   const profile = buyerProfiles.find((b) => b.userId === currentUserId);
+  const verifiedClient = users.some((user) => user.id === currentUserId && user.verificationStatus === "approved");
 
   const [displayName, setDisplayName] = React.useState(profile?.displayName ?? "");
   const [logoColor, setLogoColor] = React.useState(profile?.logoColor ?? "#0F766E");
@@ -661,7 +662,7 @@ export function BuyerProfile() {
                   <AvatarFallback className="rounded-md text-white font-medium">{initials(displayName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold">{displayName || "—"}</h3>
+                  <div className="flex items-center gap-1.5 flex-wrap"><h3 className="font-semibold">{displayName || "—"}</h3>{verifiedClient && <QuickQuidVerifiedBadge compact />}</div>
                   <p className="text-xs text-muted-foreground">{industry || "Industry not set"}</p>
                   {website && (
                     <a href={website} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline">
@@ -1109,7 +1110,10 @@ function TalentDetailPane({
                 <AvatarFallback className="rounded-md text-white text-lg font-medium">{initials(pro.displayName)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-semibold">{pro.displayName}</h1>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl font-semibold">{pro.displayName}</h1>
+                  {pro.payoutReadiness === "approved" && pro.skillVerifications?.some((item) => item.status === "approved") && <QuickQuidVerifiedBadge />}
+                </div>
                 <p className="text-sm text-muted-foreground">{pro.headline}</p>
                 <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Star className="size-3 fill-amber-400 text-amber-400" />{pro.rating}</span>
@@ -1279,7 +1283,7 @@ function GigDetailPane({ gig, onBack, onRequest }: { gig: GigDraft; onBack: () =
 // =================================================================
 export function BuyerBriefNew() {
   const {
-    currentUserId, buyerProfiles, upsertBrief, navigate, addAudit, viewParams,
+    currentUserId, buyerProfiles, upsertBrief, navigate, goBack, addAudit, viewParams,
   } = useQQ();
   const { toast } = useToast();
   const profile = buyerProfiles.find((b) => b.userId === currentUserId);
@@ -1296,6 +1300,9 @@ export function BuyerBriefNew() {
   const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
   const [publishing, setPublishing] = React.useState(false);
   const [draftId] = React.useState<string>(() => genId("BRF"));
+
+  const dirty = !!title || !!objective || deliverables.some(Boolean) || acceptanceCriteria.some(Boolean) || exclusions.some(Boolean) || budget !== 50000 || timeline !== "4 weeks" || visibility !== "open";
+  useNavigationGuard(dirty, "This brief has unsaved changes. Leave without publishing?");
 
   const lowBudget = budget < 20000 && budget > 0;
 
@@ -1366,7 +1373,7 @@ export function BuyerBriefNew() {
         title="Create a brief"
         description="A clear brief helps Pros submit accurate proposals. Be specific about scope, deliverables, and exclusions."
       >
-        <Button variant="outline" onClick={() => navigate("buyer_dashboard")}><ArrowLeft className="size-4" /> Cancel</Button>
+        <Button variant="outline" onClick={goBack}><ArrowLeft className="size-4" /> Cancel</Button>
       </PageHeader>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-6">
@@ -1491,7 +1498,7 @@ export function BuyerBriefNew() {
           <StickyCtaBar>
             <AutosaveIndicator state={saveState} onRetry={() => setSaveState("idle")} compact />
             <div className="flex gap-2 sm:ml-auto">
-              <Button variant="outline" onClick={() => navigate("buyer_dashboard")}>Discard</Button>
+              <Button variant="outline" onClick={goBack}>Discard</Button>
               <Button onClick={publish} disabled={publishing}>
                 {publishing ? <><Loader2 className="size-4 animate-spin" /> Publishing…</> : <><Send className="size-4" /> Publish brief</>}
               </Button>

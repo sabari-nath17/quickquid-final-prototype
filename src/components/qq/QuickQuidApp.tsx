@@ -19,6 +19,7 @@ import { AdminOperations, AdminKyc, AdminPayments, AdminPayouts, AdminRefunds, A
 import { MediaLifecycleDemo } from "@/components/qq/screens/admin/MediaLifecycleDemo";
 import { SupportScreen, PublicProfileScreen, BriefDetailPublic, NotificationsScreen } from "@/components/qq/screens/support/SupportScreens";
 import type { ViewName } from "@/lib/qq/types";
+import { assetPath } from "@/lib/asset-path";
 
 const ROUTES: Partial<Record<ViewName, React.ComponentType>> = {
   role_selection: LandingPage,
@@ -179,7 +180,7 @@ export function QuickQuidApp() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <img src="/quickquid-logo.svg" alt="QuickQuid" className="h-8 w-auto" />
+          <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-8 w-auto" />
           <span className="font-medium">QuickQuid</span>
         </div>
       </div>
@@ -194,7 +195,7 @@ export function QuickQuidApp() {
       <ThemeProvider>
         <>
           <ViewRouter />
-          <SupportWidget />
+          {view !== "role_selection" && <SupportWidget />}
           <CommandPalette />
         </>
       </ThemeProvider>
