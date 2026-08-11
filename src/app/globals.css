@@ -320,6 +320,44 @@
   }
 }
 
+/* These surfaces intentionally sit in the utilities layer: Tailwind's `bg-card`
+   utility is also a utility and otherwise wins over the semantic component layer. */
+@layer utilities {
+  .qq-app-shell .qq-action-panel--buyer.qq-card {
+    border-color: var(--qq-cobalt);
+    background: var(--qq-cobalt);
+    color: #fff;
+  }
+  .qq-app-shell .qq-action-panel--pro.qq-card {
+    border-color: #F8B6A9;
+    background: var(--qq-coral-soft);
+  }
+  .qq-app-shell .qq-action-panel--admin.qq-card {
+    border-color: #C7C7FF;
+    background: var(--qq-indigo-soft);
+  }
+  .qq-app-shell .qq-search-panel.qq-card {
+    border-color: color-mix(in srgb, var(--qq-role-accent) 24%, var(--border));
+    background: var(--qq-role-soft);
+  }
+  .qq-app-shell .qq-metric-card--cobalt.qq-card { border-top-color: var(--qq-cobalt); background: #F7F8FF; }
+  .qq-app-shell .qq-metric-card--coral.qq-card { border-top-color: var(--qq-coral); background: #FFF8F5; }
+  .qq-app-shell .qq-metric-card--mint.qq-card { border-top-color: var(--qq-mint); background: #F5FCF8; }
+  .qq-app-shell .qq-metric-card--gold.qq-card { border-top-color: var(--qq-gold); background: #FFFCF4; }
+  .qq-app-shell .qq-metric-card--indigo.qq-card { border-top-color: var(--qq-indigo); background: #F8F8FF; }
+  .qq-app-shell .qq-readiness-panel.qq-card {
+    border-color: #9EE5C7;
+    background: var(--qq-mint-soft);
+  }
+  .qq-app-shell .qq-private-panel.qq-card {
+    border-color: #C7C7FF;
+    background: var(--qq-indigo-soft);
+  }
+  .qq-app-shell .qq-queue-card--money.qq-card { border-top: 3px solid var(--qq-gold); background: #FFFCF4; }
+  .qq-app-shell .qq-queue-card--trust.qq-card { border-top: 3px solid var(--qq-coral); background: #FFF8F5; }
+  .qq-app-shell .qq-queue-card--operations.qq-card { border-top: 3px solid var(--qq-indigo); background: #F8F8FF; }
+}
+
 main { view-transition-name: qq-main; }
 @view-transition { navigation: auto; }
 
