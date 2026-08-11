@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { assetPath } from "@/lib/asset-path";
 import {
   PageHeader,
   EmptyState,
@@ -680,6 +681,18 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+function previewKindLabel(kind?: "identity" | "experience" | "education" | "certification" | "project" | "portfolio") {
+  const labels = {
+    identity: "Identity snapshot",
+    experience: "Experience",
+    education: "Education",
+    certification: "Certification",
+    project: "Project preview",
+    portfolio: "Portfolio preview",
+  } as const;
+  return kind ? labels[kind] : "Provider preview";
+}
+
 export function PublicProfileScreen() {
   const {
     viewParams,
@@ -705,6 +718,8 @@ export function PublicProfileScreen() {
   const [githubSyncing, setGithubSyncing] = React.useState(false);
   const githubLink = profile?.externalLinks?.find((link) => link.provider === "github");
   const syncedPreviews = profile?.externalProfilePreviews ?? [];
+  const linkedInIdentityPreview = syncedPreviews.find((preview) => preview.provider === "linkedin" && preview.kind === "identity" && preview.imageUrl);
+  const publicAvatarSrc = linkedInIdentityPreview?.imageUrl?.startsWith("/") ? assetPath(linkedInIdentityPreview.imageUrl) : linkedInIdentityPreview?.imageUrl;
 
   React.useEffect(() => {
     const handle = githubLink ? externalProfileHandle(githubLink) : null;
@@ -818,6 +833,7 @@ export function PublicProfileScreen() {
                 className="size-16 rounded-md shrink-0"
                 style={{ backgroundColor: user.avatarColor ?? "#7C3AED" }}
               >
+                {publicAvatarSrc && <AvatarImage src={publicAvatarSrc} alt={`${profile.displayName} provider profile image`} className="object-cover" />}
                 <AvatarFallback className="rounded-md text-white font-semibold text-lg">
                   {initials(profile.displayName)}
                 </AvatarFallback>
@@ -979,7 +995,33 @@ export function PublicProfileScreen() {
                   {githubProjects.length > 0 && <p className="mt-3 text-[11px] text-muted-foreground">Public repository activity only. A GitHub contribution calendar needs an authenticated GraphQL connection and is not inferred from this public sync.</p>}
                 </div>
               )}
-              {syncedPreviews.length > 0 && <div className="mt-5 border-t border-border pt-4"><div className="mb-2 flex items-center gap-2 text-sm font-medium"><ExternalLink className="size-4" /> Other provider sync previews</div><p className="mb-3 text-xs text-muted-foreground">LinkedIn, Behance, Dribbble, and portfolio metadata are shown from the profile’s provider-shaped sync record. Production adapters must replace demo fixtures with consented API responses.</p><div className="grid gap-2 sm:grid-cols-2">{syncedPreviews.map((preview) => <a key={`${preview.provider}-${preview.url}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="overflow-hidden rounded-md border border-border hover:border-primary/50">{preview.imageUrl && <div className="h-24 bg-muted"><img src={preview.imageUrl} alt="" loading="lazy" className="size-full object-cover" /></div>}<div className="p-3"><div className="flex items-center justify-between gap-2"><span className="text-xs font-medium">{externalProviderLabel(preview.provider)}</span>{preview.source === "demo_fixture" && <Badge variant="outline" className="text-[10px]">Demo sync fixture</Badge>}</div><div className="mt-1 text-sm font-medium">{preview.title}</div>{preview.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{preview.description}</p>}{preview.tags && <div className="mt-2 flex flex-wrap gap-1">{preview.tags.map((tag) => <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>)}</div>}{preview.stats && <div className="mt-2 text-[10px] text-muted-foreground">{preview.stats.join(" · ")}</div>}</div></a>)}</div></div>}
+              {syncedPreviews.length > 0 && (
+                <div className="mt-5 border-t border-border pt-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium"><ExternalLink className="size-4" /> Provider-connected profile</div>
+                  <p className="mb-3 text-xs text-muted-foreground">These cards show the full display contract: identity, optional experience/education, self-declared certification, and project previews. Demo data is clearly marked; production adapters must use consented provider responses.</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {syncedPreviews.map((preview) => {
+                      const imageSrc = preview.imageUrl?.startsWith("/") ? assetPath(preview.imageUrl) : preview.imageUrl;
+                      return (
+                        <a key={`${preview.provider}-${preview.url}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="overflow-hidden rounded-md border border-border transition-colors hover:border-primary/50 hover:bg-muted/20">
+                          {imageSrc && <div className="h-28 bg-muted"><img src={imageSrc} alt="" loading="lazy" className="size-full object-cover" /></div>}
+                          <div className="p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-medium">{externalProviderLabel(preview.provider)} · {previewKindLabel(preview.kind)}</span>
+                              {preview.source === "demo_fixture" && <Badge variant="outline" className="shrink-0 text-[10px]">Demo sync</Badge>}
+                            </div>
+                            <div className="mt-1 text-sm font-medium">{preview.title}</div>
+                            {preview.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{preview.description}</p>}
+                            {preview.details && preview.details.length > 0 && <dl className="mt-3 space-y-1.5 border-t border-border pt-2 text-xs">{preview.details.map((detail) => <div key={`${detail.label}-${detail.value}`} className="grid grid-cols-[88px_1fr] gap-2"><dt className="text-muted-foreground">{detail.label}</dt><dd className="font-medium text-foreground">{detail.value}</dd></div>)}</dl>}
+                            {preview.tags && <div className="mt-2 flex flex-wrap gap-1">{preview.tags.map((tag) => <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>)}</div>}
+                            <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-[10px] text-muted-foreground"><span>{preview.stats?.join(" · ")}</span>{preview.syncedAt && <span>· refreshed {formatDate(preview.syncedAt)}</span>}</div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </SectionCard>
           )}
 

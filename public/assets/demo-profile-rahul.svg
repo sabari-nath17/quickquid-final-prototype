@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Rahul Verma demo profile visual">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#db2777"/><stop offset="1" stop-color="#fb923c"/></linearGradient></defs>
+  <rect width="320" height="180" fill="url(#g)"/><circle cx="160" cy="71" r="35" fill="#a76b4f"/><path d="M119 69c7-39 74-42 82 3-24-18-60-17-82-3Z" fill="#18181b"/><path d="M94 180c4-50 34-72 66-72s61 22 66 72" fill="#18181b"/><path d="M43 31l17 10v20L43 71 26 61V41Z" fill="#fff" fill-opacity=".18"/><text x="22" y="158" fill="#fff" font-family="Arial, sans-serif" font-size="16" font-weight="700">DEMO PROFILE · RV</text>
+</svg>

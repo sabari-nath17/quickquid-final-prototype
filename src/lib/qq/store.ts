@@ -271,10 +271,13 @@ function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc" | "user
   const proProfiles = state.proProfiles.map((profile) => {
     const seed = seedByUser.get(profile.userId);
     if (!seed || profile.onboardingStatus === "not_started") return profile;
+    const hasOnlyDemoPreviews = profile.externalProfilePreviews?.every((preview) => preview.source === "demo_fixture") ?? false;
     return {
       ...profile,
       externalLinks: profile.externalLinks?.length ? profile.externalLinks : seed.externalLinks,
-      externalProfilePreviews: profile.externalProfilePreviews?.length ? profile.externalProfilePreviews : seed.externalProfilePreviews,
+      // Refresh only prototype-owned demo fixtures so old local sessions pick up
+      // the latest display contract; never overwrite a real future provider sync.
+      externalProfilePreviews: !profile.externalProfilePreviews?.length || hasOnlyDemoPreviews ? seed.externalProfilePreviews : profile.externalProfilePreviews,
       portfolioItems: profile.portfolioItems.length ? profile.portfolioItems : seed.portfolioItems,
       onboardingStatus: seed.onboardingStatus ?? profile.onboardingStatus,
       payoutReadiness: seed.payoutReadiness,
@@ -289,10 +292,11 @@ function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc" | "user
     const profile = profileByUser.get(submission.userId);
     if (!profile || submission.role !== "pro") return submission;
     const seedKyc = seedKycByUser.get(submission.userId);
+    const snapshotHasOnlyDemoPreviews = submission.profileSnapshot?.externalProfilePreviews?.every((preview) => preview.source === "demo_fixture") ?? false;
     return {
       ...submission,
       externalLinks: submission.externalLinks ?? profile.externalLinks,
-      profileSnapshot: submission.profileSnapshot ?? {
+      profileSnapshot: !submission.profileSnapshot || snapshotHasOnlyDemoPreviews ? {
         primaryCategory: profile.primaryCategory,
         secondaryCategory: profile.secondaryCategory,
         skills: profile.skills,
@@ -300,7 +304,7 @@ function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc" | "user
         externalProfilePreviews: profile.externalProfilePreviews,
         portfolioItemIds: profile.portfolioItems.map((item) => item.id),
         submittedAt: submission.submittedAt,
-      },
+      } : submission.profileSnapshot,
       status: seedKyc?.status ?? submission.status,
       resolvedAt: seedKyc?.resolvedAt ?? submission.resolvedAt,
     };

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Priya Nair demo profile visual">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0891b2"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+  <rect width="320" height="180" fill="url(#g)"/><circle cx="160" cy="71" r="35" fill="#c98762"/><path d="M119 75c-1-50 81-48 82 1-20-18-61-24-82-1Z" fill="#27272a"/><path d="M94 180c5-50 34-72 66-72s61 22 66 72" fill="#27272a"/><circle cx="278" cy="37" r="18" fill="#fff" fill-opacity=".16"/><text x="22" y="158" fill="#fff" font-family="Arial, sans-serif" font-size="16" font-weight="700">DEMO PROFILE · PN</text>
+</svg>

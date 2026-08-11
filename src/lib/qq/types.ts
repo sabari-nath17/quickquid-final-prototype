@@ -155,12 +155,18 @@ export interface ExternalProfileLink {
 
 export interface ExternalProfilePreview {
   provider: ExternalProfileProvider;
+  /** What this card represents; never use it as a verification decision. */
+  kind?: "identity" | "experience" | "education" | "certification" | "project" | "portfolio";
   url: string;
   title: string;
   description?: string;
   imageUrl?: string;
   tags?: string[];
   stats?: string[];
+  /** Structured provider-returned fields rendered as label/value rows. */
+  details?: { label: string; value: string }[];
+  /** Expiring provider image URLs must be refreshed rather than persisted indefinitely. */
+  imageExpiresAt?: string;
   source: "github_api" | "provider_api" | "demo_fixture" | "manual";
   syncedAt?: string;
 }
