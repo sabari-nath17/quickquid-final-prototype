@@ -1214,15 +1214,14 @@ export function ProBriefs() {
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {sortedBriefs.map((b) => (
-            <div key={b.id} className="relative">
-              {sortOrder === "best_fit" && fitScore(b) > 0 && <Badge className="absolute left-3 top-3 z-10 border border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">Category-aligned</Badge>}
-              <BriefCard
-                brief={b}
-                onOpen={() => setSelectedId(b.id)}
-                onApply={() => applyToBrief(b)}
-                showApply={payoutReady && !myAppliedBriefIds.has(b.id)}
-              />
-            </div>
+            <BriefCard
+              key={b.id}
+              brief={b}
+              eyebrow={sortOrder === "best_fit" && fitScore(b) > 0 ? <Badge className="border border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">Category-aligned</Badge> : undefined}
+              onOpen={() => setSelectedId(b.id)}
+              onApply={() => applyToBrief(b)}
+              showApply={payoutReady && !myAppliedBriefIds.has(b.id)}
+            />
           ))}
         </div>
       )}

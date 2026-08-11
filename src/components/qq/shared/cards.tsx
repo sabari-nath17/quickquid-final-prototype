@@ -85,11 +85,12 @@ export function ProfileCard({ profile, onClick }: { profile: ProProfile; onClick
   );
 }
 
-export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true }: { brief: Brief; onOpen?: () => void; onApply?: () => void; onSave?: () => void; showApply?: boolean }) {
+export function BriefCard({ brief, onOpen, onApply, onSave, showApply = true, eyebrow }: { brief: Brief; onOpen?: () => void; onApply?: () => void; onSave?: () => void; showApply?: boolean; eyebrow?: React.ReactNode }) {
   const m = statusMeta(brief.status);
   const buyerVerified = useQQ((state) => state.users.some((user) => user.id === brief.buyerId && user.verificationStatus === "approved"));
   return (
     <Card className="p-4 hover:shadow-md transition-all flex flex-col gap-3 text-left h-full">
+      {eyebrow && <div className="-mb-1">{eyebrow}</div>}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <button className="text-left" onClick={onOpen}>
