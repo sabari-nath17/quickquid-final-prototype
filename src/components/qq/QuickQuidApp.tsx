@@ -134,7 +134,7 @@ function Breadcrumb() {
 }
 
 export function QuickQuidApp() {
-  const { view, currentRole, hydrated, navigate, payments, normalizeSlaTimestamps, priorityBoosts, updatePriorityBoost, addAudit } = useQQ();
+  const { view, currentRole, currentUserId, proProfiles, hydrated, navigate, payments, normalizeSlaTimestamps, priorityBoosts, updatePriorityBoost, addAudit } = useQQ();
   const [mounted, setMounted] = React.useState(false);
   const [autoNormalized, setAutoNormalized] = React.useState(false);
   const [expiryChecked, setExpiryChecked] = React.useState(false);
@@ -153,6 +153,16 @@ export function QuickQuidApp() {
       setExpiryChecked(true);
     }
   }, [mounted, hydrated, expiryChecked, priorityBoosts, updatePriorityBoost, addAudit]);
+
+  // New Pros must complete the submitted onboarding snapshot before any paid-work surface is reachable.
+  React.useEffect(() => {
+    if (!mounted || !hydrated || currentRole !== "pro") return;
+    const profile = proProfiles.find((item) => item.userId === currentUserId);
+    const gated: ViewName[] = ["pro_dashboard", "pro_briefs", "pro_proposals", "pro_contract", "pro_payouts", "pro_gigs", "pro_gig_new", "pro_gig_detail"];
+    if (profile && profile.onboardingStatus !== "approved" && gated.includes(view)) {
+      navigate("readiness", undefined, { replace: true });
+    }
+  }, [mounted, hydrated, currentRole, currentUserId, proProfiles, view, navigate]);
 
   // On hydration, always show the landing page first.
   // Previous role is preserved in state but the user must explicitly sign in

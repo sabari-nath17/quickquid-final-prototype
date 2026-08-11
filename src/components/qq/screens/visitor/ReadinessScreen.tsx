@@ -14,7 +14,10 @@ import { StatusBadge } from "@/components/qq/shared/StatusBadge";
 import { EvidenceDropzone } from "@/components/qq/shared/EvidenceDropzone";
 import { genId, maskAccount, maskIfsc, maskPan } from "@/lib/qq/format";
 import { CheckCircle2, Clock, AlertTriangle, XCircle, FileText, Wallet, ShieldCheck, ArrowRight, Info, AlertCircle } from "lucide-react";
-import type { KycSubmission } from "@/lib/qq/types";
+import type { KycSubmission, SkillVerification, ProOnboardingSnapshot } from "@/lib/qq/types";
+import { CATEGORIES } from "@/lib/qq/format";
+import { externalProviderLabel } from "@/lib/qq/external";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function ReadinessScreen() {
   const { currentRole, currentUserId, proProfiles, buyerProfiles, kyc, navigate, setKycModal, addAudit } = useQQ();
@@ -29,14 +32,18 @@ export function ReadinessScreen() {
 
   if (currentRole === "visitor") return null;
 
+  const submittedSkills = proProfile?.skillVerifications ?? [];
+  const allSkillsSubmitted = isPro && !!proProfile?.skills.length && proProfile.skills.every((skill) => submittedSkills.some((item) => item.skill === skill && !!item.evidence));
+  const proSetupComplete = isPro && !!proProfile?.headline.trim() && !!proProfile?.bio.trim() && !!proProfile?.primaryCategory && !!proProfile?.skills.length && !!proProfile?.portfolioItems.length && (proProfile.externalLinks?.length ?? 0) > 0;
   const proItems = [
     { label: "Account created", done: !!currentUserId },
-    { label: "Personal profile", done: isPro ? !!proProfile?.bio : !!buyerProfile?.companyDescription, note: "Complete your profile so the right people can evaluate you quickly." },
+    { label: "Profile, category & skills", done: isPro ? proSetupComplete : !!buyerProfile?.companyDescription, note: isPro ? "Set a category, describe your work, add skills, a portfolio item, and connect at least one public proof link." : "Complete your profile so the right people can evaluate you quickly." },
+    { label: "Public proof links", done: isPro ? (proProfile?.externalLinks?.length ?? 0) > 0 : true, note: isPro ? "GitHub, LinkedIn, Behance, Dribbble, or another public work source." : undefined },
     { label: "Identity review", done: myKyc?.status === "approved", note: myKyc?.status === "under_review" ? "Under Admin review. Target: 24 hours." : myKyc?.status === "rejected" ? `Rejected: ${myKyc.rejectionReason}` : undefined },
-    { label: "Category evidence", done: isPro ? (proProfile?.portfolioItems.length ?? 0) > 0 : true },
+    { label: "Category skill evidence", done: isPro ? allSkillsSubmitted : true, note: isPro ? "Every selected skill is submitted to Admin for individual review." : undefined },
     { label: "Payout details", done: isPro ? proProfile?.payoutReadiness === "approved" : true, note: isPro && proProfile?.payoutReadiness === "approved" ? "Approved payout details on file" : "Add payout details before applying for paid work" },
-    { label: "Admin review", done: isPro ? proProfile?.payoutReadiness === "approved" : true },
-    { label: "Proposal access", done: isPro ? proProfile?.payoutReadiness === "approved" : true, note: "Your profile is visible, but proposal access may remain limited until the required review steps are complete." },
+    { label: "Admin approval", done: isPro ? proProfile?.onboardingStatus === "approved" : myKyc?.status === "approved", note: "No public trust badge or proposal access is granted before review." },
+    { label: "Proposal access", done: isPro ? proProfile?.onboardingStatus === "approved" && proProfile?.payoutReadiness === "approved" : true, note: "Your profile may be visible, but paid-work actions remain gated until verification is complete." },
   ];
 
   const buyerItems = [
@@ -51,13 +58,13 @@ export function ReadinessScreen() {
   const items = isPro ? proItems : buyerItems;
   const done = items.filter((i) => i.done).length;
   const pct = Math.round((done / items.length) * 100);
-  const blocked = isPro ? proProfile?.payoutReadiness !== "approved" : !buyerProfile?.orgDetails || myKyc?.status !== "approved";
+  const blocked = isPro ? proProfile?.onboardingStatus !== "approved" || proProfile?.payoutReadiness !== "approved" : !buyerProfile?.orgDetails || myKyc?.status !== "approved";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Readiness dashboard"
-        description="Complete these steps to unlock the full QuickQuid experience. We do not block browsing or drafting behind full KYC — only high-risk actions are gated."
+        description="Complete these steps to unlock the full QuickQuid experience. Draft profile work stays available while paid-work and publishing actions remain gated until review."
         status={<StatusBadge tone={pct === 100 ? "success" : pct >= 50 ? "pending" : "warning"} icon>{pct === 100 ? "Ready" : `${pct}% complete`}</StatusBadge>}
       />
 
@@ -68,15 +75,15 @@ export function ReadinessScreen() {
             <div className="mt-4 flex flex-wrap gap-2">
               {isPro ? (
                 <>
-                  {!proProfile?.skills.length ? (
-                    <Button onClick={() => navigate("pro_profile")}><ShieldCheck className="size-4" /> Add skills before verification</Button>
-                  ) : !proProfile?.payoutReadiness || proProfile.payoutReadiness !== "approved" ? (
-                    <Button onClick={() => setKycModal(true)}><ShieldCheck className="size-4" /> Add verification & payout details</Button>
+                  {!proSetupComplete ? (
+                    <Button onClick={() => navigate("pro_profile")}><ShieldCheck className="size-4" /> Complete Pro onboarding</Button>
+                  ) : myKyc?.status !== "approved" ? (
+                    <Button onClick={() => setKycModal(true)}><ShieldCheck className="size-4" /> Submit onboarding for Admin review</Button>
                   ) : (
                     <Button onClick={() => navigate("pro_profile")}>Edit profile</Button>
                   )}
-                  <Button variant="outline" onClick={() => navigate("pro_briefs")}>Browse briefs</Button>
-                  {proProfile?.payoutReadiness === "approved" && <Button variant="outline" onClick={() => navigate("pro_dashboard")}>Go to dashboard <ArrowRight className="size-4" /></Button>}
+                  {proProfile?.onboardingStatus === "approved" && <Button variant="outline" onClick={() => navigate("pro_briefs")}>Browse briefs</Button>}
+                  {proProfile?.onboardingStatus === "approved" && proProfile?.payoutReadiness === "approved" && <Button variant="outline" onClick={() => navigate("pro_dashboard")}>Go to dashboard <ArrowRight className="size-4" /></Button>}
                 </>
               ) : (
                 <>
@@ -127,8 +134,8 @@ export function ReadinessScreen() {
                 <AlertTriangle className="size-4 mt-0.5 text-amber-600" />
                 <div className="text-sm">
                   <div className="font-medium text-amber-800 dark:text-amber-300">{isPro ? "Payout readiness required" : "Client readiness required"}</div>
-                  <p className="text-amber-700 dark:text-amber-400 mt-1">{isPro ? "Add payout details and skill evidence before applying for paid-work proposals." : "Add organization/billing details and submit authorized-signatory evidence before funding an accepted milestone."}</p>
-                  <Button size="sm" className="mt-2" onClick={() => setKycModal(true)}>{isPro ? "Add verification details" : "Verify client account"}</Button>
+                  <p className="text-amber-700 dark:text-amber-400 mt-1">{isPro ? "Complete the profile, category, public proof, per-skill evidence, identity, and payout review before applying for paid-work proposals." : "Add organization/billing details and submit authorized-signatory evidence before funding an accepted milestone."}</p>
+                  <Button size="sm" className="mt-2" onClick={() => isPro && !proSetupComplete ? navigate("pro_profile") : setKycModal(true)}>{isPro && !proSetupComplete ? "Complete Pro onboarding" : isPro ? "Submit for Admin review" : "Verify client account"}</Button>
                 </div>
               </div>
             </Card>
@@ -196,7 +203,8 @@ export function KycModal() {
   const [beneficiary, setBeneficiary] = React.useState("");
   const [bankName, setBankName] = React.useState("");
   const [docName, setDocName] = React.useState("");
-  const [skillEvidenceName, setSkillEvidenceName] = React.useState("");
+  const [skillEvidenceBySkill, setSkillEvidenceBySkill] = React.useState<Record<string, string>>({});
+  const [primaryCategory, setPrimaryCategory] = React.useState("");
   const [organizationName, setOrganizationName] = React.useState("");
   const [organizationEvidenceName, setOrganizationEvidenceName] = React.useState("");
   const [billingAddress, setBillingAddress] = React.useState("");
@@ -211,11 +219,16 @@ export function KycModal() {
   const buyerProfile = buyerProfiles.find((p) => p.userId === currentUserId);
   const isPro = user?.role === "pro";
   const steps = isPro ? ["Identity", "Skills & evidence", "Payout details"] : ["Signatory", "Organization", "Billing details"];
+  const submittedSkillEvidence = proProfile?.skills.map((skill) => ({
+    skill,
+    evidence: skillEvidenceBySkill[skill] || existing?.skillVerifications?.find((item) => item.skill === skill)?.evidence || "",
+  })) ?? [];
+  const allSkillEvidenceReady = isPro && submittedSkillEvidence.length > 0 && submittedSkillEvidence.every((item) => !!item.evidence);
   const stepReady = step === 0
     ? !!(docName || existing?.identityDocName) && (pan.trim().length === 10 || !!existing?.panMasked)
     : step === 1
       ? isPro
-        ? !!proProfile?.skills.length && !!(skillEvidenceName || existing?.skillVerifications?.some((item) => item.evidence))
+        ? !!primaryCategory && !!proProfile?.portfolioItems.length && allSkillEvidenceReady && ((proProfile?.externalLinks?.length ?? 0) > 0 || existing?.status === "approved")
         : !!organizationName.trim() && !!(organizationEvidenceName || existing?.organizationEvidenceName)
       : !!beneficiary.trim() && !!(account.trim() || existing?.accountNumberMasked) && !!(ifsc.trim() || existing?.ifscMasked) && !!bankName.trim() && (isPro || (!!billingAddress.trim() && !!billingContact.trim())) && consent;
 
@@ -228,6 +241,8 @@ export function KycModal() {
       if (proProfile?.payoutDetails?.bankName) {
         setBankName(proProfile.payoutDetails.bankName);
       }
+      setPrimaryCategory(proProfile?.primaryCategory ?? "");
+      setSkillEvidenceBySkill(Object.fromEntries((proProfile?.skillVerifications ?? existing?.skillVerifications ?? []).map((item) => [item.skill, item.evidence])));
       setOrganizationName(existing?.organizationName ?? buyerProfile?.orgDetails?.companyName ?? buyerProfile?.displayName ?? "");
       setOrganizationEvidenceName(existing?.organizationEvidenceName ?? "");
       setBillingAddress(buyerProfile?.orgDetails?.billingAddress ?? "");
@@ -242,12 +257,20 @@ export function KycModal() {
     setTimeout(() => {
       const id = existing?.id ?? genId("KYC");
       const submittedAt = new Date().toISOString();
-      const skillVerifications = isPro ? (proProfile?.skills.slice(0, 4) ?? []).map((skill) => ({
-        skill,
-        evidence: skillEvidenceName || "Portfolio and profile evidence",
+      const skillVerifications: SkillVerification[] | undefined = isPro ? submittedSkillEvidence.map((item) => ({
+        skill: item.skill,
+        evidence: item.evidence,
         status: "under_review" as const,
         submittedAt,
       })) : undefined;
+      const profileSnapshot: ProOnboardingSnapshot | undefined = isPro && proProfile ? {
+        primaryCategory,
+        secondaryCategory: proProfile.secondaryCategory,
+        skills: proProfile.skills,
+        externalLinks: proProfile.externalLinks ?? [],
+        portfolioItemIds: proProfile.portfolioItems.map((item) => item.id),
+        submittedAt,
+      } : undefined;
       const sub: KycSubmission = {
         id,
         userId: user.id,
@@ -263,6 +286,8 @@ export function KycModal() {
         organizationName: isPro ? undefined : organizationName || buyerProfile?.displayName || user.name,
         organizationEvidenceName: isPro ? undefined : organizationEvidenceName || existing?.organizationEvidenceName,
         skillVerifications,
+        externalLinks: isPro ? proProfile?.externalLinks ?? [] : undefined,
+        profileSnapshot,
         status: "under_review",
         submittedAt,
       };
@@ -270,7 +295,10 @@ export function KycModal() {
       updateUserVerification(user.id, "under_review");
       if (isPro) {
         updateProProfile(user.id, {
+          primaryCategory,
           payoutReadiness: "under_review",
+          onboardingStatus: "under_review",
+          onboardingSubmittedAt: submittedAt,
           skillVerifications,
           payoutDetails: { beneficiaryName: beneficiary || user.name, accountNumberMasked: account ? maskAccount(account) : existing?.accountNumberMasked ?? "", ifscMasked: ifsc ? maskIfsc(ifsc) : existing?.ifscMasked ?? "", bankName },
         });
@@ -327,16 +355,30 @@ export function KycModal() {
             {isPro ? (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="prof">Professional headline</Label>
-                  <Input id="prof" defaultValue={user?.headline ?? ""} placeholder="e.g. Product Designer and UX Researcher" />
+                  <Label>Primary category *</Label>
+                  <Select value={primaryCategory} onValueChange={setPrimaryCategory}>
+                    <SelectTrigger><SelectValue placeholder="Select the category you will be reviewed for" /></SelectTrigger>
+                    <SelectContent>{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">This category is included in the Admin review snapshot and controls where your approved work can be discovered.</p>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Skills submitted for verification</Label>
-                  <div className="flex flex-wrap gap-1.5">{(proProfile?.skills.slice(0, 4) ?? []).map((skill) => <span key={skill} className="rounded-md border border-border bg-muted/40 px-2 py-1 text-xs">{skill}</span>)}</div>
+                <div className="rounded-md border border-border bg-muted/30 p-3 text-sm">
+                  <div className="font-medium">Profile evidence sent to Admin</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{proProfile?.externalLinks?.length ? proProfile.externalLinks.map((link) => `${externalProviderLabel(link.provider)}: ${link.url}`).join(" · ") : "Add GitHub, LinkedIn, or another public proof link in your Pro profile before submitting."}</div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Skill evidence</Label>
-                  <EvidenceDropzone label="Upload case study, work sample, or repository evidence" accept="PDF, JPG, PNG, ZIP · max 25MB" onUploaded={(file) => setSkillEvidenceName(file.name)} />
+                <div className="space-y-2">
+                  <Label>Skill evidence — one evidence item per selected skill *</Label>
+                  {(proProfile?.skills ?? []).map((skill) => (
+                    <div key={skill} className="rounded-md border border-border p-2.5">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-sm font-medium">{skill}</span>
+                        {submittedSkillEvidence.find((item) => item.skill === skill)?.evidence && <CheckCircle2 className="size-4 text-emerald-600" aria-label={`${skill} evidence attached`} />}
+                      </div>
+                      <EvidenceDropzone label={`Upload evidence for ${skill}`} accept="PDF, JPG, PNG, ZIP · max 25MB" onUploaded={(file) => setSkillEvidenceBySkill((current) => ({ ...current, [skill]: file.name }))} />
+                      {submittedSkillEvidence.find((item) => item.skill === skill)?.evidence && <p className="mt-1 text-xs text-muted-foreground">{submittedSkillEvidence.find((item) => item.skill === skill)?.evidence}</p>}
+                    </div>
+                  ))}
+                  {!proProfile?.skills.length && <p className="text-xs text-destructive">Add skills in your Pro profile before submitting onboarding.</p>}
                   <p className="text-xs text-muted-foreground">Admin reviews each submitted skill separately. One approved skill plus approved identity unlocks the QuickQuid Verified tick.</p>
                 </div>
               </>

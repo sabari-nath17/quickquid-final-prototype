@@ -40,6 +40,17 @@ Desktop geometry was checked through both the current-run screenshot and rendere
 - Client verification intake renders exactly one modal from the authenticated shell (duplicate modal issue resolved).
 - GitHub Pages static export was served under its production base path and verified with loaded assets, zero horizontal overflow, and no browser console warnings/errors.
 
+## Pro onboarding and Admin review audit
+
+- New Pro account creation preserves Pro intent and lands on the readiness dashboard with paid-work actions gated.
+- Pro profile setup requires a primary category, a 50+ character bio, at least one selected skill, one public proof link, and a portfolio item before onboarding submission.
+- Verification intake captures identity, PAN, one evidence item for every selected skill, category, payout details, and consent. Uploaded evidence is persisted by filename in this frontend prototype and remains a production storage boundary.
+- Admin KYC queue shows the submitted category, identity document, status, SLA, and per-reviewer detail. The review drawer shows the immutable profile snapshot, public proof links, portfolio count, per-skill evidence/status, masked payout fields, and audit history.
+- Automated pre-checks are explicitly non-decisive. Identity, skill, payout, risk, moderation, and payment decisions remain permission-gated human actions.
+- Paid Pro routes, gig publishing, proposals, and priority boosts remain unavailable until onboarding and payout readiness are approved. Priority review remains restricted to Finance/Ops and prevents duplicate open boosts.
+- Public GitHub metadata is read-only, public-only, rate-limited in production, and fails closed without blocking unrelated profile work. LinkedIn is stored as a safe public link until a server-side OAuth adapter exists.
+- Current-run evidence: `audit-final/07-admin-pro-onboarding-review.png`.
+
 ## Findings
 
 No actionable P0, P1, or P2 issues remain.

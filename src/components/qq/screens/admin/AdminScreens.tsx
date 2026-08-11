@@ -32,6 +32,7 @@ import type {
   Role, AuditEvent, KycSubmission, PaymentEvidence, Payout, Refund, Dispute,
   GigDraft, OfflineInstrument, TrustSafetyCase,
 } from "@/lib/qq/types";
+import { externalProviderLabel } from "@/lib/qq/external";
 import {
   ShieldCheck, ShieldAlert, Clock, AlertTriangle, CheckCircle2, XCircle,
   Eye, EyeOff, FileText, Banknote, ArrowRight, ArrowLeft, Lock, PauseCircle,
@@ -65,6 +66,7 @@ function canProcessKyc(r: Role) { return r === "admin_support" || r === "ops_man
 function canViewAudit(r: Role) { return r === "finance" || r === "risk" || r === "ops_manager"; }
 function canExportPayoutBatches(r: Role) { return r === "finance" || r === "ops_manager"; }
 function canModerateGigs(r: Role) { return r === "admin_support" || r === "ops_manager"; }
+function canReviewPriority(r: Role) { return r === "finance" || r === "ops_manager"; }
 function canRevealMasked(r: Role) { return r === "risk" || r === "finance" || r === "ops_manager"; }
 function canManageDeletionExport(r: Role) { return r === "risk" || r === "ops_manager"; }
 
@@ -437,11 +439,12 @@ export function AdminKyc() {
     updateKyc(selected.id, { status: "approved", resolvedAt: new Date().toISOString() });
     if (selected.role === "pro") {
       const currentProfile = proProfiles.find((profile) => profile.userId === selected.userId);
+      const hasApprovedSkill = currentProfile?.skillVerifications?.some((item) => item.status === "approved") ?? false;
       updateProProfile(selected.userId, {
         payoutReadiness: "approved",
+        onboardingStatus: hasApprovedSkill ? "approved" : "under_review",
         payoutDetails: currentProfile?.payoutDetails ?? { beneficiaryName: selected.beneficiaryName, accountNumberMasked: selected.accountNumberMasked, ifscMasked: selected.ifscMasked, bankName: "Verified bank account" },
       });
-      const hasApprovedSkill = proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
       updateUserVerification(selected.userId, hasApprovedSkill ? "approved" : "under_review", currentUserId ?? undefined);
     } else {
       updateUserVerification(selected.userId, "approved", currentUserId ?? undefined);
@@ -455,7 +458,7 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "rejected", rejectionReason: reason, resolvedAt: new Date().toISOString(), identityDocStatus: "rejected" });
-    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected" });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected", onboardingStatus: "rejected" });
     updateUserVerification(selected.userId, "rejected", currentUserId ?? undefined);
     logAudit("KYC rejected", selected.id, oldStatus, "rejected", reason);
     toast({ title: "KYC rejected", description: reason, variant: "destructive" });
@@ -474,7 +477,7 @@ export function AdminKyc() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "pending_reverification" });
-    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "pending_reverification" });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "pending_reverification", onboardingStatus: "pending_reverification" });
     updateUserVerification(selected.userId, "under_review");
     logAudit("KYC more info requested", selected.id, oldStatus, "pending_reverification", reason);
     toast({ title: "More info requested", description: "User notified to resubmit." });
@@ -491,8 +494,9 @@ export function AdminKyc() {
     if (!selected) return;
     const note = status === "approved" ? "Submitted evidence demonstrates the claimed skill." : "Submitted evidence is not sufficient for this skill.";
     reviewSkillVerification(selected.userId, skill, status, note);
+    const profileSkills = proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications ?? [];
     updateKyc(selected.id, {
-      skillVerifications: (selected.skillVerifications ?? []).map((item) => item.skill === skill ? {
+      skillVerifications: (selected.skillVerifications ?? profileSkills).map((item) => item.skill === skill ? {
         ...item,
         status,
         reviewedAt: new Date().toISOString(),
@@ -508,6 +512,7 @@ export function AdminKyc() {
     { key: "id", header: "Ref", render: (k) => <span className="font-mono text-xs font-medium">{k.id}</span> },
     { key: "user", header: "User", render: (k) => <span>{k.userName}</span> },
     { key: "role", header: "Role", render: (k) => <Badge variant="outline" className="text-xs">{k.role}</Badge>, hideOnMobile: true },
+    { key: "category", header: "Category", render: (k) => <span className="text-xs">{k.profileSnapshot?.primaryCategory ?? (k.role === "pro" ? proProfiles.find((profile) => profile.userId === k.userId)?.primaryCategory ?? "—" : "Client")}</span>, hideOnMobile: true },
     { key: "doc", header: "Identity doc", render: (k) => <span className="text-xs">{k.identityDocName}</span>, hideOnMobile: true },
     { key: "status", header: "Status", render: (k) => <StatusBadge tone={statusMeta(k.status).tone}>{statusMeta(k.status).label}</StatusBadge> },
     { key: "risk", header: "Risk", render: (k) => k.riskFlag ? <Badge variant="outline" className="border-amber-300 text-amber-700"><AlertTriangle className="size-3" />Flagged</Badge> : <span className="text-muted-foreground">—</span> },
@@ -615,7 +620,23 @@ export function AdminKyc() {
                 )}
 
                 {selected.role === "pro" && (
-                  <SectionCard title="Skill verification" description="Review skills individually. The account earns QuickQuid Verified only after identity and at least one skill are approved.">
+                  <>
+                    <SectionCard title="Pro onboarding snapshot" description="This is the exact category, skills, public proof, and portfolio set submitted for this review. Changes after submission require a new review.">
+                      <div className="grid gap-3 text-sm sm:grid-cols-2">
+                        <div><div className="text-xs text-muted-foreground">Primary category</div><div className="font-medium">{selected.profileSnapshot?.primaryCategory ?? proProfiles.find((profile) => profile.userId === selected.userId)?.primaryCategory ?? "Not supplied"}</div></div>
+                        <div><div className="text-xs text-muted-foreground">Portfolio items</div><div className="font-medium">{selected.profileSnapshot?.portfolioItemIds.length ?? proProfiles.find((profile) => profile.userId === selected.userId)?.portfolioItems.length ?? 0}</div></div>
+                      </div>
+                      <div className="mt-3"><div className="text-xs text-muted-foreground">Public proof links</div><div className="mt-1 space-y-1">{(selected.externalLinks ?? selected.profileSnapshot?.externalLinks ?? proProfiles.find((profile) => profile.userId === selected.userId)?.externalLinks ?? []).map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="block truncate text-xs text-primary hover:underline">{externalProviderLabel(link.provider)} · {link.url}</a>)}{!(selected.externalLinks ?? selected.profileSnapshot?.externalLinks ?? proProfiles.find((profile) => profile.userId === selected.userId)?.externalLinks ?? []).length && <span className="text-xs text-destructive">No public proof link supplied.</span>}</div></div>
+                    </SectionCard>
+                    <SectionCard title="Automated pre-checks (non-decisive)" description="These checks help Admin triage a complete submission. They never approve identity, skill, payout, or risk on their own.">
+                      <ul className="space-y-1.5 text-sm">
+                        <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 size-4 text-emerald-600" />Submitted category, profile snapshot, and portfolio references are present.</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 size-4 text-emerald-600" />Public proof URLs are stored as reviewable links; production adapters must re-check ownership and availability server-side.</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 size-4 text-emerald-600" />Each selected skill has a separately reviewable evidence item.</li>
+                        <li className="flex items-start gap-2"><ShieldCheck className="mt-0.5 size-4 text-muted-foreground" />Sensitive identity and payout values remain masked until an authorized, audited reveal.</li>
+                      </ul>
+                    </SectionCard>
+                    <SectionCard title="Skill verification" description="Review skills individually. The account earns QuickQuid Verified only after identity and at least one skill are approved.">
                     <div className="space-y-2">
                       {(selected.skillVerifications ?? proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications ?? []).map((skill) => (
                         <div key={skill.skill} className="rounded-lg border border-border p-3">
@@ -637,7 +658,8 @@ export function AdminKyc() {
                       ))}
                       {(selected.skillVerifications ?? []).length === 0 && <p className="text-sm text-muted-foreground">No skill evidence was submitted.</p>}
                     </div>
-                  </SectionCard>
+                    </SectionCard>
+                  </>
                 )}
 
                 <SectionCard title={selected.role === "pro" ? "Payout details (masked)" : "Billing account details (masked)"} description="Reveal requires an authorized role and a reason. Each reveal is audited.">
@@ -775,7 +797,7 @@ function RiskFlagView() {
     if (!selected) return;
     const oldStatus = selected.status;
     updateKyc(selected.id, { status: "rejected", rejectionReason: reason, resolvedAt: new Date().toISOString() });
-    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected" });
+    if (selected.role === "pro") updateProProfile(selected.userId, { payoutReadiness: "rejected", onboardingStatus: "rejected" });
     updateUserVerification(selected.userId, "rejected", currentUserId ?? undefined);
     logAudit("Risk: KYC rejected", selected.id, oldStatus, "rejected", reason);
     toast({ title: "KYC rejected", variant: "destructive" });
@@ -786,11 +808,12 @@ function RiskFlagView() {
     updateKyc(selected.id, { status: "approved", resolvedAt: new Date().toISOString() });
     if (selected.role === "pro") {
       const currentProfile = proProfiles.find((profile) => profile.userId === selected.userId);
+      const hasApprovedSkill = currentProfile?.skillVerifications?.some((item) => item.status === "approved") ?? false;
       updateProProfile(selected.userId, {
         payoutReadiness: "approved",
+        onboardingStatus: hasApprovedSkill ? "approved" : "under_review",
         payoutDetails: currentProfile?.payoutDetails ?? { beneficiaryName: selected.beneficiaryName, accountNumberMasked: selected.accountNumberMasked, ifscMasked: selected.ifscMasked, bankName: "Verified bank account" },
       });
-      const hasApprovedSkill = proProfiles.find((profile) => profile.userId === selected.userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
       updateUserVerification(selected.userId, hasApprovedSkill ? "approved" : "under_review", currentUserId ?? undefined);
     } else {
       updateUserVerification(selected.userId, "approved", currentUserId ?? undefined);
@@ -2529,7 +2552,7 @@ export function AdminGigModeration() {
 // ===================== 10. AdminNotes =====================
 
 export function AdminNotes() {
-  const { adminNotes, currentRole, resetData, normalizeSlaTimestamps, toggleTheme, theme, navigate, addAudit, currentUserId, priorityBoosts, updatePriorityBoost } = useQQ();
+  const { adminNotes, currentRole, resetData, normalizeSlaTimestamps, toggleTheme, theme, navigate, addAudit, currentUserId, priorityBoosts, gigs, updatePriorityBoost } = useQQ();
   const [confirmReset, setConfirmReset] = React.useState(false);
   const openPriorityBoosts = priorityBoosts.filter((pb) => pb.paymentStatus === "payment_evidence_submitted" || pb.paymentStatus === "under_admin_verification");
   return (
@@ -2580,7 +2603,7 @@ export function AdminNotes() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Priority boost verification queue" description="Pro pays a separate marketing fee to boost gig visibility. Verify payment → activate priority. Priority fee is NOT commission (0% commission unchanged).">
+      <SectionCard title="Priority boost verification queue" description="Pro pays a separate marketing fee to boost gig visibility. Finance or Ops verifies the payment evidence, then the system activates the placement. Priority fee is NOT commission (0% commission unchanged).">
         {openPriorityBoosts.length === 0 ? (
           <EmptyState title="No pending priority boosts" description="All priority boost payments are verified." icon={Rocket} />
         ) : (
@@ -2589,19 +2612,20 @@ export function AdminNotes() {
               { key: "id", header: "Ref", render: (pb) => <span className="font-mono text-xs">{pb.id}</span> },
               { key: "pro", header: "Pro", render: (pb) => <span className="font-medium">{pb.proName}</span> },
               { key: "gig", header: "Gig", render: (pb) => <span className="text-xs">{pb.gigId}</span> },
+              { key: "title", header: "Gig title", render: (pb) => <span className="text-xs">{gigs.find((gig) => gig.id === pb.gigId)?.title ?? "Unavailable"}</span>, hideOnMobile: true },
               { key: "fee", header: "Priority fee", align: "right", render: (pb) => <span className="font-semibold tabular-nums">{formatINR(pb.priorityFee)}</span> },
               { key: "duration", header: "Duration", render: (pb) => <span>{pb.duration} days</span> },
               { key: "utr", header: "UTR", render: (pb) => <span className="font-mono text-xs">{pb.paymentReference ?? "—"}</span> },
               { key: "status", header: "Status", render: (pb) => <StatusBadge tone="pending">{pb.paymentStatus.replace(/_/g, " ")}</StatusBadge> },
               { key: "actions", header: "Actions", render: (pb) => (
                 <div className="flex gap-1">
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                  <Button size="sm" variant="outline" className="h-7 text-xs" disabled={!canReviewPriority(currentRole)} onClick={() => {
                     const start = new Date().toISOString();
                     const end = new Date(Date.now() + pb.duration * 86400000).toISOString();
                     updatePriorityBoost(pb.id, { paymentStatus: "active", priorityStart: start, priorityEnd: end, resolvedAt: start, makerId: currentUserId ?? undefined });
                     addAudit({ adminId: currentUserId ?? "", adminRole: currentRole, action: "Priority boost confirmed", entity: "PriorityBoost", entityId: pb.id, oldStatus: pb.paymentStatus, newStatus: "active", reason: `${formatINR(pb.priorityFee)} for ${pb.duration} days` });
                   }}><CheckCircle2 className="size-3" /> Confirm</Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs hover:text-destructive" onClick={() => {
+                  <Button size="sm" variant="ghost" className="h-7 text-xs hover:text-destructive" disabled={!canReviewPriority(currentRole)} onClick={() => {
                     updatePriorityBoost(pb.id, { paymentStatus: "rejected", rejectionReason: "UTR not found in bank statement", resolvedAt: new Date().toISOString() });
                     addAudit({ adminId: currentUserId ?? "", adminRole: currentRole, action: "Priority boost rejected", entity: "PriorityBoost", entityId: pb.id, oldStatus: pb.paymentStatus, newStatus: "rejected", reason: "UTR not found" });
                   }}><XCircle className="size-3" /></Button>
@@ -2612,6 +2636,7 @@ export function AdminNotes() {
             emptyMessage="No pending priority boosts."
           />
         )}
+        {!canReviewPriority(currentRole) && <div className="mt-3"><PermissionDenied action="Confirm or reject priority payment evidence" allowedRoles={["finance", "ops_manager"]} /></div>}
       </SectionCard>
 
       <SectionCard title="Implementation assumptions (v0.1)" description="Hard constraints for this prototype. Do not display contradicting features.">

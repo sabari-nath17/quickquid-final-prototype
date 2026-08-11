@@ -324,6 +324,8 @@ export const useQQ = create<QQState>()(
             primaryCategory: "",
             skills: [],
             skillVerifications: [],
+            externalLinks: [],
+            onboardingStatus: "not_started",
             portfolioItems: [],
             availability: "paused",
             responseTime: "Not set",
@@ -440,7 +442,10 @@ export const useQQ = create<QQState>()(
         const approvedSkill = proProfiles.find((profile) => profile.userId === userId)?.skillVerifications?.some((item) => item.status === "approved") ?? false;
         const approvedIdentity = s.kyc.some((submission) => submission.userId === userId && submission.status === "approved");
         return {
-          proProfiles,
+          proProfiles: proProfiles.map((profile) => profile.userId === userId ? {
+            ...profile,
+            onboardingStatus: approvedSkill && approvedIdentity ? "approved" : profile.onboardingStatus,
+          } : profile),
           users: s.users.map((user) => user.id === userId ? {
             ...user,
             verificationStatus: approvedSkill && approvedIdentity ? "approved" : user.verificationStatus,

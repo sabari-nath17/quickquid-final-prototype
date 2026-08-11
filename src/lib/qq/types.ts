@@ -140,6 +140,26 @@ export interface SkillVerification {
   reviewerNote?: string;
 }
 
+/** Public proof links are intentionally separate from private KYC evidence. */
+export type ExternalProfileProvider = "github" | "linkedin" | "behance" | "dribbble" | "website" | "other";
+
+export interface ExternalProfileLink {
+  provider: ExternalProfileProvider;
+  url: string;
+  label?: string;
+  status?: "self_declared" | "connected" | "reviewed";
+  lastSyncedAt?: string;
+}
+
+export interface ProOnboardingSnapshot {
+  primaryCategory: string;
+  secondaryCategory?: string;
+  skills: string[];
+  externalLinks: ExternalProfileLink[];
+  portfolioItemIds: string[];
+  submittedAt: string;
+}
+
 export interface ProProfile {
   userId: string;
   displayName: string;
@@ -149,6 +169,9 @@ export interface ProProfile {
   secondaryCategory?: string;
   skills: string[];
   skillVerifications?: SkillVerification[];
+  externalLinks?: ExternalProfileLink[];
+  onboardingStatus?: VerificationStatus;
+  onboardingSubmittedAt?: string;
   portfolioItems: PortfolioItem[];
   availability: Availability;
   responseTime: string;
@@ -454,6 +477,8 @@ export interface KycSubmission {
   organizationName?: string;
   organizationEvidenceName?: string;
   skillVerifications?: SkillVerification[];
+  externalLinks?: ExternalProfileLink[];
+  profileSnapshot?: ProOnboardingSnapshot;
   status: VerificationStatus;
   submittedAt: string;
   resolvedAt?: string;

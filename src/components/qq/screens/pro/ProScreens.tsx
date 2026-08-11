@@ -57,8 +57,9 @@ import {
 import type {
   ProProfile, Brief, Proposal, Contract, Milestone, Payout, Dispute, Review,
   GigDraft, PortfolioItem, DeliveryVersion, VerificationStatus, ProposalStatus,
-  ContractStatus, MilestoneStatus, DisputeCategory, PaymentEvidence, AuditEvent, KycSubmission,
+  ContractStatus, MilestoneStatus, DisputeCategory, PaymentEvidence, AuditEvent, KycSubmission, ExternalProfileProvider, ExternalProfileLink,
 } from "@/lib/qq/types";
+import { EXTERNAL_PROFILE_OPTIONS, externalProviderLabel, normalizeExternalProfileUrl } from "@/lib/qq/external";
 
 // ============================================================
 // Shared helpers
@@ -457,6 +458,8 @@ export function ProProfile() {
   const [newPortfolioDesc, setNewPortfolioDesc] = React.useState("");
   const [newPortfolioUrl, setNewPortfolioUrl] = React.useState("");
   const [newPortfolioCategory, setNewPortfolioCategory] = React.useState(CATEGORIES[0]);
+  const [externalProvider, setExternalProvider] = React.useState<ExternalProfileProvider>("github");
+  const [externalUrl, setExternalUrl] = React.useState("");
 
   // payout editor local state
   const [beneficiary, setBeneficiary] = React.useState("");
@@ -510,6 +513,27 @@ export function ProProfile() {
 
   function removePortfolioItem(id: string) {
     patch({ portfolioItems: profile!.portfolioItems.filter((p) => p.id !== id) });
+  }
+
+  function addExternalLink() {
+    const url = normalizeExternalProfileUrl(externalUrl, externalProvider);
+    if (!url) {
+      toast({ title: "Use a valid public HTTPS profile URL", description: "Contact, payment, messaging, and unsupported host links are not accepted.", variant: "destructive" });
+      return;
+    }
+    const links = profile!.externalLinks ?? [];
+    if (links.some((link) => link.url === url)) {
+      toast({ title: "Link already added", variant: "destructive" });
+      return;
+    }
+    const link: ExternalProfileLink = { provider: externalProvider, url, status: "self_declared" };
+    patch({ externalLinks: [...links, link] });
+    setExternalUrl("");
+    toast({ title: `${externalProviderLabel(externalProvider)} link added`, description: "It will be included in the next Admin onboarding snapshot." });
+  }
+
+  function removeExternalLink(url: string) {
+    patch({ externalLinks: (profile!.externalLinks ?? []).filter((link) => link.url !== url) });
   }
 
   function toggleFeatured(id: string) {
@@ -593,6 +617,19 @@ export function ProProfile() {
           status={<StatusBadge tone={profile.publicVisibility ? "success" : "paused"} icon>{profile.publicVisibility ? "Public" : "Hidden"}</StatusBadge>}
         >
           <Button variant="outline" onClick={saveDraft}><Save className="size-4" /> Save draft</Button>
+          <Button
+            onClick={() => {
+              const ready = !!profile.headline.trim() && !!profile.bio.trim() && !!profile.primaryCategory && profile.skills.length > 0 && profile.portfolioItems.length > 0 && (profile.externalLinks?.length ?? 0) > 0;
+              if (!ready) {
+                toast({ title: "Complete Pro onboarding first", description: "Add your headline, bio, category, skills, portfolio item, and at least one public proof link before submitting for Admin review.", variant: "destructive" });
+                return;
+              }
+              setKycModal(true);
+            }}
+            disabled={profile.onboardingStatus === "under_review" || profile.onboardingStatus === "approved"}
+          >
+            <ShieldCheck className="size-4" /> {profile.onboardingStatus === "approved" ? "Onboarding approved" : profile.onboardingStatus === "under_review" ? "Admin review pending" : "Submit onboarding"}
+          </Button>
           {profile.publicVisibility ? (
             <Button variant="outline" onClick={unpublish}>Unpublish</Button>
           ) : (
@@ -682,6 +719,29 @@ export function ProProfile() {
                     ))}
                     {profile.skills.length === 0 && <span className="text-xs text-muted-foreground">No skills added yet.</span>}
                   </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Connected proof" description="Public work links help Buyers and Admin compare evidence. QuickQuid never asks for passwords here; production OAuth/API sync must run through a server-side adapter.">
+                <div className="space-y-3">
+                  {(profile.externalLinks ?? []).map((link) => (
+                    <div key={link.url} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 text-sm font-medium"><Globe className="size-3.5 text-primary" /> {externalProviderLabel(link.provider)} {link.status === "reviewed" && <Badge variant="outline" className="text-[10px]">Admin reviewed</Badge>}</div>
+                        <a href={link.url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-primary hover:underline">{link.url}</a>
+                      </div>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => removeExternalLink(link.url)} aria-label={`Remove ${externalProviderLabel(link.provider)} link`}><X className="size-3.5" /></Button>
+                    </div>
+                  ))}
+                  <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
+                    <Select value={externalProvider} onValueChange={(value) => setExternalProvider(value as ExternalProfileProvider)}>
+                      <SelectTrigger aria-label="Proof provider"><SelectValue /></SelectTrigger>
+                      <SelectContent>{EXTERNAL_PROFILE_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Input value={externalUrl} onChange={(event) => setExternalUrl(event.target.value)} placeholder="https://github.com/username" aria-label="Public proof URL" />
+                    <Button type="button" variant="outline" onClick={addExternalLink}><Plus className="size-4" /> Add link</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Supported now: URL capture and public GitHub repository preview. LinkedIn, Behance, Dribbble, and website connections are stored as reviewable links; OAuth tokens and private data are intentionally out of this frontend prototype.</p>
                 </div>
               </SectionCard>
 
@@ -3029,9 +3089,10 @@ const GIG_COVER_COLORS = ["#7C3AED", "#0891B2", "#DB2777", "#CA8A04", "#0F766E",
 const PACKAGE_NAMES = ["Basic", "Standard", "Premium"];
 
 export function ProGigNew() {
-  const { currentUserId, users, viewParams, gigs, upsertGig, navigate, goBack, addAudit } = useQQ();
+  const { currentUserId, users, proProfiles, viewParams, gigs, upsertGig, navigate, goBack, addAudit } = useQQ();
   const { toast } = useToast();
   const user = users.find((u) => u.id === currentUserId);
+  const proProfile = proProfiles.find((profile) => profile.userId === currentUserId);
   const editing = viewParams.gigId ? gigs.find((g) => g.id === viewParams.gigId) : undefined;
 
   const [step, setStep] = React.useState<GigStep>("Basics");
@@ -3107,16 +3168,27 @@ export function ProGigNew() {
   }
 
   function saveDraft() {
-    upsertGig(buildGig("draft"));
+    const draft = buildGig("draft");
+    upsertGig(draft);
     toast({ title: "Draft saved", description: "You can continue editing from the Gigs tab." });
-    navigate("pro_gig_detail", { gigId: editing?.id ?? buildGig("draft").id });
+    navigate("pro_gig_detail", { gigId: draft.id });
   }
 
   function submitForReview() {
+    if (user?.verificationStatus !== "approved" || proProfile?.onboardingStatus !== "approved") {
+      toast({ title: "Complete Pro onboarding first", description: "Admin must approve your identity, category, skill evidence, public proof, and payout details before a gig can enter moderation.", variant: "destructive" });
+      navigate("readiness");
+      return;
+    }
     if (!title.trim()) { toast({ title: "Title required", variant: "destructive" }); setStep("Basics"); return; }
     if (!shortDesc.trim()) { toast({ title: "Short description required", variant: "destructive" }); setStep("Basics"); return; }
+    if (!category.trim()) { toast({ title: "Category required", variant: "destructive" }); setStep("Basics"); return; }
     if (included.length === 0) { toast({ title: "Add at least one included item", variant: "destructive" }); setStep("Service Scope"); return; }
+    if (!deliverableFormat.trim()) { toast({ title: "Deliverable format required", variant: "destructive" }); setStep("Deliverables"); return; }
+    if (!deliveryTimeline.trim()) { toast({ title: "Delivery timeline required", variant: "destructive" }); setStep("Deliverables"); return; }
     if (proFee <= 0) { toast({ title: "Enter a valid Pro fee", variant: "destructive" }); setStep("Pricing"); return; }
+    if (buyerReqs.length === 0) { toast({ title: "Add at least one Buyer requirement", variant: "destructive" }); setStep("Requirements"); return; }
+    if (evidence.length === 0) { toast({ title: "Attach at least one evidence item", variant: "destructive" }); setStep("Requirements"); return; }
     setSubmitting(true);
     setTimeout(() => {
       const g = buildGig("submitted");
@@ -3386,8 +3458,13 @@ export function ProGigNew() {
             <ul className="space-y-1.5 text-sm">
               <li className="flex items-center gap-2">{title.trim() ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Title</li>
               <li className="flex items-center gap-2">{shortDesc.trim() ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Short description</li>
+              <li className="flex items-center gap-2">{category.trim() ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Category</li>
               <li className="flex items-center gap-2">{included.length > 0 ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} At least one included item</li>
+              <li className="flex items-center gap-2">{deliverableFormat.trim() ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Deliverable format</li>
+              <li className="flex items-center gap-2">{deliveryTimeline.trim() ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Delivery timeline</li>
               <li className="flex items-center gap-2">{proFee > 0 ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Valid Pro fee</li>
+              <li className="flex items-center gap-2">{buyerReqs.length > 0 ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Buyer requirements</li>
+              <li className="flex items-center gap-2">{evidence.length > 0 ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-muted-foreground" />} Evidence attached</li>
             </ul>
           </SectionCard>
           <SectionCard title="States" description="Gig states: draft, submitted, under review, approved-live, changes requested, rejected, paused, archived.">
@@ -3419,11 +3496,14 @@ export function ProGigNew() {
 // ============================================================
 
 export function ProGigDetail() {
-  const { viewParams, gigs, navigate, updateGig, addAudit, currentUserId, priorityBoosts, submitPriorityBoost } = useQQ();
+  const { viewParams, gigs, navigate, updateGig, addAudit, currentUserId, users, proProfiles, priorityBoosts, submitPriorityBoost } = useQQ();
   const { toast } = useToast();
   const gig = gigs.find((g) => g.id === viewParams.gigId);
   const [confirmArchive, setConfirmArchive] = React.useState(false);
-  const priorityBoost = priorityBoosts.find((pb) => pb.gigId === viewParams.gigId);
+  const priorityBoost = priorityBoosts.filter((pb) => pb.gigId === viewParams.gigId).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  const priorityBoostOpen = priorityBoost && ["payment_evidence_submitted", "under_admin_verification", "payment_confirmed", "active"].includes(priorityBoost.paymentStatus);
+  const currentUser = users.find((user) => user.id === currentUserId);
+  const currentProfile = proProfiles.find((profile) => profile.userId === currentUserId);
 
   if (!gig) {
     return (
@@ -3441,6 +3521,11 @@ export function ProGigDetail() {
   const total = buyerTotal(gig.proFee);
 
   function submit() {
+    if (currentUser?.verificationStatus !== "approved" || currentProfile?.onboardingStatus !== "approved") {
+      toast({ title: "Complete Pro onboarding first", description: "Admin approval is required before publishing a gig.", variant: "destructive" });
+      navigate("readiness");
+      return;
+    }
     updateGig(gig!.id, { status: "submitted", moderationReason: undefined });
     addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Gig submitted for review", entity: "Gig", entityId: gig!.id, newStatus: "submitted" });
     toast({ title: "Gig submitted for review", description: "QuickQuid will review your gig." });
@@ -3554,7 +3639,7 @@ export function ProGigDetail() {
             </div>
           </SectionCard>
 
-          {gig.status === "approved_live" && (
+          {gig.status === "approved_live" && currentUser?.verificationStatus === "approved" && currentProfile?.onboardingStatus === "approved" && (
             <SectionCard title="Performance" description="Views, requests, conversion, active orders.">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard label="Views" value={gig.views} icon={Eye} />
@@ -3603,11 +3688,19 @@ export function ProGigDetail() {
               proName={gig.proName}
               boost={priorityBoost}
               onSubmit={(pb) => {
+                if (priorityBoostOpen || currentUser?.verificationStatus !== "approved" || currentProfile?.onboardingStatus !== "approved") {
+                  toast({ title: "Priority boost unavailable", description: "Only one priority request may be open at a time, and the Pro must be fully verified.", variant: "destructive" });
+                  return;
+                }
                 submitPriorityBoost(pb);
                 addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Priority boost payment submitted", entity: "PriorityBoost", entityId: pb.id, newStatus: "payment_evidence_submitted", reason: `${formatINR(pb.priorityFee)} for ${pb.duration} days` });
                 toast({ title: "Priority payment submitted", description: "Under Admin review." });
               }}
             />
+          )}
+
+          {gig.status === "approved_live" && (currentUser?.verificationStatus !== "approved" || currentProfile?.onboardingStatus !== "approved") && (
+            <InterlockCard tone="warning" icon={ShieldCheck} title="Verification required before promotion" body="Priority placement is a paid marketing action. Complete Pro onboarding and Admin approval before submitting payment evidence." primary={<Button size="sm" onClick={() => navigate("readiness")}>Open onboarding</Button>} />
           )}
 
           <InterlockCard tone="info" icon={Info} title="Versioning" body="Changing price, scope, timeline, or deliverables creates a new version and may require re-review. Existing contracts retain original terms." />

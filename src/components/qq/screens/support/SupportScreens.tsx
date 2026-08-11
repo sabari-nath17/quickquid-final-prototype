@@ -74,6 +74,8 @@ import {
   Bookmark,
   Save,
   Info,
+  Github,
+  ExternalLink,
 } from "lucide-react";
 import type {
   SupportTicket,
@@ -81,6 +83,7 @@ import type {
   NotificationItem,
   TrustSafetyCase,
 } from "@/lib/qq/types";
+import { externalProfileHandle, externalProviderLabel } from "@/lib/qq/external";
 
 /* =========================================================================
    1. SupportScreen — Screen 99.2
@@ -697,6 +700,28 @@ export function PublicProfileScreen() {
   const user = users.find((u) => u.id === proId);
 
   const [reportOpen, setReportOpen] = React.useState(false);
+  const [githubProjects, setGithubProjects] = React.useState<{ name: string; html_url: string; description?: string; language?: string; stargazers_count?: number }[]>([]);
+  const [githubSyncing, setGithubSyncing] = React.useState(false);
+  const githubLink = profile?.externalLinks?.find((link) => link.provider === "github");
+
+  React.useEffect(() => {
+    const handle = githubLink ? externalProfileHandle(githubLink) : null;
+    if (!handle || typeof window === "undefined") {
+      setGithubProjects([]);
+      setGithubSyncing(false);
+      return;
+    }
+    let cancelled = false;
+    setGithubSyncing(true);
+    fetch(`https://api.github.com/users/${encodeURIComponent(handle)}/repos?sort=updated&per_page=6`, { headers: { Accept: "application/vnd.github+json" } })
+      .then((response) => response.ok ? response.json() : [])
+      .then((repos) => {
+        if (!cancelled && Array.isArray(repos)) setGithubProjects(repos.filter((repo) => repo && typeof repo.name === "string").map((repo) => ({ name: repo.name, html_url: repo.html_url, description: repo.description, language: repo.language, stargazers_count: repo.stargazers_count })).slice(0, 6));
+      })
+      .catch(() => { if (!cancelled) setGithubProjects([]); })
+      .finally(() => { if (!cancelled) setGithubSyncing(false); });
+    return () => { cancelled = true; };
+  }, [githubLink?.url]);
 
   if (!profile || !user) {
     return (
@@ -921,6 +946,29 @@ export function PublicProfileScreen() {
                   );
                 })}
               </div>
+            </SectionCard>
+          )}
+
+          {(profile.externalLinks?.length ?? 0) > 0 && (
+            <SectionCard title="Connected proof" description="Public links are self-declared until QuickQuid records a review decision. GitHub repositories are read from the provider's public API when available.">
+              <div className="grid gap-2 sm:grid-cols-2">
+                {(profile.externalLinks ?? []).map((link) => (
+                  <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md border border-border p-3 text-sm hover:border-primary/50 hover:bg-muted/30">
+                    {link.provider === "github" ? <Github className="size-4" /> : <ExternalLink className="size-4" />}
+                    <span className="min-w-0"><span className="block font-medium">{externalProviderLabel(link.provider)}</span><span className="block truncate text-xs text-muted-foreground">{link.url}</span></span>
+                  </a>
+                ))}
+              </div>
+              {githubLink && (
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium"><Github className="size-4" /> GitHub projects {githubSyncing && <span className="text-xs font-normal text-muted-foreground">Syncing public repositories…</span>}</div>
+                  {githubProjects.length > 0 ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {githubProjects.map((repo) => <a key={repo.html_url} href={repo.html_url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-3 hover:border-primary/50"><div className="text-sm font-medium">{repo.name}</div><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{repo.description || "Public repository"}</p><div className="mt-2 text-[10px] text-muted-foreground">{repo.language || "Code"} · ★ {repo.stargazers_count ?? 0}</div></a>)}
+                    </div>
+                  ) : !githubSyncing ? <p className="text-xs text-muted-foreground">No public repositories were returned. The link remains available for Admin review; private repositories are never requested.</p> : null}
+                </div>
+              )}
             </SectionCard>
           )}
 
