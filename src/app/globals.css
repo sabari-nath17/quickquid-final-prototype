@@ -221,33 +221,33 @@
     border-width: 1px;
     box-shadow: 0 14px 28px -24px rgba(20, 21, 29, 0.48);
   }
-  .qq-action-panel--buyer {
+  .qq-app-shell .qq-action-panel--buyer.qq-card {
     border-color: var(--qq-cobalt);
     background: var(--qq-cobalt);
     color: #fff;
   }
   .qq-action-panel--buyer .text-muted-foreground { color: rgba(255, 255, 255, 0.78); }
   .qq-action-panel--buyer .text-primary { color: #E7EAFF; }
-  .qq-action-panel--pro {
+  .qq-app-shell .qq-action-panel--pro.qq-card {
     border-color: #F8B6A9;
     background: var(--qq-coral-soft);
   }
   .qq-action-panel--pro .text-primary { color: #B93628; }
-  .qq-action-panel--admin {
+  .qq-app-shell .qq-action-panel--admin.qq-card {
     border-color: #C7C7FF;
     background: var(--qq-indigo-soft);
   }
   .qq-action-panel--admin .text-primary { color: #4140AD; }
-  .qq-search-panel {
+  .qq-app-shell .qq-search-panel.qq-card {
     border-color: color-mix(in srgb, var(--qq-role-accent) 24%, var(--border));
     background: var(--qq-role-soft);
   }
   .qq-metric-card { border-top-width: 3px; }
-  .qq-metric-card--cobalt { border-top-color: var(--qq-cobalt); background: #F7F8FF; }
-  .qq-metric-card--coral { border-top-color: var(--qq-coral); background: #FFF8F5; }
-  .qq-metric-card--mint { border-top-color: var(--qq-mint); background: #F5FCF8; }
-  .qq-metric-card--gold { border-top-color: var(--qq-gold); background: #FFFCF4; }
-  .qq-metric-card--indigo { border-top-color: var(--qq-indigo); background: #F8F8FF; }
+  .qq-app-shell .qq-metric-card--cobalt.qq-card { border-top-color: var(--qq-cobalt); background: #F7F8FF; }
+  .qq-app-shell .qq-metric-card--coral.qq-card { border-top-color: var(--qq-coral); background: #FFF8F5; }
+  .qq-app-shell .qq-metric-card--mint.qq-card { border-top-color: var(--qq-mint); background: #F5FCF8; }
+  .qq-app-shell .qq-metric-card--gold.qq-card { border-top-color: var(--qq-gold); background: #FFFCF4; }
+  .qq-app-shell .qq-metric-card--indigo.qq-card { border-top-color: var(--qq-indigo); background: #F8F8FF; }
   .qq-metric-card--cobalt .qq-metric-icon { background: var(--qq-cobalt-soft); color: #233CC4; }
   .qq-metric-card--coral .qq-metric-icon { background: var(--qq-coral-soft); color: #B93628; }
   .qq-metric-card--mint .qq-metric-icon { background: var(--qq-mint-soft); color: #087350; }
@@ -257,17 +257,17 @@
     background: var(--qq-role-soft);
     color: var(--qq-role-ink);
   }
-  .qq-readiness-panel {
+  .qq-app-shell .qq-readiness-panel.qq-card {
     border-color: #9EE5C7;
     background: var(--qq-mint-soft);
   }
-  .qq-private-panel {
+  .qq-app-shell .qq-private-panel.qq-card {
     border-color: #C7C7FF;
     background: var(--qq-indigo-soft);
   }
-  .qq-queue-card--money { border-top: 3px solid var(--qq-gold); background: #FFFCF4; }
-  .qq-queue-card--trust { border-top: 3px solid var(--qq-coral); background: #FFF8F5; }
-  .qq-queue-card--operations { border-top: 3px solid var(--qq-indigo); background: #F8F8FF; }
+  .qq-app-shell .qq-queue-card--money.qq-card { border-top: 3px solid var(--qq-gold); background: #FFFCF4; }
+  .qq-app-shell .qq-queue-card--trust.qq-card { border-top: 3px solid var(--qq-coral); background: #FFF8F5; }
+  .qq-app-shell .qq-queue-card--operations.qq-card { border-top: 3px solid var(--qq-indigo); background: #F8F8FF; }
 
   .scroll-area-thin {
     scrollbar-width: thin;
