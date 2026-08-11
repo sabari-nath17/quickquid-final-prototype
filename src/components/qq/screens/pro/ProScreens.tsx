@@ -122,14 +122,15 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   tone?: "default" | "success" | "warning";
 }) {
+  const visualTone = tone === "success" ? "mint" : tone === "warning" ? "gold" : "coral";
   return (
-    <Card className="p-4">
+    <Card className={cn("qq-metric-card p-4", `qq-metric-card--${visualTone}`)}>
       <div className="flex items-center justify-between gap-2">
         <div>
           <div className="text-xs text-muted-foreground">{label}</div>
           <div className={cn("mt-1 text-xl font-semibold tabular-nums", tone === "success" && "text-emerald-600 dark:text-emerald-400", tone === "warning" && "text-amber-600 dark:text-amber-400")}>{value}</div>
         </div>
-        <div className={cn("rounded-md p-2", tone === "success" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400" : tone === "warning" ? "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400" : "bg-muted text-muted-foreground")}>
+        <div className={cn("qq-metric-icon rounded-md p-2", tone === "success" && "bg-[#EDFBF4] text-[#087350] dark:bg-emerald-950 dark:text-emerald-400", tone === "warning" && "bg-[#FFF7E4] text-[#8A5B06] dark:bg-amber-950 dark:text-amber-400")}>
           <Icon className="size-4" />
         </div>
       </div>
@@ -194,6 +195,17 @@ export function ProDashboard() {
         <Button variant="outline" onClick={() => navigate("pro_briefs")}><Briefcase className="size-4" /> Browse briefs</Button>
         <Button onClick={() => navigate("pro_proposals")}><FileText className="size-4" /> My proposals</Button>
       </PageHeader>
+
+      <Card className="qq-action-panel qq-action-panel--pro p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">Opportunity desk</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight">Find work that fits the evidence you have already built.</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Compare scope, budget, timeline, and exclusions before you decide to apply. Your proof stays the signal—not a black-box score.</p>
+          </div>
+          <Button className="min-h-11 shrink-0 sm:self-center" onClick={() => navigate("pro_briefs")}><Briefcase className="size-4" /> Browse briefs</Button>
+        </div>
+      </Card>
 
       {showFundingBanner && (
         <div className="sticky top-16 z-20 -mx-1">
@@ -646,7 +658,7 @@ export function ProProfile() {
         </PageHeader>
       </div>
 
-      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+      <Card className="qq-action-panel qq-action-panel--pro p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-primary">Buyer-facing profile</p>
@@ -1155,7 +1167,7 @@ export function ProBriefs() {
         />
       )}
 
-      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+      <Card className="qq-search-panel p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

@@ -44,6 +44,13 @@
   --color-info-foreground: var(--info-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-qq-paper: var(--qq-paper);
+  --color-qq-ink: var(--qq-ink);
+  --color-qq-cobalt: var(--qq-cobalt);
+  --color-qq-coral: var(--qq-coral);
+  --color-qq-mint: var(--qq-mint);
+  --color-qq-gold: var(--qq-gold);
+  --color-qq-indigo: var(--qq-indigo);
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
@@ -52,45 +59,57 @@
 
 :root {
   --radius: 0.875rem;
-  /* QuickQuid Design System — Operational Flat+ */
-  --background: #F3F5F2;          /* Field Paper */
-  --foreground: #141715;          /* Working Ink */
+  /* QuickQuid Design System — Execution colour system */
+  --qq-paper: #FCFBF7;
+  --qq-ink: #14151D;
+  --qq-cobalt: #3D5AFE;
+  --qq-coral: #F4513C;
+  --qq-mint: #0B9B6B;
+  --qq-gold: #C88A16;
+  --qq-indigo: #5C5BD6;
+  --qq-cobalt-soft: #EEF1FF;
+  --qq-coral-soft: #FFF0EC;
+  --qq-mint-soft: #EDFBF4;
+  --qq-gold-soft: #FFF7E4;
+  --qq-indigo-soft: #F0F0FF;
+  --background: var(--qq-paper);
+  --foreground: var(--qq-ink);
   --card: #FFFFFF;                /* Surface */
   --card-foreground: #141715;
   --popover: #FFFFFF;
   --popover-foreground: #141715;
-  --primary: #141715;             /* Working Ink for primary actions */
+  --primary: var(--qq-cobalt);    /* Forward motion */
   --primary-foreground: #FFFFFF;
-  --secondary: #E8EAE6;
-  --secondary-foreground: #141715;
-  --muted: #E8EAE6;
-  --muted-foreground: #6B7068;
-  --accent: #4E62D8;              /* Forecast Indigo */
-  --accent-foreground: #FFFFFF;
+  --secondary: #F0F0EB;
+  --secondary-foreground: var(--qq-ink);
+  --muted: #F0F0EB;
+  --muted-foreground: #69706C;
+  --accent: var(--qq-cobalt-soft);
+  --accent-foreground: #233CC4;
   --destructive: #C43F39;         /* Exception Red */
   --border: #D4D8D2;
   --input: #D4D8D2;
-  --ring: #4E62D8;                /* Forecast Indigo focus ring */
+  --ring: var(--qq-cobalt);
   /* Status tokens */
-  --success: #0B8F63;             /* Execution Green */
+  --success: var(--qq-mint);
   --success-foreground: #FFFFFF;
-  --info: #4E62D8;                /* Forecast Indigo */
+  --info: var(--qq-cobalt);
   --info-foreground: #FFFFFF;
-  --warning: #B46D0A;             /* Attention Ochre */
+  --warning: var(--qq-gold);
   --warning-foreground: #FFFFFF;
   /* Charts */
-  --chart-1: #0B8F63;
-  --chart-2: #4E62D8;
-  --chart-3: #B46D0A;
+  --chart-1: var(--qq-mint);
+  --chart-2: var(--qq-cobalt);
+  --chart-3: var(--qq-gold);
   --chart-4: #C43F39;
   --chart-5: #6B7068;
   /* Sidebar */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #141715;
-  --sidebar-primary: #141715;
+  --sidebar-primary: var(--qq-cobalt);
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F3F5F2;
-  --sidebar-accent-foreground: #141715;
+  --sidebar-accent: var(--qq-cobalt-soft);
+  --sidebar-accent-foreground: #233CC4;
   --sidebar-border: #D4D8D2;
   --sidebar-ring: #4E62D8;
 }
@@ -158,6 +177,98 @@
 }
 
 @layer components {
+  .qq-app-shell {
+    --qq-role-accent: var(--qq-cobalt);
+    --qq-role-soft: var(--qq-cobalt-soft);
+    --qq-role-ink: #233CC4;
+  }
+  .qq-app-shell[data-qq-role="pro"] {
+    --primary: var(--qq-coral);
+    --ring: var(--qq-coral);
+    --accent: var(--qq-coral-soft);
+    --accent-foreground: #B93628;
+    --qq-role-accent: var(--qq-coral);
+    --qq-role-soft: var(--qq-coral-soft);
+    --qq-role-ink: #B93628;
+  }
+  .qq-app-shell[data-qq-role="admin_support"],
+  .qq-app-shell[data-qq-role="finance"],
+  .qq-app-shell[data-qq-role="risk"],
+  .qq-app-shell[data-qq-role="ops_manager"] {
+    --primary: var(--qq-indigo);
+    --ring: var(--qq-indigo);
+    --accent: var(--qq-indigo-soft);
+    --accent-foreground: #4140AD;
+    --qq-role-accent: var(--qq-indigo);
+    --qq-role-soft: var(--qq-indigo-soft);
+    --qq-role-ink: #4140AD;
+  }
+  .qq-app-shell [data-slot="card"] {
+    box-shadow: 0 1px 2px rgba(20, 21, 29, 0.04), 0 8px 22px -18px rgba(20, 21, 29, 0.3);
+  }
+  .qq-page-header {
+    border-left: 3px solid var(--qq-role-accent);
+    padding-left: 0.9rem;
+  }
+  .qq-section-card {
+    border-color: color-mix(in srgb, var(--qq-role-accent) 16%, var(--border));
+  }
+  .qq-sidebar-trust {
+    border-color: color-mix(in srgb, var(--qq-role-accent) 22%, var(--border));
+    background: var(--qq-role-soft);
+  }
+  .qq-action-panel {
+    border-width: 1px;
+    box-shadow: 0 14px 28px -24px rgba(20, 21, 29, 0.48);
+  }
+  .qq-action-panel--buyer {
+    border-color: var(--qq-cobalt);
+    background: var(--qq-cobalt);
+    color: #fff;
+  }
+  .qq-action-panel--buyer .text-muted-foreground { color: rgba(255, 255, 255, 0.78); }
+  .qq-action-panel--buyer .text-primary { color: #E7EAFF; }
+  .qq-action-panel--pro {
+    border-color: #F8B6A9;
+    background: var(--qq-coral-soft);
+  }
+  .qq-action-panel--pro .text-primary { color: #B93628; }
+  .qq-action-panel--admin {
+    border-color: #C7C7FF;
+    background: var(--qq-indigo-soft);
+  }
+  .qq-action-panel--admin .text-primary { color: #4140AD; }
+  .qq-search-panel {
+    border-color: color-mix(in srgb, var(--qq-role-accent) 24%, var(--border));
+    background: var(--qq-role-soft);
+  }
+  .qq-metric-card { border-top-width: 3px; }
+  .qq-metric-card--cobalt { border-top-color: var(--qq-cobalt); background: #F7F8FF; }
+  .qq-metric-card--coral { border-top-color: var(--qq-coral); background: #FFF8F5; }
+  .qq-metric-card--mint { border-top-color: var(--qq-mint); background: #F5FCF8; }
+  .qq-metric-card--gold { border-top-color: var(--qq-gold); background: #FFFCF4; }
+  .qq-metric-card--indigo { border-top-color: var(--qq-indigo); background: #F8F8FF; }
+  .qq-metric-card--cobalt .qq-metric-icon { background: var(--qq-cobalt-soft); color: #233CC4; }
+  .qq-metric-card--coral .qq-metric-icon { background: var(--qq-coral-soft); color: #B93628; }
+  .qq-metric-card--mint .qq-metric-icon { background: var(--qq-mint-soft); color: #087350; }
+  .qq-metric-card--gold .qq-metric-icon { background: var(--qq-gold-soft); color: #8A5B06; }
+  .qq-metric-card--indigo .qq-metric-icon { background: var(--qq-indigo-soft); color: #4140AD; }
+  .qq-metric-icon {
+    background: var(--qq-role-soft);
+    color: var(--qq-role-ink);
+  }
+  .qq-readiness-panel {
+    border-color: #9EE5C7;
+    background: var(--qq-mint-soft);
+  }
+  .qq-private-panel {
+    border-color: #C7C7FF;
+    background: var(--qq-indigo-soft);
+  }
+  .qq-queue-card--money { border-top: 3px solid var(--qq-gold); background: #FFFCF4; }
+  .qq-queue-card--trust { border-top: 3px solid var(--qq-coral); background: #FFF8F5; }
+  .qq-queue-card--operations { border-top: 3px solid var(--qq-indigo); background: #F8F8FF; }
+
   .scroll-area-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;

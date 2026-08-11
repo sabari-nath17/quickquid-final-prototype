@@ -66,7 +66,7 @@ export function PageHeader({
   breadcrumb?: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="qq-page-header space-y-2">
       {breadcrumb}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
@@ -286,7 +286,7 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <Card className={cn("p-4 sm:p-6", className)}>
+    <Card className={cn("qq-section-card p-4 sm:p-6", className)}>
       {(title || actions) && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>

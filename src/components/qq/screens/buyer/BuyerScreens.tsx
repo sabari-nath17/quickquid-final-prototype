@@ -212,14 +212,14 @@ export function BuyerDashboard() {
         <Button variant="outline" onClick={() => navigate("buyer_talent")}><Users className="size-4" /> Search talent</Button>
       </PageHeader>
 
-      <Card className="overflow-hidden border-primary/20 bg-primary/[0.035] p-5">
+      <Card className="qq-action-panel qq-action-panel--buyer overflow-hidden p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-primary">{nextAction.eyebrow}</p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight">{nextAction.title}</h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{nextAction.description}</p>
           </div>
-          <Button className="min-h-11 shrink-0 sm:self-center" onClick={nextAction.onClick}>{nextAction.label} <ArrowRight className="size-4" /></Button>
+          <Button className="min-h-11 shrink-0 bg-foreground text-background hover:bg-foreground/90 sm:self-center" onClick={nextAction.onClick}>{nextAction.label} <ArrowRight className="size-4" /></Button>
         </div>
       </Card>
 
@@ -417,14 +417,15 @@ function buildBuyerTimeline(contracts: Contract[], briefs: Brief[], payments: Pa
 }
 
 function QuickStats({ stats }: { stats: { label: string; value: number; icon: React.ComponentType<{ className?: string }> }[] }) {
+  const tones = ["cobalt", "coral", "mint", "gold"] as const;
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {stats.map((s) => (
-        <Card key={s.label} className="p-4 hover:shadow-sm transition-shadow">
+      {stats.map((s, index) => (
+        <Card key={s.label} className={cn("qq-metric-card p-4 hover:shadow-sm transition-shadow", `qq-metric-card--${tones[index % tones.length]}`)}>
           <div className="flex items-start justify-between gap-2">
             <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{s.label}</span>
-            <div className="rounded-md bg-primary/10 p-1.5">
-              <s.icon className="size-3.5 text-primary" />
+            <div className="qq-metric-icon rounded-md p-1.5">
+              <s.icon className="size-3.5" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold tabular-nums">{s.value}</div>
@@ -884,7 +885,7 @@ export function BuyerTalent() {
         />
       </div>
 
-      <Card className="border-primary/15 bg-primary/[0.025] p-4">
+      <Card className="qq-search-panel p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

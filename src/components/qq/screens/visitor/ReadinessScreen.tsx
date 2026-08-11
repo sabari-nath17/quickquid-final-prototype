@@ -70,7 +70,7 @@ export function ReadinessScreen() {
 
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <SectionCard title={isPro ? "Pro readiness" : "Buyer readiness"} description="Role-specific tasks. High-risk actions are gated until complete.">
+          <SectionCard className="qq-readiness-panel" title={isPro ? "Pro readiness" : "Buyer readiness"} description="Role-specific tasks. High-risk actions are gated until complete.">
             <ReadinessChecklist items={items} />
             <div className="mt-4 flex flex-wrap gap-2">
               {isPro ? (
@@ -119,7 +119,7 @@ export function ReadinessScreen() {
         </div>
 
         <div className="space-y-4">
-          <SectionCard title="What stays private">
+          <SectionCard className="qq-private-panel" title="What stays private">
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2"><ShieldCheck className="size-4 mt-0.5 text-emerald-600" /> PAN, bank account, IFSC are masked by default.</li>
               <li className="flex items-start gap-2"><ShieldCheck className="size-4 mt-0.5 text-emerald-600" /> Billing address & GSTIN never appear on public profile.</li>

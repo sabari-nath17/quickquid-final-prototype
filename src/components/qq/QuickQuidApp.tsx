@@ -214,7 +214,7 @@ export function QuickQuidApp() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="qq-app-shell min-h-screen flex flex-col bg-background" data-qq-role={currentRole} data-qq-view={view}>
         <div className="flex flex-1">
           <Sidebar />
           <MobileSidebar />

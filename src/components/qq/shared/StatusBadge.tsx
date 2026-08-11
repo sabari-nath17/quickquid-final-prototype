@@ -13,12 +13,12 @@ type Tone =
   | "locked" | "paused" | "rejected";
 
 const toneStyles: Record<Tone, string> = {
-  success: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800",
-  pending: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800",
-  warning: "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-200 dark:border-orange-800",
+  success: "bg-[#EDFBF4] text-[#087350] border-[#9EE5C7] dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800",
+  pending: "bg-[#FFF7E4] text-[#8A5B06] border-[#F0D288] dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800",
+  warning: "bg-[#FFF0EC] text-[#B93628] border-[#F8B6A9] dark:bg-orange-950 dark:text-orange-200 dark:border-orange-800",
   critical: "bg-red-600 text-white border-red-700 dark:bg-red-900 dark:text-red-50 dark:border-red-800 font-semibold",
-  info: "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-200 dark:border-sky-800",
-  neutral: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
+  info: "bg-[#EEF1FF] text-[#233CC4] border-[#BFC9FF] dark:bg-sky-950 dark:text-sky-200 dark:border-sky-800",
+  neutral: "bg-[#F0F0EB] text-[#555B57] border-[#D9DAD3] dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
   locked: "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
   paused: "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
   rejected: "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-200 dark:border-red-800",

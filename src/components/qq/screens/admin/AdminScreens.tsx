@@ -319,7 +319,7 @@ export function AdminOperations() {
       />
 
       {emphasised.length > 0 && (
-        <Card className="p-3 border-primary/30 bg-primary/5">
+        <Card className="qq-action-panel qq-action-panel--admin p-3">
           <div className="flex items-center gap-2 text-sm">
             <ShieldCheck className="size-4 text-primary" />
             <span>Your role typically owns: <strong>{emphasised.join(", ")}</strong>. Other queues are visible but action-gated.</span>
@@ -330,9 +330,9 @@ export function AdminOperations() {
       {/* Miller's Law: chunk 9 cards into 3 groups (Money / Trust / Work) */}
       {(() => {
         const groups = [
-          { label: "Money", icon: Banknote, color: "text-emerald-600", items: cards.filter((c) => ["Payment verification", "Payouts", "Refunds", "Priority boost verification"].includes(c.title)) },
-          { label: "Trust & Safety", icon: ShieldAlert, color: "text-red-600", items: cards.filter((c) => ["KYC review", "Disputes", "Trust & Safety"].includes(c.title)) },
-          { label: "Work & Operations", icon: Briefcase, color: "text-sky-600", items: cards.filter((c) => ["Gig moderation", "Support", "SLA breaches"].includes(c.title)) },
+          { label: "Money", icon: Banknote, color: "text-[#8A5B06]", tone: "money", items: cards.filter((c) => ["Payment verification", "Payouts", "Refunds", "Priority boost verification"].includes(c.title)) },
+          { label: "Trust & Safety", icon: ShieldAlert, color: "text-[#B93628]", tone: "trust", items: cards.filter((c) => ["KYC review", "Disputes", "Trust & Safety"].includes(c.title)) },
+          { label: "Work & Operations", icon: Briefcase, color: "text-[#4140AD]", tone: "operations", items: cards.filter((c) => ["Gig moderation", "Support", "SLA breaches"].includes(c.title)) },
         ];
         return (
           <div className="space-y-4">
@@ -349,7 +349,7 @@ export function AdminOperations() {
                     const isEmphasised = emphasised.includes(c.title);
                     const oldestLabel = c.oldest ? slaLabel(c.oldest, c.target || 24) : "—";
                     return (
-                      <Card key={c.title} className={cn("p-4 flex flex-col gap-2", isEmphasised && "ring-1 ring-primary/40")}>
+                      <Card key={c.title} className={cn("p-4 flex flex-col gap-2", `qq-queue-card--${group.tone}`, isEmphasised && "ring-1 ring-primary/40")}>
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="text-xs text-muted-foreground">{c.title}</div>

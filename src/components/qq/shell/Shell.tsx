@@ -103,7 +103,7 @@ export function Sidebar() {
   const { currentRole, view, navigate, switchRole, setMobileSidebar } = useQQ();
   const items = NAV[currentRole];
   return (
-    <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-border bg-card h-screen sticky top-0">
+    <aside className="qq-sidebar hidden md:flex w-[240px] shrink-0 flex-col border-r border-border bg-card h-screen sticky top-0">
       <div className="flex h-16 items-center px-4 border-b border-border">
         <button onClick={() => navigate(currentRole === "visitor" ? "role_selection" : currentRole === "buyer" ? "buyer_dashboard" : currentRole === "pro" ? "pro_dashboard" : "admin_operations")}>
           <Logo />
@@ -143,7 +143,7 @@ function SidebarTrustPanel({ role }: { role: Role }) {
     ? { title: "QuickQuid fee ₹0", body: "No platform fee during founding beta." }
     : { title: "Maker-checker", body: "All money actions are audited." };
   return (
-    <div className="mt-4 mx-1 rounded-lg border border-border bg-muted/40 p-3">
+    <div className="qq-sidebar-trust mt-4 mx-1 rounded-lg border p-3">
       <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
         <ShieldCheck className="size-3.5 text-emerald-600" /> {facts.title}
       </div>
@@ -159,7 +159,7 @@ export function MobileSidebar() {
   return (
     <div className="md:hidden fixed inset-0 z-50 flex">
       <div className="absolute inset-0 bg-black/50" onClick={() => setMobileSidebar(false)} />
-      <aside className="relative flex w-[280px] max-w-[80%] flex-col bg-card h-full">
+      <aside className="qq-sidebar relative flex w-[280px] max-w-[80%] flex-col bg-card h-full">
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
           <Logo />
           <Button variant="ghost" size="icon" onClick={() => setMobileSidebar(false)}><X className="size-5" /></Button>
