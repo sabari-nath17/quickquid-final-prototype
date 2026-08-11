@@ -59,6 +59,43 @@ No actionable P0, P1, or P2 issues remain.
 
 `final result: passed`
 
+## Cross-product colour system QA — 12 August 2026
+
+### Source truth, evidence, and normalization
+
+- Selected visual direction: `/Users/sabarismac/.codex/generated_images/019fefa5-5ae0-75b2-9382-85ed8c87cd88/exec-4b7da050-50e6-4727-8326-65913397f226.png` — the approved integrated Buyer dashboard direction, `1487 × 1058` raster pixels. It defines the paper canvas, cobalt forward action, coral attention, mint proof/completion, gold money, and restrained risk treatment used in this pass.
+- The source is a direction board rather than a pixel-identical representation of the existing prototype data model. This review therefore tests hierarchy, semantic colour assignment, density, and readability—not a false one-to-one content comparison.
+- Deployed implementation: [QuickQuid prototype](https://sabari-nath17.github.io/quickquid-final-prototype/), captured at a `1280 × 720` CSS viewport and `1×` capture density. All evidence files are `1280 × 720` raster pixels.
+
+| Surface | Evidence | Rendered state |
+| --- | --- | --- |
+| Buyer dashboard | `audit-final/18-buyer-dashboard-colour-system.png` | Northstar Labs; cobalt primary action, gold payment attention, cobalt/coral/mint/gold metrics |
+| Pro dashboard | `audit-final/19-pro-dashboard-colour-system.png` | Akhil Menon; coral opportunity desk, gold funding interlock, coral/mint commercial metrics |
+| Admin operations | `audit-final/20-admin-operations-colour-system.png` | Vikram T (Ops Manager); indigo operations, gold money queues, coral risk/trust queues |
+
+The implementation source and rendered Buyer state were inspected in one side-by-side image input at `/tmp/quickquid-colour-system-comparison.png`. Its top row is the normalized full-view comparison; its lower row is a fixed crop of the dashboard header, primary action, attention card, and metric row. Both sides use a `640 × 360` 16:9 content crop, with source/implementation positioned consistently. This avoids claiming device-pixel parity across the source's `1487 × 1058` composition and the prototype's `1280 × 720` browser viewport.
+
+### Required fidelity and interaction checks
+
+- **Hierarchy and spacing:** the source's left navigation, compact utility bar, page heading, primary action region, attention state, and grouped metrics remain scannable in that order. The implementation keeps the existing product workflow and data rather than introducing decorative dashboard content.
+- **Semantic palette:** cobalt carries Buyer forward motion; coral carries Pro discovery and time-sensitive attention; mint indicates proof/readiness/completion; gold is reserved for payment/payout attention; red is limited to risk/action-required states; and indigo marks admin operations. The paper/ink base keeps normal data work legible.
+- **Typography and copy:** the existing Sora / Source Sans information hierarchy remains intact. Operational copy continues to state conditions, rather than inventing live activity, scores, or payment completion.
+- **Assets and icons:** no new remote or raster product asset is required for this system pass. Existing icon controls retain their labels and visible focus treatment.
+- **Responsive and overflow scope:** these screenshots are desktop evidence only. The shared semantic classes do not add fixed widths; rendered Buyer, Pro, and Admin views each reported `scrollWidth = clientWidth = 1280`, so this pass introduces no desktop horizontal overflow. The landing and mobile-specific QA above remains the source of record for the public mobile route.
+- **Role-state smoke test:** switched Buyer → Pro → Ops Manager through the real demo selector, captured each home state, then returned to Buyer. The role accent follows the signed-in role without leaking an old role's colour into the next dashboard.
+- **Console:** final browser session returned no console errors.
+
+### Findings and iteration history
+
+| Severity | Finding | Resolution and post-fix evidence |
+| --- | --- | --- |
+| P1 | The initial semantic action-panel selectors could still be overridden by Tailwind's later `bg-card` utility, leaving a required coloured panel white. | The first selector tightening was published in `9094d4e`; the full comparison caught the remaining cascade issue. Commit `641d122` places the semantic surface rules in the utilities layer, after Tailwind's competing utility. Post-fix Buyer computed background is `rgb(61, 90, 254)` and `audit-final/18-buyer-dashboard-colour-system.png` shows the cobalt action panel. |
+| P2 | No remaining P2 visual or interaction issue found in the Buyer, Pro, or Admin desktop comparison. | Verified against the current deployed build and the evidence table above. |
+
+No actionable P0, P1, or P2 issues remain within this cross-product desktop colour-system scope.
+
+`final result: passed`
+
 ## Marketplace Buyer and Pro enhancement QA — 11 August 2026
 
 ### Source truth and comparison method
