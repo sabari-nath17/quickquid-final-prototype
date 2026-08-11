@@ -24,7 +24,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -60,6 +60,8 @@ import type {
   ContractStatus, MilestoneStatus, DisputeCategory, PaymentEvidence, AuditEvent, KycSubmission, ExternalProfileProvider, ExternalProfileLink,
 } from "@/lib/qq/types";
 import { EXTERNAL_PROFILE_OPTIONS, externalProviderLabel, normalizeExternalProfileUrl } from "@/lib/qq/external";
+import { assetPath } from "@/lib/asset-path";
+import { GitHubProofPanel } from "@/components/qq/shared/GitHubProofPanel";
 
 // ============================================================
 // Shared helpers
@@ -604,6 +606,8 @@ export function ProProfile() {
 
   const payoutStatus = profile.payoutReadiness;
   const featured = profile.portfolioItems.find((p) => p.featured);
+  const linkedInIdentityPreview = profile.externalProfilePreviews?.find((preview) => preview.provider === "linkedin" && preview.kind === "identity" && preview.imageUrl);
+  const publicAvatarSrc = linkedInIdentityPreview?.imageUrl?.startsWith("/") ? assetPath(linkedInIdentityPreview.imageUrl) : linkedInIdentityPreview?.imageUrl;
 
   return (
     <div className="space-y-6">
@@ -958,6 +962,7 @@ export function ProProfile() {
               <div className="p-5 bg-gradient-to-br from-muted/40 to-background">
                 <div className="flex items-start gap-3">
                   <Avatar className="size-16 rounded-md" style={{ backgroundColor: avatarColor(currentUserId ?? undefined) }}>
+                    {publicAvatarSrc && <AvatarImage src={publicAvatarSrc} alt={`${profile.displayName} provider profile image`} className="object-cover" />}
                     <AvatarFallback className="rounded-md text-white font-semibold text-lg">{initials(profile.displayName)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -1000,7 +1005,14 @@ export function ProProfile() {
                   </div>
                 </section>
 
-                {(profile.externalLinks?.length ?? 0) > 0 && <section><h3 className="text-sm font-semibold mb-1">Connected proof & synced previews</h3><div className="grid gap-2 sm:grid-cols-2">{(profile.externalLinks ?? []).map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-2.5 text-xs hover:border-primary/50"><div className="font-medium">{link.label ?? externalProviderLabel(link.provider)} {link.isDemo && <Badge variant="outline" className="ml-1 text-[9px]">Demo</Badge>}</div><div className="mt-0.5 truncate text-muted-foreground">{link.url}</div></a>)}</div>{(profile.externalProfilePreviews ?? []).length > 0 && <div className="mt-2 grid gap-2 sm:grid-cols-2">{(profile.externalProfilePreviews ?? []).map((preview) => <a key={`${preview.provider}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="rounded-md border border-dashed border-border p-2.5 text-xs hover:border-primary/50"><div className="flex items-center justify-between gap-2"><span className="font-medium">{externalProviderLabel(preview.provider)}</span><span className="text-[10px] text-muted-foreground">{preview.source === "demo_fixture" ? "Demo sync" : "Synced"}</span></div><div className="mt-1 font-medium">{preview.title}</div><div className="mt-0.5 line-clamp-2 text-muted-foreground">{preview.description}</div></a>)}</div>}</section>}
+                {(profile.externalLinks?.length ?? 0) > 0 && (
+                  <section className="space-y-4">
+                    <div><h3 className="text-sm font-semibold">Connected proof</h3><p className="mt-1 text-xs text-muted-foreground">Public links stay self-declared until an Admin review. Provider cards below show the full production display contract.</p></div>
+                    <div className="grid gap-2 sm:grid-cols-2">{(profile.externalLinks ?? []).filter((link) => link.provider !== "github").map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-2.5 text-xs hover:border-primary/50"><div className="font-medium">{link.label ?? externalProviderLabel(link.provider)} {link.isDemo && <Badge variant="outline" className="ml-1 text-[9px]">Demo</Badge>}</div><div className="mt-0.5 truncate text-muted-foreground">{link.url}</div></a>)}</div>
+                    {(profile.externalLinks ?? []).filter((link) => link.provider === "github").map((link) => <GitHubProofPanel key={link.url} link={link} seed={profile.userId} />)}
+                    {(profile.externalProfilePreviews ?? []).length > 0 && <div className="grid gap-3 sm:grid-cols-2">{(profile.externalProfilePreviews ?? []).map((preview) => { const imageSrc = preview.imageUrl?.startsWith("/") ? assetPath(preview.imageUrl) : preview.imageUrl; return <a key={`${preview.provider}-${preview.title}`} href={preview.url} target="_blank" rel="noreferrer" className="overflow-hidden rounded-md border border-dashed border-border hover:border-primary/50">{imageSrc && <div className="h-28 bg-muted"><img src={imageSrc} alt="" loading="lazy" className="size-full object-cover" /></div>}<div className="p-3 text-xs"><div className="flex items-center justify-between gap-2"><span className="font-medium">{externalProviderLabel(preview.provider)} · {preview.kind ?? "preview"}</span><span className="text-[10px] text-muted-foreground">{preview.source === "demo_fixture" ? "Demo sync" : "Synced"}</span></div><div className="mt-1 text-sm font-medium">{preview.title}</div>{preview.description && <p className="mt-1 line-clamp-2 text-muted-foreground">{preview.description}</p>}{preview.details?.length ? <dl className="mt-2 space-y-1 border-t border-border pt-2">{preview.details.map((detail) => <div key={`${detail.label}-${detail.value}`} className="grid grid-cols-[76px_1fr] gap-2"><dt className="text-muted-foreground">{detail.label}</dt><dd className="font-medium">{detail.value}</dd></div>)}</dl> : null}{preview.tags?.length ? <div className="mt-2 flex flex-wrap gap-1">{preview.tags.map((tag) => <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>)}</div> : null}</div></a>; })}</div>}
+                  </section>
+                )}
 
                 <section>
                   <h3 className="text-sm font-semibold mb-1">Selected work</h3>

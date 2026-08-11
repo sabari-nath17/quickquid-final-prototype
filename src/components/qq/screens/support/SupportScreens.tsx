@@ -39,6 +39,7 @@ import {
 import { StatusBadge, statusMeta } from "@/components/qq/shared/StatusBadge";
 import { FeeBreakdown } from "@/components/qq/shared/FeeBreakdown";
 import { PortfolioGallery } from "@/components/qq/shared/PortfolioGallery";
+import { GitHubProofPanel } from "@/components/qq/shared/GitHubProofPanel";
 import {
   buyerFee,
   buyerTotal,
@@ -84,7 +85,7 @@ import type {
   NotificationItem,
   TrustSafetyCase,
 } from "@/lib/qq/types";
-import { externalProfileHandle, externalProviderLabel } from "@/lib/qq/external";
+import { externalProviderLabel } from "@/lib/qq/external";
 
 /* =========================================================================
    1. SupportScreen — Screen 99.2
@@ -713,37 +714,10 @@ export function PublicProfileScreen() {
   const user = users.find((u) => u.id === proId);
 
   const [reportOpen, setReportOpen] = React.useState(false);
-  const [githubProjects, setGithubProjects] = React.useState<{ name: string; html_url: string; description?: string; language?: string; stargazers_count?: number; forks_count?: number; topics?: string[]; pushed_at?: string; license?: { name?: string; spdx_id?: string } | null }[]>([]);
-  const [githubProfile, setGithubProfile] = React.useState<{ login: string; name?: string; avatar_url?: string; bio?: string; public_repos?: number; followers?: number; html_url?: string } | null>(null);
-  const [githubSyncing, setGithubSyncing] = React.useState(false);
   const githubLink = profile?.externalLinks?.find((link) => link.provider === "github");
   const syncedPreviews = profile?.externalProfilePreviews ?? [];
   const linkedInIdentityPreview = syncedPreviews.find((preview) => preview.provider === "linkedin" && preview.kind === "identity" && preview.imageUrl);
   const publicAvatarSrc = linkedInIdentityPreview?.imageUrl?.startsWith("/") ? assetPath(linkedInIdentityPreview.imageUrl) : linkedInIdentityPreview?.imageUrl;
-
-  React.useEffect(() => {
-    const handle = githubLink ? externalProfileHandle(githubLink) : null;
-    if (!handle || typeof window === "undefined") {
-      setGithubProjects([]);
-      setGithubProfile(null);
-      setGithubSyncing(false);
-      return;
-    }
-    let cancelled = false;
-    setGithubSyncing(true);
-    Promise.all([
-      fetch(`https://api.github.com/users/${encodeURIComponent(handle)}`, { headers: { Accept: "application/vnd.github+json" } }).then((response) => response.ok ? response.json() : null),
-      fetch(`https://api.github.com/users/${encodeURIComponent(handle)}/repos?sort=updated&per_page=6`, { headers: { Accept: "application/vnd.github+json" } }).then((response) => response.ok ? response.json() : []),
-    ])
-      .then(([githubUser, repos]) => {
-        if (cancelled) return;
-        setGithubProfile(githubUser && typeof githubUser.login === "string" ? githubUser : null);
-        if (Array.isArray(repos)) setGithubProjects(repos.filter((repo) => repo && typeof repo.name === "string" && typeof repo.html_url === "string").map((repo) => ({ name: repo.name, html_url: repo.html_url, description: repo.description, language: repo.language, stargazers_count: repo.stargazers_count, forks_count: repo.forks_count, topics: Array.isArray(repo.topics) ? repo.topics.filter((topic: unknown): topic is string => typeof topic === "string").slice(0, 4) : [], pushed_at: repo.pushed_at, license: repo.license })).slice(0, 6));
-      })
-      .catch(() => { if (!cancelled) { setGithubProjects([]); setGithubProfile(null); } })
-      .finally(() => { if (!cancelled) setGithubSyncing(false); });
-    return () => { cancelled = true; };
-  }, [githubLink?.url]);
 
   if (!profile || !user) {
     return (
@@ -982,19 +956,7 @@ export function PublicProfileScreen() {
                   </a>
                 ))}
               </div>
-              {githubLink && (
-                <div className="mt-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium"><Github className="size-4" /> GitHub projects {githubLink.isDemo && <Badge variant="outline" className="text-[10px]">Demo API fixture</Badge>}{githubSyncing && <span className="text-xs font-normal text-muted-foreground">Syncing public repositories…</span>}</div>
-                  {githubLink.isDemo && <p className="mb-2 text-xs text-amber-700 dark:text-amber-300">Synthetic public source for prototype/API demonstration only. Replace with the Pro’s consented GitHub connection before production.</p>}
-                  {githubProfile && <div className="mb-3 flex items-start gap-3 rounded-md border border-border bg-muted/20 p-3"><Avatar className="size-10"><AvatarImage src={githubProfile.avatar_url} alt={`${githubProfile.name || githubProfile.login} GitHub avatar`} /><AvatarFallback>{initials(githubProfile.name || githubProfile.login)}</AvatarFallback></Avatar><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2 font-medium">{githubProfile.name || githubProfile.login}{githubProfile.html_url && <a href={githubProfile.html_url} target="_blank" rel="noreferrer" className="text-xs font-normal text-primary hover:underline">View GitHub</a>}</div><div className="text-xs text-muted-foreground">@{githubProfile.login}{githubProfile.bio ? ` · ${githubProfile.bio}` : ""}</div><div className="mt-1 text-[10px] text-muted-foreground">{githubProfile.public_repos ?? 0} public repos · {githubProfile.followers ?? 0} followers</div></div></div>}
-                  {githubProjects.length > 0 ? (
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {githubProjects.map((repo) => <a key={repo.html_url} href={repo.html_url} target="_blank" rel="noreferrer" className="rounded-md border border-border p-3 hover:border-primary/50"><div className="flex items-start justify-between gap-2"><div className="text-sm font-medium">{repo.name}</div><ExternalLink className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" /></div><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{repo.description || "Public repository"}</p><div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground"><span>{repo.language || "Code"}</span><span>★ {repo.stargazers_count ?? 0}</span><span>⑂ {repo.forks_count ?? 0}</span>{repo.license?.spdx_id && <span>{repo.license.spdx_id}</span>}{repo.pushed_at && <span>Updated {timeAgo(repo.pushed_at)}</span>}</div>{repo.topics && repo.topics.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{repo.topics.map((topic) => <Badge key={topic} variant="secondary" className="text-[10px]">{topic}</Badge>)}</div>}</a>)}
-                    </div>
-                  ) : !githubSyncing ? <p className="text-xs text-muted-foreground">No public repositories were returned. The link remains available for Admin review; private repositories are never requested.</p> : null}
-                  {githubProjects.length > 0 && <p className="mt-3 text-[11px] text-muted-foreground">Public repository activity only. A GitHub contribution calendar needs an authenticated GraphQL connection and is not inferred from this public sync.</p>}
-                </div>
-              )}
+              {githubLink && <div className="mt-4"><GitHubProofPanel link={githubLink} seed={profile.userId} /></div>}
               {syncedPreviews.length > 0 && (
                 <div className="mt-5 border-t border-border pt-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-medium"><ExternalLink className="size-4" /> Provider-connected profile</div>
