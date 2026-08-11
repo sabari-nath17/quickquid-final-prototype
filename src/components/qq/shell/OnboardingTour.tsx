@@ -35,7 +35,7 @@ const STEPS = [
   {
     icon: ShieldCheck,
     title: "Locked business rules",
-    body: "0% Pro commission (always a ₹0 line). 14% beta Buyer fee shown before payment. Manual payment verification — no wallet, no automated escrow. Max 4 milestones. Taxes = 'Calculated by Finance if applicable'.",
+    body: "0% Pro commission (always a ₹0 line). 0% Buyer fee shown before payment. Payments processed via the integrated payment system. Max 4 milestones. Taxes = 'Calculated by Finance if applicable'.",
     cta: "Next",
   },
   {

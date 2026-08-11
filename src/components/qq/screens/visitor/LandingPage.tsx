@@ -514,7 +514,7 @@ export function LandingPage() {
           </div>
         </div>
         <div className="mx-auto max-w-6xl mt-3 text-center text-[10px] text-muted-foreground">
-          QuickQuid fee ₹0 during beta · No wallet · No automated escrow · Payment-provider charges and taxes may apply
+          QuickQuid fee ₹0 during beta · Payments via integrated payment system · Payment-provider charges and taxes may apply
         </div>
       </footer>
     </div>

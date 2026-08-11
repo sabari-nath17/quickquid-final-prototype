@@ -122,7 +122,7 @@ export function PriorityBoostPanel({ gigId, gigTitle, proId, proName, boost, onS
           </div>
           <StatusBadge tone="pending">Under review</StatusBadge>
         </div>
-        <div className="mt-2 text-xs text-muted-foreground">Admin will verify your priority payment. Target: 24 hours. Your gig stays in organic results meanwhile.</div>
+        <div className="mt-2 text-xs text-muted-foreground">Your priority payment is being processed via the integrated payment system. Your gig stays in organic results meanwhile.</div>
       </Card>
     );
   }

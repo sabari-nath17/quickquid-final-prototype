@@ -198,7 +198,7 @@ export function ProDashboard() {
             tone="warning"
             icon={AlertTriangle}
             title="Payment verification pending. Do not begin work until QuickQuid confirms funding."
-            body="An accepted milestone is currently under manual payment verification. Expected Admin review target: 24 hours."
+            body="An accepted milestone is being processed via the integrated payment system. You will be notified once funding is confirmed."
             primary={<Button size="sm" onClick={() => navigate("pro_contract", { contractId: myContracts.find((c) => c.milestones.some((m) => m.status === "funding_pending"))?.id ?? "" })}><Eye className="size-3.5" /> View contract</Button>}
           />
         </div>
@@ -336,8 +336,8 @@ export function ProDashboard() {
           </SectionCard>
 
           <SectionCard title="0% QuickQuid commission">
-            <p className="text-sm text-muted-foreground">Keep 100% of your agreed professional fee. The Buyer sees the applicable 14% beta QuickQuid fee before payment.</p>
-            <div className="mt-2 text-xs text-muted-foreground">No wallet · No automated escrow · Payouts manually processed in v0.1.</div>
+            <p className="text-sm text-muted-foreground">Keep 100% of your agreed professional fee. The Buyer sees the applicable 0% QuickQuid fee before payment.</p>
+            <div className="mt-2 text-xs text-muted-foreground">Payouts are processed via the integrated payment system.</div>
           </SectionCard>
         </div>
       </div>
@@ -547,7 +547,7 @@ export function ProProfile() {
     setPayoutEditing(false);
     toast({
       title: "Payout details submitted for re-verification",
-      description: "New paid-work proposals are paused until an Admin re-verifies. Typical target: 24 hours.",
+      description: "New paid-work proposals are paused until an Admin re-verifies.",
     });
   }
 
@@ -860,7 +860,7 @@ export function ProProfile() {
                     <Input id="ifs" value={ifsc} onChange={(e) => setIfsc(e.target.value)} placeholder="HDFC0001234" />
                   </div>
                 </div>
-                <InterlockCard tone="warning" icon={AlertTriangle} title="Saving will pause new proposals" body="Status will change to Pending Admin Re-verification. Existing contracts are unaffected. Typical review target: 24 hours." />
+                <InterlockCard tone="warning" icon={AlertTriangle} title="Saving will pause new proposals" body="Status will change to Pending Admin Re-verification. Existing contracts are unaffected." />
                 <div className="flex gap-2">
                   <Button onClick={savePayout}>Save & submit for re-verification</Button>
                   <Button variant="ghost" onClick={() => setPayoutEditing(false)}>Cancel</Button>
@@ -869,7 +869,7 @@ export function ProProfile() {
             )}
 
             {(payoutStatus === "pending_reverification" || payoutStatus === "under_review") && (
-              <InterlockCard tone="warning" icon={Clock} title="Pending Admin re-verification" body="Your payout details are under Admin review. New paid-work proposals are paused until re-verified. Typical review target: 24 hours." />
+              <InterlockCard tone="warning" icon={Clock} title="Pending Admin re-verification" body="Your payout details are under Admin review. New paid-work proposals are paused until re-verified." />
             )}
 
             {payoutStatus === "rejected" && (
@@ -1170,8 +1170,8 @@ function BriefDetail({ brief, onBack, onApply, payoutReady, applied }: {
             <FeeBreakdown proFee={brief.budget} />
           </SectionCard>
 
-          <SectionCard title="Buyer fee (14% beta)">
-            <p className="text-sm text-muted-foreground">The Buyer pays the brief budget plus a 14% beta fee. Your professional fee stays separate and QuickQuid deducts 0% commission from it.</p>
+          <SectionCard title="Buyer fee (0%)">
+            <p className="text-sm text-muted-foreground">The Buyer pays the brief budget plus a 0% fee. Your professional fee stays separate and QuickQuid deducts 0% commission from it.</p>
             <div className="mt-2 text-xs text-muted-foreground">Pro fee {formatINR(brief.budget)} · Buyer fee {formatINR(fee)} · Buyer total {formatINR(total)}</div>
           </SectionCard>
 
@@ -1283,7 +1283,7 @@ export function ProProposals() {
                     <div className="mt-1 text-xs text-muted-foreground">Buyer · {brief?.buyerName ?? "—"} · submitted {timeAgo(p.createdAt)}</div>
                     <div className="mt-2 grid sm:grid-cols-3 gap-2 text-sm">
                       <div><div className="text-xs text-muted-foreground">Proposed fee</div><div className="font-semibold">{formatINR(p.proposedFee)}</div></div>
-                      <div><div className="text-xs text-muted-foreground">Buyer fee (14%)</div><div className="font-semibold">{formatINR(buyerFee(p.proposedFee))}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Buyer fee (0%)</div><div className="font-semibold">{formatINR(buyerFee(p.proposedFee))}</div></div>
                       <div><div className="text-xs text-muted-foreground">Buyer total</div><div className="font-semibold">{formatINR(buyerTotal(p.proposedFee))}</div></div>
                     </div>
                   </div>
@@ -1449,7 +1449,7 @@ function ProposalForm({ brief, onCancel, onSubmit, payoutReady, activeCount }: {
               <div className="mt-3 space-y-1.5">
                 <Label htmlFor="fee">Your professional fee (INR)</Label>
                 <Input id="fee" type="number" min={0} value={counterFee} onChange={(e) => setCounterFee(e.target.value)} />
-                <p className="text-xs text-muted-foreground">QuickQuid deducts 0% commission from your fee. The Buyer pays your fee plus a 14% beta fee.</p>
+                <p className="text-xs text-muted-foreground">QuickQuid deducts 0% commission from your fee. The Buyer pays your fee plus a 0% fee.</p>
               </div>
             )}
           </SectionCard>
@@ -1513,7 +1513,7 @@ function ProposalForm({ brief, onCancel, onSubmit, payoutReady, activeCount }: {
         </div>
 
         <div className="space-y-4">
-          <SectionCard title="Commercial summary" description="0% QuickQuid commission. Buyer fee 14% beta.">
+          <SectionCard title="Commercial summary" description="0% QuickQuid commission. Buyer fee 0%.">
             <FeeBreakdown proFee={proposedFee} />
           </SectionCard>
 
@@ -1645,7 +1645,7 @@ export function ProContract() {
     const scale = fee / contract!.totalProFee;
     const milestones = contract!.milestones.map((ms) => ({ ...ms, proFee: Math.round(ms.proFee * scale) }));
     updateContract(contract!.id, { totalProFee: fee, milestones });
-    addMessage({ id: genId("MSG"), contractId: contract!.id, from: "system", fromName: "QuickQuid", text: `Pro countered with a revised fee of ${formatINR(fee)}. Buyer fee recalculated at 14% = ${formatINR(buyerFee(fee))}; Buyer total ${formatINR(buyerTotal(fee))}.`, at: new Date().toISOString() });
+    addMessage({ id: genId("MSG"), contractId: contract!.id, from: "system", fromName: "QuickQuid", text: `Pro countered with a revised fee of ${formatINR(fee)}. Buyer fee recalculated at 0% = ${formatINR(buyerFee(fee))}; Buyer total ${formatINR(buyerTotal(fee))}.`, at: new Date().toISOString() });
     addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Counter-offer sent", entity: "Contract", entityId: contract!.id, newStatus: "offer sent", reason: `Revised fee ${formatINR(fee)}` });
     toast({ title: "Counter-offer sent", description: "Buyer fee and total recalculated instantly." });
   }
@@ -1669,7 +1669,7 @@ export function ProContract() {
           tone="warning"
           icon={AlertTriangle}
           title="Payment verification pending"
-          body="Expected Admin review target: 24 hours. Do not begin work until payment is confirmed."
+          body="Funding is being processed via the integrated payment system. Do not begin work until payment is confirmed."
           primary={<Button size="sm" variant="outline" onClick={() => setTab("workroom")}>View workroom</Button>}
         />
       )}
@@ -1730,15 +1730,15 @@ export function ProContract() {
             <div className="space-y-4">
               <SectionCard title="Pro fee (your take)">
                 <div className="text-2xl font-semibold tabular-nums">{formatINR(contract.totalProFee)}</div>
-                <div className="mt-1 text-xs text-muted-foreground">0% QuickQuid commission. Payouts are processed manually in v0.1.</div>
+                <div className="mt-1 text-xs text-muted-foreground">0% QuickQuid commission. Payouts are processed via the integrated payment system.</div>
               </SectionCard>
 
-              <SectionCard title="Buyer fee (14% beta)">
+              <SectionCard title="Buyer fee (0%)">
                 <FeeBreakdown proFee={contract.totalProFee} />
               </SectionCard>
 
               {fundingPending && (
-                <InterlockCard tone="warning" icon={AlertTriangle} title="Do not begin work until payment is confirmed" body="Milestone M1 funding is pending manual admin review. You will receive a notification once it is cleared. Expected Admin review target: 24 hours." />
+                <InterlockCard tone="warning" icon={AlertTriangle} title="Do not begin work until payment is confirmed" body="Milestone M1 funding is being processed via the integrated payment system. You will receive a notification once it is cleared." />
               )}
             </div>
           </div>
@@ -1805,7 +1805,7 @@ function AcceptDeclineCard({ onAccept, onDecline, onCounter, totalProFee }: {
           <div className="space-y-1.5">
             <Label htmlFor="ctf">Your counter fee (INR)</Label>
             <Input id="ctf" type="number" min={0} value={counterFee} onChange={(e) => setCounterFee(e.target.value)} />
-            <p className="text-xs text-muted-foreground">Buyer fee (14%) {formatINR(buyerFee(Number(counterFee) || 0))} · Buyer total {formatINR(buyerTotal(Number(counterFee) || 0))}</p>
+            <p className="text-xs text-muted-foreground">Buyer fee (0%) {formatINR(buyerFee(Number(counterFee) || 0))} · Buyer total {formatINR(buyerTotal(Number(counterFee) || 0))}</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => { const v = Number(counterFee); if (v <= 0) { toast({ title: "Enter a valid fee", variant: "destructive" }); return; } onCounter(v); }}>Send counter</Button>
@@ -1951,15 +1951,15 @@ function WorkroomTab({ contract, currentMilestone }: { contract: Contract; curre
             </div>
 
             {ms.status === "funding_pending" && (
-              <InterlockCard tone="warning" icon={AlertTriangle} title="Payment verification pending" body="Expected Admin review target: 24 hours. Do not begin work until payment is confirmed." />
+              <InterlockCard tone="warning" icon={AlertTriangle} title="Payment verification pending" body="Funding is being processed via the integrated payment system. Do not begin work until payment is confirmed." />
             )}
 
             {ms.status === "accepted" && (
-              <InterlockCard tone="info" icon={CheckCircle2} title="Milestone accepted" body="Buyer accepted this deliverable. Payout has been queued for manual processing — it is NOT instant." />
+              <InterlockCard tone="info" icon={CheckCircle2} title="Milestone accepted" body="Buyer accepted this deliverable. Payout is processed via the integrated payment system." />
             )}
 
             {ms.status === "payout_queued" && (
-              <InterlockCard tone="info" icon={Clock} title="Payout queued (manual)" body="A Finance maker-checker payout is queued. QuickQuid processes payouts manually in v0.1. You'll see a slip reference once processed." />
+              <InterlockCard tone="info" icon={Clock} title="Payout queued" body="A payout is queued via the integrated payment system. You'll see a slip reference once processed." />
             )}
 
             {ms.status === "payout_processed" && (
@@ -2676,7 +2676,7 @@ function InvoiceTab({ contract }: { contract: Contract }) {
         <Card className="p-4">
           <div className="space-y-2 text-sm">
             <Row label="Professional services" value={formatINR(contract.totalProFee)} />
-            <Row label="QuickQuid Buyer fee (14% beta)" value={formatINR(fee)} />
+            <Row label="QuickQuid Buyer fee (0%)" value={formatINR(fee)} />
             <Row label="Applicable tax" value="Calculated by Finance if applicable" muted />
             <Separator className="my-1" />
             <Row label={<span className="font-semibold">Buyer total before applicable tax</span>} value={<span className="font-semibold">{formatINR(total)}</span>} />
@@ -2923,7 +2923,7 @@ export function ProGigs() {
       {myGigs.length === 0 ? (
         <EmptyState
           title="No gigs yet"
-          description="Create a fixed-scope gig so Buyers can order your service directly. The Buyer sees the applicable 14% QuickQuid fee before payment."
+          description="Create a fixed-scope gig so Buyers can order your service directly. The Buyer sees the applicable 0% QuickQuid fee before payment."
           icon={Sparkles}
           actions={<Button onClick={() => navigate("pro_gig_new")}><Plus className="size-4" /> Create your first gig</Button>}
         />
@@ -3117,7 +3117,7 @@ export function ProGigNew() {
       upsertGig(g);
       addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Gig submitted for review", entity: "Gig", entityId: g.id, newStatus: "submitted" });
       setSubmitting(false);
-      toast({ title: "Gig submitted for review", description: "QuickQuid will review scope, claims, and pricing. Typical target: 24 hours." });
+      toast({ title: "Gig submitted for review", description: "QuickQuid will review scope, claims, and pricing." });
       navigate("pro_gig_detail", { gigId: g.id });
     }, 700);
   }
@@ -3282,7 +3282,7 @@ export function ProGigNew() {
                 </div>
                 <FeeBreakdown proFee={proFee} />
                 <div className="text-xs text-muted-foreground">
-                  Commercial summary: Pro fee {formatINR(proFee)} · commission {formatINR(0)} · Buyer fee 14% {formatINR(fee)} · Buyer total {formatINR(total)}.
+                  Commercial summary: Pro fee {formatINR(proFee)} · commission {formatINR(0)} · Buyer fee 0% {formatINR(fee)} · Buyer total {formatINR(total)}.
                 </div>
               </div>
             </SectionCard>
@@ -3373,7 +3373,7 @@ export function ProGigNew() {
         </div>
 
         <div className="space-y-4">
-          <SectionCard title="Commercial summary" description="0% QuickQuid commission. Buyer fee 14% beta.">
+          <SectionCard title="Commercial summary" description="0% QuickQuid commission. Buyer fee 0%.">
             <FeeBreakdown proFee={proFee} compact />
           </SectionCard>
           <SectionCard title="Validation">
@@ -3437,7 +3437,7 @@ export function ProGigDetail() {
   function submit() {
     updateGig(gig!.id, { status: "submitted", moderationReason: undefined });
     addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Gig submitted for review", entity: "Gig", entityId: gig!.id, newStatus: "submitted" });
-    toast({ title: "Gig submitted for review", description: "Typical target: 24 hours." });
+    toast({ title: "Gig submitted for review", description: "QuickQuid will review your gig." });
   }
   function pause() {
     const next = gig!.status === "paused" ? "approved_live" : "paused";
@@ -3586,7 +3586,7 @@ export function ProGigDetail() {
 
           <SectionCard title="Commercial summary">
             <FeeBreakdown proFee={gig.proFee} compact />
-            <div className="mt-2 text-xs text-muted-foreground">Pro fee {formatINR(gig.proFee)} · commission {formatINR(0)} · Buyer fee 14% {formatINR(fee)} · Buyer total {formatINR(total)}.</div>
+            <div className="mt-2 text-xs text-muted-foreground">Pro fee {formatINR(gig.proFee)} · commission {formatINR(0)} · Buyer fee 0% {formatINR(fee)} · Buyer total {formatINR(total)}.</div>
           </SectionCard>
 
           {gig.status === "approved_live" && (
@@ -3599,7 +3599,7 @@ export function ProGigDetail() {
               onSubmit={(pb) => {
                 submitPriorityBoost(pb);
                 addAudit({ adminId: currentUserId ?? "", adminRole: "pro", action: "Priority boost payment submitted", entity: "PriorityBoost", entityId: pb.id, newStatus: "payment_evidence_submitted", reason: `${formatINR(pb.priorityFee)} for ${pb.duration} days` });
-                toast({ title: "Priority payment submitted", description: "Under Admin review. Target: 24 hours." });
+                toast({ title: "Priority payment submitted", description: "Under Admin review." });
               }}
             />
           )}

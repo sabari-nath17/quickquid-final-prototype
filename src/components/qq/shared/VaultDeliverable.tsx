@@ -125,7 +125,7 @@ export function VaultDeliverable({
           </div>
           {buyerFee !== undefined && (
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Buyer fee (14%)</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Buyer fee (0%)</div>
               <div className="font-semibold tabular-nums">${buyerFee.toLocaleString()}</div>
             </div>
           )}

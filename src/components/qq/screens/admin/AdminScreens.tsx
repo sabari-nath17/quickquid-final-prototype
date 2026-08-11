@@ -1167,7 +1167,7 @@ export function AdminPayments() {
         </TabsContent>
 
         <TabsContent value="over_under" className="mt-4">
-          <SectionCard title="Over / under payment resolver (Screen 09.8)" description="No wallet in v0.1 — surplus cannot be auto-credited. Choose: hold for reconciliation, apply to approved outstanding, manual refund, or reject and request correction.">
+          <SectionCard title="Over / under payment resolver (Screen 09.8)" description="Surplus/shortfall handling via the integrated payment system. Choose: hold for reconciliation, apply to approved outstanding, refund, or reject and request correction.">
             <Card className="p-4">
               <div className="grid sm:grid-cols-3 gap-4 text-sm">
                 <div><div className="text-xs text-muted-foreground">Expected</div><div className="text-xl font-semibold tabular-nums">{formatINR(overUnderRow.expected)}</div></div>
@@ -1181,7 +1181,7 @@ export function AdminPayments() {
                 <Button variant="outline" className="justify-start min-h-[44px]" onClick={() => toast({ title: "Manual refund queued", description: "Surplus added to refund queue." })}><Receipt className="size-4" /> Manual refund surplus</Button>
                 <Button variant="destructive" className="justify-start min-h-[44px]" onClick={() => toast({ title: "Rejected — request correction", description: "Buyer asked to resubmit correct amount." })}><XCircle className="size-4" /> Reject & request correction</Button>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">No wallet, no auto-credit. All actions create audit events with role + timestamp.</p>
+              <p className="mt-3 text-xs text-muted-foreground">All actions create audit events with role + timestamp.</p>
             </Card>
           </SectionCard>
         </TabsContent>
@@ -2581,12 +2581,12 @@ export function AdminNotes() {
 
       <SectionCard title="v0.1 specific constraints" description="These are non-negotiable in this prototype.">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Wallet className="size-4 text-muted-foreground" />No wallet</div><p className="text-xs text-muted-foreground mt-1">No in-platform balance. Surplus/overpayment cannot be auto-credited.</p></Card>
-          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Landmark className="size-4 text-muted-foreground" />No escrow</div><p className="text-xs text-muted-foreground mt-1">No automated escrow. Payments verified manually by Finance.</p></Card>
-          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Banknote className="size-4 text-muted-foreground" />Manual payouts</div><p className="text-xs text-muted-foreground mt-1">No auto-payout API. Finance exports batches and processes via bank.</p></Card>
-          <Card className="p-3"><div className="font-medium flex items-center gap-2"><BadgeCheck className="size-4 text-emerald-600" />14% beta fee</div><p className="text-xs text-muted-foreground mt-1">Buyer fee fixed at 14% for controlled beta. 13% standard and earned-rate ladder are future — must NOT be shown as active.</p></Card>
+          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Wallet className="size-4 text-muted-foreground" />Integrated payments</div><p className="text-xs text-muted-foreground mt-1">Payments flow through the integrated payment system. Surplus/overpayment handled by the provider.</p></Card>
+          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Landmark className="size-4 text-muted-foreground" />Provider escrow</div><p className="text-xs text-muted-foreground mt-1">Funds held by the payment provider and released on milestone confirmation.</p></Card>
+          <Card className="p-3"><div className="font-medium flex items-center gap-2"><Banknote className="size-4 text-muted-foreground" />Automated payouts</div><p className="text-xs text-muted-foreground mt-1">Payouts are processed via the payment provider's API.</p></Card>
+          <Card className="p-3"><div className="font-medium flex items-center gap-2"><BadgeCheck className="size-4 text-emerald-600" />0% Buyer fee</div><p className="text-xs text-muted-foreground mt-1">Buyer fee is 0%. No platform commission is taken from the Pro fee.</p></Card>
           <Card className="p-3"><div className="font-medium flex items-center gap-2"><Receipt className="size-4 text-emerald-600" />0% Pro commission</div><p className="text-xs text-muted-foreground mt-1">Pro fee and Buyer fee are always separate line items. Net payout = Pro fee (minus statutory withholding if applied).</p></Card>
-          <Card className="p-3"><div className="font-medium flex items-center gap-2"><ListChecks className="size-4 text-primary" />Max 4 milestones</div><p className="text-xs text-muted-foreground mt-1">Due to manual payment verification overhead in v0.1.</p></Card>
+          <Card className="p-3"><div className="font-medium flex items-center gap-2"><ListChecks className="size-4 text-primary" />Max 4 milestones</div><p className="text-xs text-muted-foreground mt-1">v0.1 cap of 4 milestones per contract.</p></Card>
           <Card className="p-3"><div className="font-medium flex items-center gap-2"><FileCheck2 className="size-4 text-amber-600" />Taxes: Finance-only</div><p className="text-xs text-muted-foreground mt-1">Shown as "Calculated by Finance if applicable". Never hardcode TDS/GST/TCS rates.</p></Card>
           <Card className="p-3"><div className="font-medium flex items-center gap-2"><UserCog className="size-4 text-muted-foreground" />Role switcher = demo only</div><p className="text-xs text-muted-foreground mt-1">Restricted to prototype mode for demo/QA. Not a production feature.</p></Card>
           <Card className="p-3"><div className="font-medium flex items-center gap-2"><AlertOctagon className="size-4 text-destructive" />No off-platform payments</div><p className="text-xs text-muted-foreground mt-1">Circumvention detection in messages; flagged to Trust & Safety.</p></Card>

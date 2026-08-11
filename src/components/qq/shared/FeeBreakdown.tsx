@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatINR, buyerFee as calcFee, buyerTotal } from "@/lib/qq/format";
+import { formatINR, buyerTotal } from "@/lib/qq/format";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -18,7 +18,6 @@ export function FeeBreakdown({
   compact?: boolean;
   className?: string;
 }) {
-  const fee = calcFee(proFee);
   const total = buyerTotal(proFee);
   return (
     <Card className={compact ? "p-3" : "p-4"}>
@@ -31,7 +30,7 @@ export function FeeBreakdown({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild><Info className="size-3 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>QuickQuid deducts 0% from the Pro’s professional fee.</TooltipContent>
+                  <TooltipContent>QuickQuid deducts 0% from the Pro's professional fee.</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </span>
@@ -39,7 +38,7 @@ export function FeeBreakdown({
           value={formatINR(0)}
           muted
         />
-        <Row label="Buyer fee (14% beta)" value={formatINR(fee)} />
+        <Row label="QuickQuid Buyer fee (0%)" value={formatINR(0)} muted />
         {showTax && (
           <Row
             label={

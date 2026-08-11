@@ -1423,7 +1423,7 @@ export function BuyerBriefNew() {
                   placeholder="e.g. No backend development"
                 />
                 <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-                  <Info className="size-3 inline mr-1" /> Max 4 milestones per contract in v0.1 due to manual payment verification. Keep deliverables aligned with up to 4 phases.
+                  <Info className="size-3 inline mr-1" /> Max 4 milestones per contract in v0.1. Keep deliverables aligned with up to 4 phases.
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -1444,7 +1444,7 @@ export function BuyerBriefNew() {
                   </Alert>
                 )}
                 <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-                  <Info className="size-3 inline mr-1" /> This is the Pro fee. A 14% beta Buyer fee applies on top. Taxes calculated by Finance if applicable.
+                  <Info className="size-3 inline mr-1" /> This is the Pro fee. A 0% Buyer fee applies. Taxes calculated by Finance if applicable.
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -1521,7 +1521,7 @@ export function BuyerBriefNew() {
           </SectionCard>
           <FeeBreakdown proFee={budget} />
           <Card className="p-3">
-            <div className="text-xs text-muted-foreground">Buyer total (Pro fee + 14% buyer fee)</div>
+            <div className="text-xs text-muted-foreground">Buyer total (Pro fee + 0% buyer fee)</div>
             <div className="text-2xl font-semibold tabular-nums">{formatINR(buyerTotal(budget))}</div>
             <div className="text-xs text-muted-foreground mt-1">Taxes calculated by Finance if applicable.</div>
           </Card>
@@ -2120,7 +2120,7 @@ export function BuyerContract() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild><Info className="size-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>v0.1 cap: 4 milestones per contract due to manual payment verification.</TooltipContent>
+                  <TooltipContent>v0.1 cap: 4 milestones per contract.</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             }
@@ -2323,7 +2323,7 @@ export function BuyerContract() {
                       <div className="font-semibold tabular-nums">{formatINR(contract.totalProFee)}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">Buyer fee (14%)</div>
+                      <div className="text-xs text-muted-foreground">Buyer fee (0%)</div>
                       <div className="font-semibold tabular-nums">{formatINR(buyerFee(contract.totalProFee))}</div>
                     </div>
                     <div>
@@ -2843,7 +2843,7 @@ export function BuyerPayment() {
     <div className="space-y-6">
       <PageHeader
         title="Submit payment evidence"
-        description="Manual payment verification. Submit UTR or transaction reference first; screenshots are optional."
+        description="Submit UTR or transaction reference first; screenshots are optional."
         breadcrumb={<Button variant="ghost" size="sm" onClick={() => navigate(contract ? "buyer_contract" : "buyer_dashboard", contract ? { contractId: contract.id } : undefined)} className="mb-1"><ChevronLeft className="size-3.5" /> Back</Button>}
       />
 
@@ -2880,7 +2880,7 @@ export function BuyerPayment() {
               <span className="font-medium tabular-nums">{formatINR(amountDue)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Buyer fee (14%)</span>
+              <span className="text-muted-foreground">Buyer fee (0%)</span>
               <span className="font-medium tabular-nums">{formatINR(buyerFee(amountDue))}</span>
             </div>
             <Separator />

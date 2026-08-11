@@ -71,7 +71,7 @@ export function RoleSelectionScreen() {
               icon={<Briefcase className="size-5" />}
               title="I want to hire"
               desc="Find vetted professionals for your work."
-              valueProp="14% flat Buyer fee · 0% Pro commission"
+              valueProp="0% Buyer fee · 0% Pro commission"
               tone="emerald"
             />
             <IntentCard
@@ -133,7 +133,7 @@ export function RoleSelectionScreen() {
                     onCheckedChange={(v) => setConsent({ terms: v === true })}
                     className="mt-0.5"
                   />
-                  <span>I agree to the QuickQuid Terms of Service, including the <strong>14% beta Buyer Fee</strong> and <strong>0% QuickQuid platform commission</strong> for Pros.</span>
+                  <span>I agree to the QuickQuid Terms of Service, including the <strong>0% Buyer Fee</strong> and <strong>0% QuickQuid platform commission</strong> for Pros.</span>
                 </label>
                 <label className="flex items-start gap-2 text-sm">
                   <Checkbox
@@ -171,7 +171,7 @@ export function RoleSelectionScreen() {
             <>
               <div className="grid sm:grid-cols-3 gap-3">
                 <TrustStat icon={<ShieldCheck className="size-4" />} label="Identity reviewed" sub="Every Pro is verified" />
-                <TrustStat icon={<CheckCircle2 className="size-4" />} label="Manual payment verification" sub="No automated escrow" />
+                <TrustStat icon={<CheckCircle2 className="size-4" />} label="Secure payments" sub="Integrated payment system" />
                 <TrustStat icon={<User className="size-4" />} label="0% Pro commission" sub="Keep your full fee" />
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">

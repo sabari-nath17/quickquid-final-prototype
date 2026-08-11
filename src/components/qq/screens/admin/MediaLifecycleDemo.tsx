@@ -250,7 +250,7 @@ export function MediaLifecycleDemo() {
                 { label: "Contract", value: "QQ-5500" },
                 { label: "Milestone M1", value: "$400 (50% upfront)" },
                 { label: "Sarah submitted", value: "UTR UTR882341771 via NEFT" },
-                { label: "Admin review target", value: "24 hours" },
+                { label: "Admin review target", value: "Auto via payment system" },
               ]}
               adminAction="Finance T2 opens Payment Verification queue → Bank Statement Matcher → confirms UTR matches expected amount → marks payment confirmed → milestone funded → Buyer & Pro notified → timeline advances."
             />

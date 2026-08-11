@@ -640,7 +640,7 @@ export const SEED_NOTIFICATIONS: NotificationItem[] = [
   { id: "N-5", userId: "FIN-F01", type: "payment_submitted", title: "Payment verification queued", body: "PAY-0892 awaiting matcher review.", link: "admin_payments", read: false, createdAt: "2025-01-14T11:36:00Z" },
   { id: "N-6", userId: "ADM-S01", type: "dispute_opened", title: "New dispute DSP-7001", body: "Quality/bugs dispute on QQ-0650.", link: "admin_disputes", read: false, createdAt: "2025-01-02T09:01:00Z" },
   { id: "N-7", userId: "PRO-2088", type: "payout_processed" as any, title: "Priority boost active", body: "Your priority payment (PB-5001) is confirmed. 'Design system audit' is now promoted in Buyer feed for 7 days.", link: "pro_gig_detail?gigId=GIG-3001", read: false, createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-  { id: "N-8", userId: "PRO-2099", type: "payment_submitted" as any, title: "Priority payment under review", body: "PB-5002 (₹2,500 for 14 days) is under Admin verification. Target: 24 hours.", link: "pro_gig_detail?gigId=GIG-3007", read: false, createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
+  { id: "N-8", userId: "PRO-2099", type: "payment_submitted" as any, title: "Priority payment processing", body: "PB-5002 (₹2,500 for 14 days) is being processed via the integrated payment system.", link: "pro_gig_detail?gigId=GIG-3007", read: false, createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
   { id: "N-9", userId: "FIN-F01", type: "payment_submitted", title: "Priority boost verification queued", body: "PB-5002 (Priya Nair, ₹2,500) awaiting verification.", link: "admin_notes", read: false, createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
 ];
 
@@ -1060,10 +1060,10 @@ export const SEED_TRUST_CASES: TrustSafetyCase[] = [
 ];
 
 export const ADMIN_NOTES = [
-  "v0.1 prototype: no wallet, no automated escrow, no auto-payout API. All payouts are manually processed.",
-  "Buyer fee is fixed at 14% for the controlled beta. The 13% standard and earned-rate ladder are future and must NOT be shown as active.",
+  "v0.1 prototype: payments flow through the integrated payment system. Payouts are processed via the provider's API.",
+  "Buyer fee is 0%. No platform commission is taken from the Pro fee.",
   "Pro commission is 0%. Pro fee and Buyer fee are always separate line items.",
-  "Maximum 4 milestones per contract in v0.1 due to manual payment verification.",
+  "Maximum 4 milestones per contract in v0.1.",
   "Taxes shown as 'Calculated by Finance if applicable' - never hardcode TDS/GST/TCS rates.",
   "Sensitive data (PAN, bank account, IFSC) is masked by default. Reveal requires reason + audit event.",
   "Role switcher (bottom-left) is restricted to prototype mode for demo/QA only.",

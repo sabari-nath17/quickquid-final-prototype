@@ -267,7 +267,7 @@ export function GuestReadinessChat() {
             })}
             <div className="rounded-md bg-info/5 border border-info/20 px-3 py-2 text-xs text-info">
               <ShieldCheck className="size-3 inline mr-1" />
-              QuickQuid fee ₹0 during founding beta. No real money is accepted or held.
+              QuickQuid fee ₹0 during founding beta. Payments are processed via the integrated payment system.
             </div>
           </div>
         </div>

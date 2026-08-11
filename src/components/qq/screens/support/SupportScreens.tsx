@@ -1070,7 +1070,7 @@ export function PublicProfileScreen() {
 
               <div className="mt-3 text-[11px] text-muted-foreground">
                 QuickQuid deducts <strong>0% commission</strong> from this Pro.
-                The buyer fee (14% beta) is added on top of the pro fee.
+                The buyer fee (0%) is added on top of the pro fee.
               </div>
 
               <Separator className="my-3" />
@@ -1505,7 +1505,7 @@ export function BriefDetailPublic() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Buyer fee (14% beta)</span>
+                  <span>Buyer fee (0%)</span>
                   <span className="font-medium text-foreground">
                     {formatINR(fee)}
                   </span>
@@ -1604,7 +1604,7 @@ export function BriefDetailPublic() {
               <ul className="space-y-1 text-muted-foreground">
                 <li>· Pro fee and Buyer fee are always shown separately.</li>
                 <li>· Pro never pays QuickQuid commission.</li>
-                <li>· Buyer fee is 14% during the controlled beta.</li>
+                <li>· Buyer fee is 0%.</li>
                 <li>· Taxes are calculated by Finance if applicable.</li>
               </ul>
             </Card>
@@ -1651,8 +1651,8 @@ const NOTIFICATION_MATRIX: MatrixRow[] = [
     event: "Payment evidence submitted",
     emailSubject: "Payment evidence submitted for {paymentId}",
     emailBody:
-      "Your payment evidence is under Admin verification. Target review time: 24 hours. Work should not begin until funding is confirmed.",
-    pushText: "Payment under verification. Target 24h.",
+      "Your payment evidence is being processed via the integrated payment system. Work should not begin until funding is confirmed.",
+    pushText: "Payment under processing.",
     triggeredBy: "Payment status → payment_evidence_submitted",
   },
   {

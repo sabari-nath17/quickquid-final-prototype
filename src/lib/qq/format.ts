@@ -1,6 +1,6 @@
 // QuickQuid formatting & fee helpers
 
-export const BETA_BUYER_FEE_RATE = 0.14; // 14% controlled beta
+export const BETA_BUYER_FEE_RATE = 0; // 0% take rate (payment system to be integrated)
 export const PLATFORM_COMMISSION_RATE = 0; // 0% from Pro
 
 export function formatINR(amount: number): string {
