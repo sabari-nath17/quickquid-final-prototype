@@ -58,3 +58,40 @@ Desktop geometry was checked through both the current-run screenshot and rendere
 No actionable P0, P1, or P2 issues remain.
 
 `final result: passed`
+
+## Marketplace Buyer and Pro enhancement QA — 11 August 2026
+
+### Source truth and comparison method
+
+- Buyer references captured in the in-app browser: [Fiverr category](https://www.fiverr.com/categories/graphics-design), [Upwork talent search](https://www.upwork.com/nx/search/talent/), and [Contra hire](https://contra.com/hire).
+- Pro references captured in the in-app browser: [Upwork work discovery](https://www.upwork.com/freelance-jobs/) and [Contra independent community](https://contra.com/independents). Fiverr's direct seller route presented a human-check page, so a Google Images result was used only as a secondary visual reference.
+- This is an intentional pattern adaptation, not a pixel clone. The QA compared search/filter hierarchy, card density, action hierarchy, commercial clarity, and profile proof placement while retaining QuickQuid copy, policies, and identity.
+- Source and implementation were placed in the same comparison input before judgment: temporary browser-session composites `/tmp/quickquid-qa-buyer-comparison.png` (Upwork talent beside QuickQuid Buyer Talent) and `/tmp/quickquid-qa-pro-comparison.png` (Upwork work discovery beside QuickQuid Pro Briefs). Third-party capture files are not committed.
+
+### Rendered implementation evidence
+
+| Surface | Evidence | CSS viewport | State checked |
+| --- | --- | --- | --- |
+| Buyer talent discovery | `audit-final/14-buyer-talent-marketplace.png` | 1440 × 822 | Search-first entry, category shortcuts, filters, sort, result count, talent cards |
+| Pro brief discovery | `audit-final/15-pro-briefs-marketplace.png` | 1440 × 822 | Search, visible scope/budget/timeline/visibility, transparent category alignment, View/Apply actions |
+| Pro profile editor | `audit-final/16-pro-profile-marketplace.png` | 1440 × 822 | Buyer-facing proof summary, clear public/private boundary, profile actions |
+| Responsive Pro profile | `audit-final/17-pro-profile-mobile.png` | 390 × 844 | Header, Back, actions, proof summary, bottom navigation; no visible horizontal overflow |
+
+### Interaction and accessibility checks
+
+- Buyer search narrows `React` to the single matching professional. Search, category choices, filters, sort, tab switcher, and `Review proof` affordances remain available through the existing real data flow.
+- Pro brief search narrows `portal` to two matching briefs. The category-alignment sort is explicitly explained as a local ordering aid and never claims a match, approval, or priority entitlement.
+- Profile actions consolidate the Buyer preview, save, onboarding status, and publishing decision at the top of the form; the summary states exactly what a Buyer can and cannot see.
+- Keyboard semantics were checked in the rendered DOM: result cards with a click action expose button semantics and keyboard activation; the mobile navigation trigger now has the accessible name `Open navigation`.
+- Browser console errors: none in the final QA session.
+
+### Findings and iterations
+
+| Severity | Finding | Resolution |
+| --- | --- | --- |
+| P1 | The first Pro Briefs pass overlaid `Category-aligned` on brief titles. | Moved the badge into the reusable `BriefCard` eyebrow region in commit `5a48ac3`; the post-fix screenshot shows a clear title hierarchy. |
+| P2 | The compact mobile sidebar trigger had no accessible name. | Added `aria-label="Open navigation"` in `Shell.tsx`; this retains the icon treatment without leaving an unnamed control. |
+
+No actionable P0, P1, or P2 visual, interaction, responsive, or accessibility issues remain after the post-fix review.
+
+`final result: passed`

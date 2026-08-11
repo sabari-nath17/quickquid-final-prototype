@@ -260,7 +260,7 @@ export function Header() {
   const roleHome = currentRole === "buyer" ? "buyer_dashboard" : currentRole === "pro" ? "pro_dashboard" : "admin_operations";
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-4">
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileSidebar(true)}><Menu className="size-5" /></Button>
+      <Button variant="ghost" size="icon" aria-label="Open navigation" className="md:hidden" onClick={() => setMobileSidebar(true)}><Menu className="size-5" /></Button>
       {view !== roleHome && <BackButton label="Back" className="shrink-0" />}
       {showSearch && (
         <button
