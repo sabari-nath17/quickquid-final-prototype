@@ -172,7 +172,8 @@ export function ReadinessSummary() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl w-full px-4 py-8 space-y-6">
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,8fr)_minmax(280px,4fr)] lg:py-8">
+        <main className="min-w-0 space-y-6">
         <div className="rounded-lg border border-success/30 bg-success/5 p-4 flex items-start gap-3">
           <CheckCircle2 className="size-5 text-success mt-0.5 shrink-0" />
           <div>
@@ -254,10 +255,23 @@ export function ReadinessSummary() {
           <span>Nothing has been published. Your project will remain a private draft until you review and submit it.</span>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button size="lg" className="h-12 flex-1" onClick={startAuth}>Create account and save project</Button>
-          <Button variant="outline" size="lg" className="h-12" onClick={() => navigate("guest_readiness_chat")}><Edit3 className="size-4" /> Edit answers</Button>
-        </div>
+        </main>
+
+        <aside className="lg:sticky lg:top-20 h-fit">
+          <Card className="p-5 elev-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next step</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight">Keep this project private and editable</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Create a Buyer account to save the prepared brief. It will not be published or shared with Pros yet.</p>
+            <div className="mt-5 space-y-2">
+              <Button size="lg" className="h-12 w-full" onClick={startAuth}>Create account and save</Button>
+              <Button variant="outline" size="lg" className="h-11 w-full" onClick={() => navigate("guest_readiness_chat")}><Edit3 className="size-4" /> Edit answers</Button>
+            </div>
+            <div className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground space-y-2">
+              <p className="flex gap-2"><ShieldCheck className="size-3.5 shrink-0 text-success" />No project has been published.</p>
+              <p className="flex gap-2"><CheckCircle2 className="size-3.5 shrink-0 text-success" />You review the final brief before matching.</p>
+            </div>
+          </Card>
+        </aside>
       </div>
     </div>
   );

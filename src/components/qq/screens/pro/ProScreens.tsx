@@ -299,7 +299,7 @@ export function ProDashboard() {
               title="Add payout details before applying"
               body="QuickQuid needs approved payout details before you can submit a paid-work proposal."
               primary={<Button size="sm" onClick={() => setKycModal(true)}><ShieldCheck className="size-3.5" /> Add payout details</Button>}
-              secondary={<Button size="sm" variant="ghost" onClick={() => navigate("readiness")}>Cancel</Button>}
+              secondary={<Button size="sm" variant="ghost" onClick={() => navigate("pro_profile")}>Complete profile</Button>}
             />
           )}
 

@@ -182,7 +182,8 @@ export function GuestReadinessChat() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4">
+      <header className="sticky top-0 z-30 border-b border-border bg-card">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate("role_selection", undefined, { replace: true })} className="flex items-center gap-2">
             <img src={assetPath("/quickquid-logo.svg")} alt="QuickQuid" className="h-7 w-auto" />
@@ -196,6 +197,7 @@ export function GuestReadinessChat() {
           <Button variant="ghost" size="sm" onClick={startOver}><RotateCcw className="size-3.5" /> Start over</Button>
           <BackButton label="Back" />
         </div>
+        </div>
       </header>
 
       {/* Trust note */}
@@ -205,10 +207,23 @@ export function GuestReadinessChat() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 grid lg:grid-cols-[60%_40%]">
+      <div className="flex-1 grid lg:min-h-[calc(100vh-5.5rem)] lg:grid-cols-[minmax(0,7fr)_minmax(320px,5fr)]">
         {/* Chat area */}
         <div className="flex flex-col border-r border-border">
-          <div className="flex-1 overflow-y-auto scroll-area-thin p-4 space-y-3">
+          <div className="border-b border-border bg-background px-4 py-4 sm:px-6">
+            <div className="mx-auto max-w-3xl">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Guided brief builder</p>
+                  <h1 className="mt-1 text-lg font-semibold tracking-tight">Answer one thing at a time</h1>
+                </div>
+                <Badge variant="outline" className="shrink-0 tabular-nums">Step {Math.min(currentStep + 1, 8)} of 8</Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">We turn your request into scope, dependencies, timing, and acceptance criteria a Pro can act on.</p>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto scroll-area-thin px-4 py-5 sm:px-6">
+            <div className="mx-auto max-w-3xl space-y-3">
             {messages.map((m) => (
               <div key={m.id} className={cn("flex", m.role === "ai" ? "justify-start" : "justify-end")}>
                 <div className={cn("max-w-[80%] rounded-lg px-3 py-2 text-sm", m.role === "ai" ? "bg-muted text-foreground" : "bg-foreground text-background")}>
@@ -226,12 +241,13 @@ export function GuestReadinessChat() {
               </div>
             )}
             <div ref={messagesEndRef} />
+            </div>
           </div>
 
           {/* Input area */}
           {showInput && (
-            <div className="border-t border-border p-3 bg-card elev-1">
-              <div className="flex gap-2">
+            <div className="border-t border-border bg-card p-3 elev-1">
+              <div className="mx-auto flex max-w-3xl gap-2">
                 <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type your answer…" onKeyDown={(e) => { if (e.key === "Enter" && input.trim()) handleResponse(input.trim()); }} className="flex-1 h-11" />
                 <Button onClick={() => input.trim() && handleResponse(input.trim())} className="h-11 px-5">Send</Button>
               </div>
@@ -246,12 +262,22 @@ export function GuestReadinessChat() {
         </div>
 
         {/* Readiness panel */}
-        <div className="hidden lg:block bg-muted/20 overflow-y-auto scroll-area-thin">
-          <div className="p-4 space-y-3">
+        <aside className="hidden bg-muted/20 lg:block">
+          <div className="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto scroll-area-thin p-5">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold">Readiness checklist</h3>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Your project</p>
+                <h3 className="mt-0.5 text-sm font-semibold">Readiness checklist</h3>
+              </div>
               <Badge variant="outline" className="tabular-nums">{completedCount} of 7</Badge>
             </div>
+            <Card className="mb-4 p-3">
+              <p className="line-clamp-3 text-sm font-medium">{guestDraft.workingTitle || guestDraft.originalRequest}</p>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-success transition-all" style={{ width: `${(completedCount / 7) * 100}%` }} />
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">Keep answering to make your eventual brief more matchable.</p>
+            </Card>
             {READINESS_AREAS.map((area) => {
               const done = guestDraft.completedAreas.includes(area.key);
               return (
@@ -272,7 +298,7 @@ export function GuestReadinessChat() {
               QuickQuid fee ₹0 during founding beta. Payments are processed via the integrated payment system.
             </div>
           </div>
-        </div>
+        </aside>
       </div>
 
       {/* Mobile progress bar */}

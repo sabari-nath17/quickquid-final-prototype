@@ -714,6 +714,7 @@ export function PublicProfileScreen() {
   const user = users.find((u) => u.id === proId);
 
   const [reportOpen, setReportOpen] = React.useState(false);
+  const [activeProfileSection, setActiveProfileSection] = React.useState<"overview" | "work" | "proof">("overview");
   const githubLink = profile?.externalLinks?.find((link) => link.provider === "github");
   const syncedPreviews = profile?.externalProfilePreviews ?? [];
   const linkedInIdentityPreview = syncedPreviews.find((preview) => preview.provider === "linkedin" && preview.kind === "identity" && preview.imageUrl);
@@ -898,6 +899,28 @@ export function PublicProfileScreen() {
             )}
           </Card>
 
+          <nav aria-label="Profile sections" className="sticky top-14 z-10 -mx-1 flex gap-1 overflow-x-auto border-y border-border bg-background/95 px-1 py-2 backdrop-blur">
+            {[
+              ["overview", "Overview"],
+              ["work", "Selected work"],
+              ["proof", "Proof & links"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setActiveProfileSection(value as typeof activeProfileSection)}
+                className={cn(
+                  "min-h-10 shrink-0 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  activeProfileSection === value ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+                aria-current={activeProfileSection === value ? "page" : undefined}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          {activeProfileSection === "overview" && <>
           {/* About */}
           {profile.bio && (
             <SectionCard title="About" description={`Languages: ${profile.languages.join(", ")} · ${profile.timeZone}`}>
@@ -945,8 +968,10 @@ export function PublicProfileScreen() {
               </div>
             </SectionCard>
           )}
+          </>}
 
           {(profile.externalLinks?.length ?? 0) > 0 && (
+            activeProfileSection === "proof" &&
             <SectionCard title="Connected proof" description="Public links are self-declared until QuickQuid records a review decision. GitHub repositories are read from the provider's public API when available.">
               <div className="grid gap-2 sm:grid-cols-2">
                 {(profile.externalLinks ?? []).map((link) => (
@@ -989,6 +1014,7 @@ export function PublicProfileScreen() {
 
           {/* Selected work — Portfolio (masonry gallery with lightbox) */}
           {profile.portfolioItems.length > 0 && (
+            activeProfileSection === "work" &&
             <SectionCard
               title="Selected work"
               description="Case studies and past projects. Click any item to open the full-screen gallery."
@@ -1010,6 +1036,7 @@ export function PublicProfileScreen() {
 
           {/* Reviews */}
           <SectionCard
+            {...(activeProfileSection === "overview" ? {} : { className: "hidden" })}
             title="Reviews"
             description={
               proReviews.length > 0
@@ -1068,6 +1095,7 @@ export function PublicProfileScreen() {
 
           {/* Work history */}
           <SectionCard
+            {...(activeProfileSection === "work" ? {} : { className: "hidden" })}
             title="Work history"
             description="Contracts completed or in progress on QuickQuid. Sensitive commercial values are not shown publicly."
           >
@@ -1103,7 +1131,7 @@ export function PublicProfileScreen() {
           </SectionCard>
 
           {/* Privacy note */}
-          <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+          {activeProfileSection === "overview" && <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
             <div className="flex items-start gap-2">
               <ShieldCheck className="size-3.5 mt-0.5 text-emerald-600" />
               <div>
@@ -1115,7 +1143,7 @@ export function PublicProfileScreen() {
                 profile.
               </div>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Commercial pane 33% — sticky */}
@@ -1176,6 +1204,9 @@ export function PublicProfileScreen() {
                 >
                   <Bookmark className="size-4" /> Save profile
                 </Button>
+                <Button variant="ghost" className="w-full" onClick={() => setActiveProfileSection("proof")}>
+                  Review proof &amp; links
+                </Button>
               </div>
 
               {isPaused && (
@@ -1219,6 +1250,15 @@ export function PublicProfileScreen() {
             </Card>
           </div>
         </div>
+      </div>
+
+      <div className="sticky bottom-14 z-20 flex gap-2 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+        <Button className="min-h-11 flex-1" disabled={isPaused} onClick={() => navigate("buyer_brief_new", { proId: profile.userId })}>
+          <Briefcase className="size-4" /> Invite to brief
+        </Button>
+        <Button variant="outline" size="icon" className="size-11 shrink-0" disabled={isPaused} onClick={() => navigate("buyer_messages")} aria-label={`Message ${profile.displayName}`}>
+          <MessageSquare className="size-4" />
+        </Button>
       </div>
 
       <ReportProfileDialog

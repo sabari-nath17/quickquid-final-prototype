@@ -122,6 +122,45 @@ export function BuyerDashboard() {
     ),
   );
   const rejectedPayments = myPayments.filter((p) => p.status === "payment_rejected");
+  const nextAction = rejectedPayments.length > 0
+    ? {
+        eyebrow: "Payment needs attention",
+        title: `Resubmit evidence for ${rejectedPayments[0].milestoneLabel}`,
+        description: "QuickQuid needs updated payment evidence before the current milestone can move forward.",
+        label: "Resubmit evidence",
+        onClick: () => navigate("buyer_payment", { contractId: rejectedPayments[0].contractId }),
+      }
+    : actionContracts.length > 0
+      ? {
+          eyebrow: "Your next action",
+          title: `Fund ${actionContracts[0].briefTitle}`,
+          description: "Submit payment evidence to unlock the first milestone for the Pro.",
+          label: "Submit payment evidence",
+          onClick: () => navigate("buyer_payment", { contractId: actionContracts[0].id }),
+        }
+      : myProposals.length > 0
+        ? {
+            eyebrow: "Proposals waiting",
+            title: `${myProposals.length} proposal${myProposals.length === 1 ? "" : "s"} need a decision`,
+            description: "Review the strongest fit while the project context is still fresh.",
+            label: "Review proposals",
+            onClick: () => navigate("buyer_brief_detail", { briefId: myProposals[0].briefId }),
+          }
+        : myBriefs.length > 0
+          ? {
+              eyebrow: "Keep momentum",
+              title: "Invite a Pro or refine your open brief",
+              description: "A clearer brief and direct invitations usually lead to faster, better-fit proposals.",
+              label: "Open latest brief",
+              onClick: () => navigate("buyer_brief_detail", { briefId: myBriefs[0].id }),
+            }
+          : {
+              eyebrow: "Start a project",
+              title: "Prepare your first brief",
+              description: "Set the outcome, scope, budget, and acceptance criteria before you ask a Pro to quote.",
+              label: "Post a brief",
+              onClick: () => navigate("buyer_brief_new"),
+            };
 
   const stats = [
     { label: "Active briefs", value: myBriefs.filter((b) => b.status === "active" || b.status === "approaching_inactivity").length, icon: FileText },
@@ -167,6 +206,17 @@ export function BuyerDashboard() {
         <Button onClick={() => navigate("buyer_brief_new")}><Plus className="size-4" /> Post a brief</Button>
         <Button variant="outline" onClick={() => navigate("buyer_talent")}><Users className="size-4" /> Search talent</Button>
       </PageHeader>
+
+      <Card className="overflow-hidden border-primary/20 bg-primary/[0.035] p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">{nextAction.eyebrow}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight">{nextAction.title}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{nextAction.description}</p>
+          </div>
+          <Button className="min-h-11 shrink-0 sm:self-center" onClick={nextAction.onClick}>{nextAction.label} <ArrowRight className="size-4" /></Button>
+        </div>
+      </Card>
 
       {/* Action required banner */}
       {(actionContracts.length > 0 || rejectedPayments.length > 0) && (
@@ -1288,7 +1338,7 @@ export function BuyerBriefNew() {
   const { toast } = useToast();
   const profile = buyerProfiles.find((b) => b.userId === currentUserId);
 
-  const [title, setTitle] = React.useState("");
+  const [title, setTitle] = React.useState(viewParams.title ?? "");
   const [category, setCategory] = React.useState(CATEGORIES[0]);
   const [objective, setObjective] = React.useState(viewParams.prefill ?? "");
   const [deliverables, setDeliverables] = React.useState<string[]>([""]);
@@ -1380,7 +1430,15 @@ export function BuyerBriefNew() {
         <div className="space-y-4 min-w-0">
           <AutosaveIndicator state={saveState} onRetry={() => setSaveState("idle")} />
 
-          <Accordion type="multiple" defaultValue={["basics", "scope", "budget", "timeline", "visibility"]} className="space-y-3">
+          <Card className="border-primary/15 bg-primary/[0.025] p-4">
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
+              <div><p className="font-medium">1. Define the outcome</p><p className="mt-1 text-xs text-muted-foreground">Title, category, and the problem to solve.</p></div>
+              <div><p className="font-medium">2. Make scope testable</p><p className="mt-1 text-xs text-muted-foreground">Deliverables, exclusions, and acceptance criteria.</p></div>
+              <div><p className="font-medium">3. Set commercial context</p><p className="mt-1 text-xs text-muted-foreground">Budget, timeline, and who can view it.</p></div>
+            </div>
+          </Card>
+
+          <Accordion type="multiple" defaultValue={["basics"]} className="space-y-3">
             <AccordionItem value="basics" className="border border-border rounded-md px-4">
               <AccordionTrigger className="py-4"><span className="flex items-center gap-2"><FileText className="size-4" /> Basics</span></AccordionTrigger>
               <AccordionContent className="space-y-4 pb-4">
@@ -1971,6 +2029,37 @@ export function BuyerContract() {
   const isCompleted = contract.status === "completed";
   const isDisputed = contract.status === "disputed";
   const myReview = reviews.find((r) => r.contractId === contract.id && r.fromUserId === currentUserId);
+  const pactAction = fundingPending
+    ? {
+        eyebrow: "Pact is waiting on funding",
+        title: `Fund ${currentMilestone?.label ?? "the first milestone"} before work begins`,
+        description: "The Pro cannot begin work until QuickQuid confirms payment evidence for this milestone.",
+        label: "Submit payment evidence",
+        onClick: () => navigate("buyer_payment", { contractId: contract.id }),
+      }
+    : currentMilestone?.status === "submitted" || currentMilestone?.status === "in_review"
+      ? {
+          eyebrow: "Your decision is needed",
+          title: `Review ${currentMilestone.label}`,
+          description: "Check the delivered work against the agreed acceptance criteria before releasing the next step.",
+          label: "Review milestone",
+          onClick: () => setActiveTab("workroom"),
+        }
+      : isCompleted
+        ? {
+            eyebrow: "Pact complete",
+            title: "Close the loop with a review or rehire",
+            description: "The contract record remains available as the source of truth for this completed work.",
+            label: "Open completion",
+            onClick: () => setActiveTab("completion"),
+          }
+        : {
+            eyebrow: "Current Pact",
+            title: `${currentMilestone?.label ?? "Milestone"} is in progress`,
+            description: "Scope, delivery versions, and acceptance stay in the workroom so both sides are working from the same record.",
+            label: "Open workroom",
+            onClick: () => setActiveTab("workroom"),
+          };
 
   function acceptMilestone() {
     if (!acceptMilestoneId) return;
@@ -2109,6 +2198,17 @@ export function BuyerContract() {
           </AlertDescription>
         </Alert>
       )}
+
+      <Card className="border-primary/20 bg-primary/[0.035] p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">{pactAction.eyebrow}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight">{pactAction.title}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{pactAction.description}</p>
+          </div>
+          <Button className="min-h-11 shrink-0" onClick={pactAction.onClick}>{pactAction.label} <ArrowRight className="size-4" /></Button>
+        </div>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full sm:w-auto overflow-x-auto">

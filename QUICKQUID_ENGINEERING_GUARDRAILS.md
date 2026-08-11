@@ -102,6 +102,21 @@ Rejected evidence goes to `rejected` and may be resubmitted. A Pro may have only
 
 Finance or Ops verifies the payment reference. Activation records maker, checker/authorization, timestamps, fee, duration, gig ID, and an audit event. A scheduled worker/webhook must expire the placement at `priorityEnd`; the UI expiry check is only a demo fallback.
 
+## Conversion layout contract
+
+This prototype is also the visual behavior reference for production implementation. Preserve these screen-placement rules unless validated usability evidence supports a change:
+
+- **One task, one dominant action.** Each task surface has one filled primary CTA. Secondary actions use outline or text treatment and must not compete with the commitment action. Do not place more than three decision actions above the first content boundary.
+- **Desktop canvas.** Authenticated content stays within a centered `max-width: 1280px` canvas. Use a 12-column grid: `8/4` for a decision record plus a sticky action/context rail; `7/3` or equivalent for an editor plus live preview. Keep the shell navigation separate from the page task area.
+- **Readiness.** Guest chat keeps the conversation in a narrow, centered reading column and uses a persistent desktop checklist/context rail. The prepared-project screen is `8/4`: readable brief on the left, account/save decision on the right. Never publish as a consequence of account creation.
+- **Buyer dashboard.** Place the next irreversible or time-sensitive action immediately under the page header, before statistics and lists. Metrics support a decision; they must not displace it. Keep active work ahead of historical briefs.
+- **Brief builder.** Start with the outcome, reveal scope second, and commercial/visibility controls last. Default to the first section only; keep an on-screen live preview and a sticky save/publish bar. Autosave status must be visible beside the save action, never buried in a toast alone.
+- **Pro public profile.** Use an `8/4` page: identity and selected section on the left; availability, starting fee, invite/message, and shortlist actions in a sticky right rail. Separate `Overview`, `Selected work`, and `Proof & links`; never intermix provider data with QuickQuid verification. On mobile, retain a thumb-reachable Invite CTA.
+- **Pact/workroom.** Show the present decision before tabs or detailed history: funding, milestone review, or completion. The timeline and delivery record remain the source of truth; a button must state its consequence (for example, `Submit payment evidence`, not `Continue`).
+- **Mobile.** Preserve a 44px minimum target for interactive controls. Use a sticky bottom action only for the current primary decision, above mobile navigation. Stack desktop rails below the task content; do not merely shrink them into unreadable side columns.
+- **Spacing and scanning.** Use the existing 8px spacing rhythm, group labels and inputs tightly, and separate unrelated decisions with clear card or section boundaries. Use familiar labels such as Back, Save draft, Publish brief, Invite to brief, and Review milestone.
+- **State and safety.** Every user action needs visible feedback. Retain unsaved-work confirmation, Back/cancel routes, focus treatment, disabled explanations, and factual fee/verification language. Automation may suggest or calculate; it cannot silently publish, accept, pay, verify, or alter a Pact.
+
 ## Automation and AI guard rails
 
 Automation may:
