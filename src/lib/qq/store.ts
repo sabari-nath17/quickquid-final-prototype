@@ -262,13 +262,46 @@ const initialState = {
   buyerOnboardingComplete: false,
 };
 
+/** Merge newly added seed fixtures into an older local prototype session without
+ * overwriting user-edited fields. New accounts are never matched by this list. */
+function mergeSeedProFixtures(state: Pick<QQState, "proProfiles" | "kyc">) {
+  const seedByUser = new Map(SEED_PRO_PROFILES.map((profile) => [profile.userId, profile]));
+  const proProfiles = state.proProfiles.map((profile) => {
+    const seed = seedByUser.get(profile.userId);
+    if (!seed || profile.onboardingStatus === "not_started") return profile;
+    return {
+      ...profile,
+      externalLinks: profile.externalLinks?.length ? profile.externalLinks : seed.externalLinks,
+      portfolioItems: profile.portfolioItems.length ? profile.portfolioItems : seed.portfolioItems,
+    };
+  });
+  const profileByUser = new Map(proProfiles.map((profile) => [profile.userId, profile]));
+  const kyc = state.kyc.map((submission) => {
+    const profile = profileByUser.get(submission.userId);
+    if (!profile || submission.role !== "pro") return submission;
+    return {
+      ...submission,
+      externalLinks: submission.externalLinks ?? profile.externalLinks,
+      profileSnapshot: submission.profileSnapshot ?? {
+        primaryCategory: profile.primaryCategory,
+        secondaryCategory: profile.secondaryCategory,
+        skills: profile.skills,
+        externalLinks: profile.externalLinks ?? [],
+        portfolioItemIds: profile.portfolioItems.map((item) => item.id),
+        submittedAt: submission.submittedAt,
+      },
+    };
+  });
+  return { proProfiles, kyc };
+}
+
 export const useQQ = create<QQState>()(
   persist(
     (set, get) => ({
       hydrated: false,
       ...initialState,
 
-      setHydrated: () => set({ hydrated: true }),
+      setHydrated: () => set((state) => ({ hydrated: true, ...mergeSeedProFixtures(state) })),
       switchRole: (role) => {
         const user = get().users.find((u) => u.role === role);
         set({
