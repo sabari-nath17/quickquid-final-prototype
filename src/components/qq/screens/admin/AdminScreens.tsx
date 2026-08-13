@@ -316,6 +316,7 @@ export function AdminOperations() {
         title="Operations dashboard"
         description="Live queue health across all admin functions. Money movement and high-risk actions remain permission-gated with maker-checker and audit events."
         status={<Badge variant="outline"><RolePill role={currentRole} /></Badge>}
+        tone="admin"
       />
 
       {emphasised.length > 0 && (

@@ -210,9 +210,23 @@
     border-left: 3px solid var(--qq-role-accent);
     padding-left: 0.9rem;
   }
+  /* Route intent accents keep dense records scannable without leaking role-specific hex values into screens. */
+  .qq-page-header--tone-buyer { border-left-color: var(--qq-cobalt); }
+  .qq-page-header--tone-pro { border-left-color: var(--qq-coral); }
+  .qq-page-header--tone-proof { border-left-color: var(--qq-mint); }
+  .qq-page-header--tone-money { border-left-color: var(--qq-gold); }
+  .qq-page-header--tone-admin { border-left-color: var(--qq-indigo); }
+  .qq-page-header--tone-risk { border-left-color: var(--destructive); }
   .qq-section-card {
     border-color: color-mix(in srgb, var(--qq-role-accent) 16%, var(--border));
   }
+  .qq-section-card--tone-buyer { border-color: color-mix(in srgb, var(--qq-cobalt) 24%, var(--border)); }
+  .qq-section-card--tone-pro { border-color: color-mix(in srgb, var(--qq-coral) 24%, var(--border)); }
+  .qq-section-card--tone-proof { border-color: color-mix(in srgb, var(--qq-mint) 28%, var(--border)); }
+  .qq-section-card--tone-money { border-color: color-mix(in srgb, var(--qq-gold) 30%, var(--border)); }
+  .qq-section-card--tone-admin { border-color: color-mix(in srgb, var(--qq-indigo) 24%, var(--border)); }
+  .qq-section-card--tone-risk { border-color: color-mix(in srgb, var(--destructive) 26%, var(--border)); }
+  .qq-section-card--compact { box-shadow: 0 1px 2px rgba(20, 21, 29, 0.03); }
   .qq-sidebar-trust {
     border-color: color-mix(in srgb, var(--qq-role-accent) 22%, var(--border));
     background: var(--qq-role-soft);

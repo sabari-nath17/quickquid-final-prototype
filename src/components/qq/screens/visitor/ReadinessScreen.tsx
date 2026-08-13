@@ -66,6 +66,7 @@ export function ReadinessScreen() {
         title="Readiness dashboard"
         description="Complete these steps to unlock the full QuickQuid experience. Draft profile work stays available while paid-work and publishing actions remain gated until review."
         status={<StatusBadge tone={pct === 100 ? "success" : pct >= 50 ? "pending" : "warning"} icon>{pct === 100 ? "Ready" : `${pct}% complete`}</StatusBadge>}
+        tone="proof"
       />
 
       <div className="grid lg:grid-cols-3 gap-4">

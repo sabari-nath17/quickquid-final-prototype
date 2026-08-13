@@ -6,10 +6,13 @@
 
 ## 1. LIST OF ALL SCREENS / PAGES
 
-### Visitor (3 screens)
+### Visitor (9 screens)
 1. Role Selection (`role_selection`)
 2. Auth / Sign-in (`auth`)
 3. Readiness Dashboard (`readiness`)
+36. Guest Readiness Chat (`guest_readiness_chat`)
+37. Readiness Summary (`readiness_summary`)
+38. Buyer Onboarding (`buyer_onboarding`)
 
 ### Buyer (8 screens)
 4. Buyer Dashboard (`buyer_dashboard`)
@@ -51,7 +54,13 @@
 34. Brief Detail Public (`brief_detail_public`)
 35. Notifications Center (`notifications`)
 
-**Total: 35 screens**
+**Total: 38 registered routes**
+
+### Design-source coverage
+
+The current prototype registers 38 routes. Four are existing approved visual anchors: the landing page (documented in `design-qa.md`), Buyer Dashboard, Pro Briefs, and Admin Operations. The remaining 34 routes are the new canonical frames tracked in `design-sources/manifest.json`; the manifest also records mobile-critical routes, dominant action, state, and the implementation screenshot path to capture during QA. The supplied Buyer Dashboard direction board is retained as a visual reference only and is not counted as a route.
+
+The source pack is durable under `design-sources/`: the supplied PNGs are preserved in `references/`, optimized WebP copies are in `webp/`, and cross-route interaction contracts are in `state-sheets/`. All screen implementations must continue using the existing QuickQuid fixtures and truth boundaries; a source frame never authorizes inventing marketplace activity, verification, ratings, or payment state.
 
 ---
 

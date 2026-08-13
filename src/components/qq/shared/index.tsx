@@ -52,21 +52,30 @@ export function useNavigationGuard(shouldBlock: boolean, message = "You have uns
   }, [shouldBlock, message, setNavigationGuard]);
 }
 
+/**
+ * Shared visual language for route-level decisions. Keep these names semantic
+ * so a screen can communicate intent without coupling itself to a colour hex.
+ */
+export type SemanticTone = "buyer" | "pro" | "proof" | "money" | "admin" | "risk" | "neutral";
+export type SectionDensity = "comfortable" | "compact";
+
 export function PageHeader({
   title,
   description,
   status,
   children,
   breadcrumb,
+  tone = "neutral",
 }: {
   title: string;
   description?: string;
   status?: React.ReactNode;
   children?: React.ReactNode;
   breadcrumb?: React.ReactNode;
+  tone?: SemanticTone;
 }) {
   return (
-    <div className="qq-page-header space-y-2">
+    <div className={cn("qq-page-header space-y-2", `qq-page-header--tone-${tone}`)}>
       {breadcrumb}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
@@ -278,15 +287,19 @@ export function SectionCard({
   children,
   actions,
   className,
+  tone = "neutral",
+  density = "comfortable",
 }: {
   title?: string;
   description?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
+  tone?: SemanticTone;
+  density?: SectionDensity;
 }) {
   return (
-    <Card className={cn("qq-section-card p-4 sm:p-6", className)}>
+    <Card className={cn("qq-section-card", density === "compact" ? "p-3 sm:p-4" : "p-4 sm:p-6", `qq-section-card--tone-${tone}`, density === "compact" && "qq-section-card--compact", className)}>
       {(title || actions) && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>

@@ -180,6 +180,7 @@ export function BuyerDashboard() {
         <PageHeader
           title="Buyer dashboard"
           description="Your projects, briefs, and payments in one place."
+          tone="buyer"
         />
         <EmptyState
           icon={Briefcase}
@@ -207,6 +208,7 @@ export function BuyerDashboard() {
         title="Buyer dashboard"
         description="Your projects, briefs, and payments in one place."
         status={<StatusBadge tone="info" icon={false}>Buyer · BUY-{(currentUserId ?? "").slice(-4)}</StatusBadge>}
+        tone="buyer"
       >
         <Button onClick={() => navigate("buyer_brief_new")}><Plus className="size-4" /> Post a brief</Button>
         <Button variant="outline" onClick={() => navigate("buyer_talent")}><Users className="size-4" /> Search talent</Button>

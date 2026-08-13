@@ -191,6 +191,7 @@ export function ProDashboard() {
         title="Pro dashboard"
         description="0% QuickQuid commission. Keep 100% of your agreed professional fee."
         status={<StatusBadge tone="success" icon>Pro · {profile?.displayName ?? "—"}</StatusBadge>}
+        tone="pro"
       >
         <Button variant="outline" onClick={() => navigate("pro_briefs")}><Briefcase className="size-4" /> Browse briefs</Button>
         <Button onClick={() => navigate("pro_proposals")}><FileText className="size-4" /> My proposals</Button>
