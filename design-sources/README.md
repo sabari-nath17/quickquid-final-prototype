@@ -16,6 +16,10 @@ The approved anchors are `buyer_dashboard`, `pro_briefs`, and `admin_operations`
 
 The manifest is intentionally implementation-facing: each route records its role, canonical state, source anchor, mobile requirement, dominant action, and the expected screenshot path for QA. Capture implementation screenshots into `implementation/` as each batch is reviewed.
 
+## Captured route images
+
+The current implementation capture pass contains one desktop PNG and optimized WebP for every registered route under `implementation/` and `implementation-webp/`. The full review contact sheet is `implementation-contact-sheet.webp`. Mobile captures are included for the critical routes that were exercised at the 390 × 844 viewport; additional mobile captures can be added using the same filenames with a `-mobile` suffix.
+
 ## Shared state sheets
 
 The state sheets are the cross-route contract for loading/empty/error/permission, form validation and unsaved work, modal/drawer behavior, and responsive navigation. They are deliberately shared so screens do not invent one-off interaction patterns.

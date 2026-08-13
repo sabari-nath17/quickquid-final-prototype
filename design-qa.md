@@ -59,6 +59,27 @@ No actionable P0, P1, or P2 issues remain.
 
 `final result: passed`
 
+## Route image capture pack — 13 August 2026
+
+### Source and output
+
+- Source truth: the approved QuickQuid screen anchors in `design-sources/references/` and the 38-route mapping in `design-sources/manifest.json`.
+- Implementation evidence: one captured desktop PNG and optimized WebP for every registered route under `design-sources/implementation/` and `design-sources/implementation-webp/`.
+- Review contact sheet: `design-sources/implementation-contact-sheet.webp`.
+- Mobile evidence: `readiness-mobile.png`, `buyer-dashboard-mobile.png`, `buyer-brief-new-mobile.png`, `buyer-brief-detail-mobile.png`, and `pro-profile-mobile.png` captured at 390 × 844. The desktop captures use the browser's default desktop viewport and full-page mode so the entire screen state is visible.
+
+### Coverage
+
+All 38 manifest routes now have a concrete implementation image. The approved anchor routes remain unchanged; the remaining routes are captured from the live frontend with demo fixture data, preserving the existing role gates, payment evidence, admin queues, and public-profile truth boundaries. `buyer_onboarding` reuses the shared readiness-summary renderer, and `brief_detail_public` uses the shared brief-detail record layout; both are intentionally represented by the same visual component family rather than a fabricated alternate screen.
+
+### Validation
+
+- No route capture was generated from invented UI copy or fabricated marketplace activity.
+- PNG/WebP pairs were checked for successful file creation and are linked by the existing manifest implementation paths.
+- The deployed implementation used for capture is the same production build published from commit `46c4eee`.
+
+`final result: passed`
+
 ## Cross-product colour system QA — 12 August 2026
 
 ### Source truth, evidence, and normalization
