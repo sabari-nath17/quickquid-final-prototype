@@ -3,6 +3,7 @@
 ## Files
 
 - Design reference file: https://www.figma.com/design/uRftP5IejVtzkMlqbGTXXr
+- Visual workflow map frame: https://www.figma.com/design/uRftP5IejVtzkMlqbGTXXr/QuickQuid-%E2%80%94-Product-Flow-Reference?node-id=8-101
 - Complete workflow map: https://www.figma.com/board/dfkTe9hjefuQSY570lvnmj
 
 ## Figma pages
